@@ -1,0 +1,38 @@
+﻿export const results = [
+  {
+    id: "r001",
+    eventId: "100m-senior",
+    participantId: "p001",
+    position: 1,
+    performance: "11.42s",
+    points: 5,
+    status: "Published",
+  },
+  {
+    id: "r002",
+    eventId: "100m-senior",
+    participantId: "p002",
+    position: 2,
+    performance: "11.68s",
+    points: 3,
+    status: "Published",
+  },
+  {
+    id: "r003",
+    eventId: "200m-senior",
+    participantId: "p003",
+    position: 1,
+    performance: "23.91s",
+    points: 5,
+    status: "Published",
+  },
+  {
+    id: "r004",
+    eventId: "400m-senior",
+    participantId: "p004",
+    position: 1,
+    performance: "52.18s",
+    points: 5,
+    status: "Published",
+  },
+];

@@ -1,0 +1,37 @@
+﻿export const admins = [
+  {
+    id: "a001",
+    name: "Super Admin",
+    role: "Super Admin",
+    permissions: [
+      "festival",
+      "participants",
+      "teams",
+      "sports",
+      "events",
+      "venues",
+      "schedule",
+      "results",
+      "users",
+      "downloads",
+      "wall",
+    ],
+    status: "Active",
+  },
+  {
+    id: "a002",
+    name: "Fest Coordinator",
+    role: "Coordinator",
+    permissions: [
+      "participants",
+      "teams",
+      "events",
+      "venues",
+      "schedule",
+      "results",
+      "downloads",
+      "wall",
+    ],
+    status: "Active",
+  },
+];
