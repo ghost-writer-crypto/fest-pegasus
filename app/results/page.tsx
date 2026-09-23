@@ -1,45 +1,117 @@
-﻿import { events } from "../../data/events";
-import { participants } from "../../data/participants";
-import { results } from "../../data/results";
+import Link from "next/link";
+import {
+  getActiveFestival,
+  getPublishedResultsByFestival,
+  getEventsByFestival,
+  getTeamsByFestival,
+  getParticipantsByFestival,
+  type ResultRow,
+  type EventRow,
+  type TeamRow,
+  type ParticipantRow,
+} from "@/lib/repositories";
+import ResultsClient from "./ResultsClient";
 
-export default function ResultsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ResultsPage() {
+  let publishedResults: ResultRow[] = [];
+  let events: EventRow[] = [];
+  let teams: TeamRow[] = [];
+  let participants: ParticipantRow[] = [];
+
+  try {
+    const festival = await getActiveFestival();
+    if (festival) {
+      [publishedResults, events, teams, participants] = await Promise.all([
+        getPublishedResultsByFestival(festival.id),
+        getEventsByFestival(festival.id),
+        getTeamsByFestival(festival.id),
+        getParticipantsByFestival(festival.id),
+      ]);
+    }
+  } catch (error) {
+    console.error("[ResultsPage] Error retrieving published results:", error);
+    publishedResults = [];
+    events = [];
+    teams = [];
+    participants = [];
+  }
+
   return (
-    <main>
-      <h1>Results</h1>
+    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--results pegasus-animate-fade">
+      {/* Header */}
+      <section className="pegasus-page__header">
+        <p className="pegasus-eyebrow">OFFICIAL STANDINGS & PODIUMS</p>
+        <h1 className="pegasus-page-title">Results</h1>
+        <p className="pegasus-page__description">
+          Verified and officially published event outcomes, athlete rankings,
+          and championship points for the Pegasus Sports Festival.
+        </p>
+      </section>
 
-      {events.map((event) => {
-        const eventResults = results.filter(
-          (result) => result.eventId === event.id
-        );
+      {/* Published Results or Authentic Empty State */}
+      {publishedResults.length === 0 ? (
+        <section
+          className="pegasus-card"
+          style={{ textAlign: "center", padding: "64px 24px" }}
+        >
+          <p className="pegasus-eyebrow" style={{ color: "var(--muted)" }}>
+            STANDINGS PENDING
+          </p>
+          <h2
+            style={{
+              margin: "12px 0 10px",
+              fontSize: "24px",
+              fontWeight: 800,
+            }}
+          >
+            No published results yet.
+          </h2>
+          <p
+            style={{
+              margin: "0 auto",
+              maxWidth: "520px",
+              fontSize: "14px",
+              color: "var(--muted)",
+              lineHeight: 1.6,
+            }}
+          >
+            Official results will appear here once verified by judges and
+            published by the festival technical committee. Check back soon.
+          </p>
 
-        if (eventResults.length === 0) {
-          return null;
-        }
-
-        return (
-          <section key={event.id}>
-            <h2>{event.name}</h2>
-
-            {eventResults.map((result) => {
-              const participant = participants.find(
-                (item) => item.id === result.participantId
-              );
-
-              return (
-                <div key={result.id}>
-                  <p>
-                    {result.position}.{" "}
-                    {participant?.name ?? "Unknown Participant"}
-                  </p>
-                  <p>
-                    {result.performance} - {result.points} points
-                  </p>
-                </div>
-              );
-            })}
-          </section>
-        );
-      })}
+          <div
+            style={{
+              marginTop: "28px",
+              display: "flex",
+              justifyContent: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Link
+              href="/schedules"
+              className="pegasus-button pegasus-button--secondary"
+            >
+              View Schedules <span>↗</span>
+            </Link>
+            <Link
+              href="/fixtures"
+              className="pegasus-button pegasus-button--subtle"
+            >
+              View Fixtures <span>↗</span>
+            </Link>
+          </div>
+        </section>
+      ) : (
+        <ResultsClient
+          initialResults={publishedResults}
+          events={events}
+          teams={teams}
+          participants={participants}
+        />
+      )}
     </main>
   );
 }

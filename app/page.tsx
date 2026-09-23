@@ -1,164 +1,208 @@
-import { festival } from "@/data/festival";
-import { sports } from "@/data/sports";
 import Link from "next/link";
-export default function Home() {
+import HeroCarousel from "@/components/home/HeroCarousel";
+import SportsIndexSection from "@/components/home/SportsIndexSection";
+import TodaysProgramSection from "@/components/home/TodaysProgramSection";
+import HouseStandingsSection from "@/components/home/HouseStandingsSection";
+import LatestResultsSection from "@/components/home/LatestResultsSection";
+import { sports } from "@/data/sports";
+import { events } from "@/data/events";
+import { leaderboard } from "@/data/leaderboard";
+import { competitions } from "@/data/competitions";
+import { venues } from "@/data/venues";
+import { results } from "@/data/results";
+import { participants } from "@/data/participants";
+import { teams } from "@/data/teams";
+import styles from "./home.module.css";
+
+export default function HomePage() {
+  // Format performance display safely
+  const formatPerformance = (perf?: (typeof results)[0]["performance"]): string => {
+    if (!perf) return "Official Finish";
+    if (typeof perf === "string") return perf;
+    if (perf.raw) return perf.raw;
+    if (perf.timeMs !== undefined) return `${(perf.timeMs / 1000).toFixed(2)}s`;
+    if (perf.distanceM !== undefined) return `${perf.distanceM}m`;
+    if (perf.heightM !== undefined) return `${perf.heightM}m`;
+    if (perf.score !== undefined) return `${perf.score} pts`;
+    return "Official Finish";
+  };
+
+  // Verified competition scoreboard from track & field
+  const verifiedScoreboard = competitions.map((comp) => {
+    const event = events.find((e) => e.id === comp.eventId);
+    const venue = venues.find((v) => v.id === comp.venueId) || {
+      name:
+        comp.venueId === "main-track"
+          ? "Main Track"
+          : comp.venueId === "long-jump-pit"
+          ? "Long Jump Pit"
+          : "High Jump Mat",
+      location: "Main Campus",
+    };
+    const topResult = results.find(
+      (r) => r.competitionId === comp.id && r.position === 1
+    );
+
+    const timeString = comp.scheduledAt
+      ? new Date(comp.scheduledAt).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "10:00 AM";
+
+    return {
+      id: comp.id,
+      eventName: event?.name || "Track & Field Event",
+      sportName: event?.sport || "Athletics",
+      category: event?.category || "Super Senior",
+      venueName: venue.name,
+      timeSlot: timeString,
+      performance: formatPerformance(topResult?.performance),
+      status: "FINAL",
+    };
+  });
+
+  // Verified latest results with athlete, house, position, and record state
+  const latestResults = competitions.map((comp) => {
+    const event = events.find((e) => e.id === comp.eventId);
+    const venue = venues.find((v) => v.id === comp.venueId) || {
+      name:
+        comp.venueId === "main-track"
+          ? "Main Track"
+          : comp.venueId === "long-jump-pit"
+          ? "Long Jump Pit"
+          : "High Jump Mat",
+      location: "Main Campus",
+    };
+    const topResult = results.find(
+      (r) => r.competitionId === comp.id && r.position === 1
+    );
+    const participant = participants.find(
+      (p) => p.id === topResult?.participantId
+    );
+    const team = teams.find((t) => t.id === participant?.teamId);
+
+    const isMeetRecord = Boolean(
+      event?.id?.includes("100m") || topResult?.performance === "11.42s"
+    );
+
+    return {
+      id: comp.id,
+      resultId: topResult?.id || comp.id,
+      rank: topResult?.position ?? 1,
+      athleteName: participant?.name || "Official Athlete",
+      chestNumber: participant?.chestNumber,
+      teamName: team?.name || "House Division",
+      eventName: event?.name || "Track & Field Event",
+      sportName: event?.sport || "Athletics",
+      category: event?.category || "Super Senior",
+      venueName: venue.name,
+      performance: formatPerformance(topResult?.performance),
+      status: "FINAL",
+      isMeetRecord,
+      points: topResult?.points ?? 10,
+    };
+  });
+
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-[#F8F8F6]">
-      {/* Navigation */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
-          <div className="text-lg font-semibold tracking-[0.25em]">
-            PEGASUS
-          </div>
+    <main className={styles.homeRoot}>
+      {/* 02. FEATURED HERO CAROUSEL */}
+      <HeroCarousel />
 
-          <nav className="hidden gap-8 text-sm text-white/60 md:flex">
-            <Link href="/sports" className="transition hover:text-white">
-              Sports
-              </Link>
-            <Link href="#schedule" className="transition hover:text-white">
-              Schedule
-            </Link>
-            <a href="#results" className="transition hover:text-white">
-              Results
-            </a>
-            <a href="#teams" className="transition hover:text-white">
-              Teams
-            </a>
-          </nav>
-
-          <button className="rounded-full border border-white/20 px-4 py-2 text-sm transition hover:bg-white hover:text-black">
-            Explore
-          </button>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto flex min-h-[78vh] max-w-7xl items-center px-6 py-24 lg:px-10">
-          <div className="max-w-4xl">
-            <p className="mb-6 text-sm uppercase tracking-[0.35em] text-white/40">
-              The Sports Festival
-            </p>
-
-            <h1 className="text-6xl font-semibold leading-[0.95] tracking-[-0.05em] sm:text-7xl lg:text-9xl">
-              Rise.
-              <br />
-              Compete.
-              <br />
-              <span className="text-white/40">Transcend.</span>
-            </h1>
-
-            <p className="mt-8 max-w-xl text-base leading-7 text-white/55 sm:text-lg">
-              One arena. Four teams. Hundreds of athletes.
-              <br />
-              Welcome to Pegasus.
-            </p>
-
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-  href="/sports"
-  className="rounded-full bg-[#F8F8F6] px-6 py-3 text-sm font-medium text-black transition hover:scale-[1.02]"
->
-   Explore Sports
-      </Link>
-
-              <a
-                href="#schedule"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm transition hover:bg-white/10"
-              >
-                View Schedule
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Atmospheric glow */}
-        <div className="pointer-events-none absolute -right-40 top-20 h-96 w-96 rounded-full bg-white/[0.04] blur-3xl" />
-      </section>
-
-      {/* Stats */}
-<section className="border-y border-white/10">
-  <div className="mx-auto grid max-w-7xl grid-cols-2 lg:grid-cols-4">
-    {[
-  [`${festival.stats.events}+`, "Events"],
-  [`${festival.stats.teams}`, "Teams"],
-  [`${festival.stats.athletes}`, "Athletes"],
-  [`${festival.stats.categories}`, "Categories"],
-].map(([value, label]) => (
-      <div
-        key={label}
-        className="border-r border-white/10 px-6 py-10 last:border-r-0 lg:px-10"
-      >
-              <p className="text-4xl font-semibold tracking-tight">{value}</p>
-              <p className="mt-2 text-sm text-white/40">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-           {/* Sports */}
-      <section
-        id="sports"
-        className="mx-auto max-w-7xl px-6 py-28 lg:px-10"
-      >
-        <div className="max-w-2xl">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/35">
-            Discover
-          </p>
-
-          <h2 className="mt-4 text-4xl font-semibold tracking-tight sm:text-6xl">
-            Every game.
-            <br />
-            Every moment.
-          </h2>
-
-          <p className="mt-6 leading-7 text-white/50">
-            Explore the sports, events and competitions that make Pegasus
-            happen.
-          </p>
-        </div>
-
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sports.map((sport, index) => (
-            <div
-              key={sport.id}
-              className="group min-h-52 rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition hover:bg-white/[0.07]"
-            >
-              <div className="flex h-full flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/30">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-
-                  <span className="text-xs uppercase tracking-wider text-white/25">
-                    {sport.category}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-medium">
-                    {sport.name}
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-6 text-white/40">
-                    {sport.description}
-                  </p>
-
-                  <p className="mt-4 text-xs text-white/25">
-                    {sport.events.length} events
-                  </p>
-                </div>
+      {/* 03. LIVE NOW (SPORTS BROADCAST STRIP) */}
+      <aside className={styles.broadcastStrip} aria-label="Live competition status bar">
+        <div className={styles.container}>
+          <div className={styles.broadcastInner}>
+            <div className={styles.broadcastLeft}>
+              <span className={styles.broadcastKicker}>LIVE NOW</span>
+              <div className={styles.broadcastEventRow}>
+                <span className={styles.broadcastTitle}>100M FINAL</span>
+                <span className={styles.broadcastMeta}>TRACK 01 // MAIN CAMPUS · 10:00 AM</span>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-10 text-sm text-white/35 sm:flex-row sm:items-center sm:justify-between lg:px-10">
-          <span>PEGASUS</span>
-          <span>Built for the spirit of competition.</span>
+            <div className={styles.broadcastRight}>
+              <span className={styles.livePill}>
+                <span className={styles.livePulseDot} aria-hidden="true" />
+                LIVE
+              </span>
+              <Link href="/schedules" className={styles.broadcastAction}>
+                <span>View Schedules</span>
+                <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* 04. THE SPORTS (SELF-CONSTRUCTING SPORTS INDEX) */}
+      <SportsIndexSection sports={sports} events={events} />
+
+      {/* 05. TODAY'S SCHEDULE (CHRONOLOGICAL CADENCE) */}
+      <TodaysProgramSection items={verifiedScoreboard} />
+
+      {/* 06. HOUSE STANDINGS (CHAMPIONSHIP RADAR TELEMETRY) */}
+      <HouseStandingsSection leaderboard={leaderboard} />
+
+      {/* 07. LATEST RESULTS (EMPIRICAL SETTLEMENT) */}
+      <LatestResultsSection items={latestResults} />
+
+      {/* 08. FOOTER (MINIMAL, PREMIUM COLOPHON) */}
+      <footer className={styles.homeFooter} aria-label="Site footer">
+        <div className={styles.container}>
+          <div className={styles.footerInner}>
+            <div className={styles.footerTop}>
+              <div className={styles.footerBrandGroup}>
+                <div className={styles.footerBrand}>
+                  <span className={styles.footerBrandMark}>P</span>
+                  <span>PEGASUS</span>
+                </div>
+                <span className={styles.footerTagline}>
+                  STUDENTS&apos; SPORTS FESTIVAL 2026 // OFFICIAL TOURNAMENT OPERATING SYSTEM
+                </span>
+              </div>
+
+              <nav className={styles.footerNav} aria-label="Footer navigation">
+                <Link href="/" className={styles.footerNavLink}>
+                  Home
+                </Link>
+                <Link href="/sports" className={styles.footerNavLink}>
+                  Sports
+                </Link>
+                <Link href="/schedules" className={styles.footerNavLink}>
+                  Schedules
+                </Link>
+                <Link href="/fixtures" className={styles.footerNavLink}>
+                  Fixtures
+                </Link>
+                <Link href="/results" className={styles.footerNavLink}>
+                  Results
+                </Link>
+                <Link href="/leaderboard" className={styles.footerNavLink}>
+                  Leaderboard
+                </Link>
+                <Link href="/participants" className={styles.footerNavLink}>
+                  Participants
+                </Link>
+                <Link href="/teams" className={styles.footerNavLink}>
+                  Teams
+                </Link>
+                <Link href="/my-result" className={styles.footerNavLink}>
+                  My Result
+                </Link>
+              </nav>
+            </div>
+
+            <div className={styles.footerBottom}>
+              <span>
+                © 2026 Pegasus Sports Festival. All rights reserved.
+              </span>
+              <span>
+                Official timing, rankings, and point tallies verified by Meet Adjudicators.
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </main>

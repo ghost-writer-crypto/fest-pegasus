@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-22T00:53:00.000Z",
+  "title": "Design System: PEGASUS Sports Fest OS",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Deep Stadium Navy",
+        "canonical": "#1A3663",
+        "tonalRamp": ["#0B172B", "#102340", "#1A3663", "#2A5291", "#3E6FBC", "#739EE0", "#B3CEF5", "#E8EDF3"]
+      },
+      "action": {
+        "role": "accent",
+        "displayName": "Competition Crimson",
+        "canonical": "#E53737",
+        "tonalRamp": ["#681010", "#991B1B", "#C52929", "#E53737", "#EE6565", "#F89B9B", "#FCA5A5", "#FEE2E2"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Atmospheric Sky Blue",
+        "canonical": "#5B9BD5",
+        "tonalRamp": ["#1A436B", "#255D94", "#3D7FBF", "#5B9BD5", "#82B6E3", "#ACD1F0", "#D5E7F8", "#EDF5FC"]
+      },
+      "highlight": {
+        "role": "tertiary",
+        "displayName": "Championship Gold",
+        "canonical": "#F2B84B",
+        "tonalRamp": ["#6B4A08", "#9E6F10", "#C78F1A", "#F2B84B", "#F6C974", "#F9DB9E", "#FCECC7", "#FEF7E8"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Pure White Canvas",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#1A2433", "#334155", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#F1F5F9", "#FFFFFF"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Major section headlines in uppercase with tight athletic tracking." },
+      "headline": { "displayName": "Headline", "purpose": "Hero headlines and key card titles." },
+      "title": { "displayName": "Title", "purpose": "Sport row titles, match fixtures, and competition names." },
+      "body": { "displayName": "Body", "purpose": "Editorial copy, narrative synopsis, and administrative notes." },
+      "label": { "displayName": "Label", "purpose": "Monospace numbered section kickers and live broadcast chips." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 2px rgba(26, 54, 99, 0.05)", "purpose": "Subtle surface elevation for interactive elements." },
+      { "name": "shadow-card", "value": "0 2px 8px rgba(26, 54, 99, 0.06)", "purpose": "Card focus and hover elevation." },
+      { "name": "shadow-elevation", "value": "0 8px 24px -4px rgba(26, 54, 99, 0.08)", "purpose": "Modal dialogs and action sheets." }
+    ],
+    "motion": [
+      { "name": "motion-instant", "value": "90ms", "purpose": "Tap, press, and toggle tactile feedback." },
+      { "name": "motion-fast", "value": "160ms", "purpose": "Hover transitions, focus shifts, and link highlights." },
+      { "name": "motion-standard", "value": "320ms", "purpose": "Viewport entry reveals and coordinate shifts." },
+      { "name": "motion-cinematic", "value": "600ms", "purpose": "Continuous scene transformations." },
+      { "name": "ease-out-editorial", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Primary athletic acceleration curve." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "390px" },
+      { "name": "md", "value": "640px" },
+      { "name": "lg", "value": "960px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-voltage action button for live events and primary CTAs.",
+      "html": "<button class=\"ds-btn-primary\"><span>MY RESULT</span><span aria-hidden=\"true\">↗</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #E53737; color: #FFFFFF; padding: 12px 24px; font-family: system-ui, sans-serif; font-size: 14px; font-weight: 750; letter-spacing: 0.05em; text-transform: uppercase; border: none; border-radius: 2px; cursor: pointer; transition: background 160ms cubic-bezier(0.16, 1, 0.3, 1), transform 90ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn-primary:hover { background: #C52929; } .ds-btn-primary:active { transform: scale(0.985); }"
+    },
+    {
+      "name": "Secondary Outline Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Architectural outline button for navigation and secondary actions.",
+      "html": "<button class=\"ds-btn-secondary\"><span>ALL SPORTS</span><span aria-hidden=\"true\">↗</span></button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #FFFFFF; color: #1A3663; padding: 8px 16px; font-family: system-ui, sans-serif; font-size: 13px; font-weight: 750; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid #E8EDF3; border-radius: 2px; cursor: pointer; transition: background 160ms cubic-bezier(0.16, 1, 0.3, 1), border-color 160ms cubic-bezier(0.16, 1, 0.3, 1), transform 90ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn-secondary:hover { background: #F8FAFC; border-color: #C9D3DF; } .ds-btn-secondary:active { transform: scale(0.985); }"
+    },
+    {
+      "name": "Live Event Badge",
+      "kind": "chip",
+      "description": "Active broadcast status badge with pulsating crimson indicator.",
+      "html": "<div class=\"ds-live-chip\"><span class=\"ds-pulse-dot\"></span><span>LIVE</span></div>",
+      "css": ".ds-live-chip { display: inline-flex; align-items: center; gap: 6px; background: #FEE2E2; color: #E53737; padding: 4px 10px; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2px; } .ds-pulse-dot { width: 7px; height: 7px; border-radius: 9999px; background: #E53737; animation: dsPulse 1.6s infinite ease-in-out; } @keyframes dsPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Championship Arena",
+    "overview": "PEGASUS is an athletic, editorial tournament operating system built for high-stakes collegiate competition. The visual language blends the speed and precision of live sports broadcast chyrons with the disciplined typography of contemporary sports journalism. The system communicates momentum, hierarchy, and indisputable mathematical accuracy.\n\nSurfaces feel fast, sharp, and physically grounded. Rather than floating cards or diffuse SaaS shadows, the interface is structured around crisp architectural dividing rules, razor-sharp hairlines, and high-contrast typographic anchors. White space is expansive and intentional, framed by deep collegiate navy and punctuated by high-voltage competition red.",
+    "keyCharacteristics": [
+      "Broadcast Kinetic Hierarchy: Clear operational states (Live Now, In Adjudication, Verified, Meet Record) with distinct visual cues.",
+      "Architectural Line Gridwork: Continuous horizontal rules anchor elements to baselines, acting as rails for data and state transitions.",
+      "Disciplined Form Language: Micro-radii (2px–4px) maintain an engineered, hardware-like edge rather than bubbly consumer aesthetics.",
+      "Tabular Rigor: High-density numerical alignment for times, distances, scores, and rankings across all devices."
+    ],
+    "rules": [
+      { "name": "The 10% Accent Rule", "body": "Competition Crimson (#E53737) is an emergency and action beacon. It must never cover more than 10% of any viewport. Its power comes from restraint.", "section": "colors" },
+      { "name": "The No-Neon Public Rule", "body": "Arbitrary neon green, purple, cyan, or pastel gradients are strictly prohibited in the public festival world. Use only the approved palette.", "section": "colors" },
+      { "name": "The Tabular Number Rule", "body": "All numerical figures (scores, ranks, times, metrics, distances) must render with font-variant-numeric: tabular-nums to prevent layout shift and enable instant vertical column scanning.", "section": "typography" },
+      { "name": "The Monospace Anchor Rule", "body": "Every major section title must be preceded by a numbered monospace kicker (01 / ..., 04 / ...) to maintain narrative continuity down the festival timeline.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "All components sit flat against the canvas at rest. Elevation increases only in response to direct pointer interaction or modal overlay states.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the approved palette (#1A3663, #E53737, #5B9BD5, #F2B84B, #FFFFFF, #E8EDF3).",
+      "Do use font-variant-numeric: tabular-nums for all scoreboards, point tables, and timing displays.",
+      "Do respect the 10% limit on Competition Crimson (#E53737).",
+      "Do preserve 100% resting layout fidelity when designing motion transitions.",
+      "Do provide instant zero-duration fallbacks for users with prefers-reduced-motion: reduce.",
+      "Do maintain strict isolation between the clean public world and high-contrast dark operational shells."
+    ],
+    "donts": [
+      "Don't modify or refactor the frozen Hero Carousel (components/home/HeroCarousel.tsx).",
+      "Don't introduce lime, purple, teal, magenta, or arbitrary neon colors into the public interface.",
+      "Don't use generic floating cards, multi-color gradient blobs, or glassmorphism.",
+      "Don't use bouncy, elastic, or constant-floating animations.",
+      "Don't invent fictional official team names, logos, colors, or athlete data. Use development placeholders (House 01–House 04).",
+      "Don't force an Islamic or anti-Islamic visual theme. Religious identity remains organic and contextual."
+    ]
+  }
+}

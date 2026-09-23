@@ -1,0 +1,75 @@
+.typeWrap {
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+}
+
+/* 1. Hairline Clip Mask Reveal */
+.mask {
+  overflow: hidden;
+}
+
+.mask .innerContent {
+  display: inline-block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition:
+    transform var(--type-duration, 420ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity var(--type-duration, 420ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  transition-delay: var(--type-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.mask.revealed .innerContent {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 2. Kinetic Letter Tracking Expansion (Editorial Kickers) */
+.tracking .innerContent {
+  display: inline-block;
+  letter-spacing: -0.04em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    letter-spacing var(--type-duration, 480ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity var(--type-duration, 480ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--type-duration, 480ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  transition-delay: var(--type-delay, 0ms);
+  will-change: letter-spacing, opacity, transform;
+}
+
+.tracking.revealed .innerContent {
+  letter-spacing: inherit;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. Editorial Lift with subtle depth */
+.editorial-lift {
+  overflow: hidden;
+}
+
+.editorial-lift .innerContent {
+  display: inline-block;
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+  transition:
+    transform var(--type-duration, 400ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity var(--type-duration, 400ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  transition-delay: var(--type-delay, 0ms);
+}
+
+.editorial-lift.revealed .innerContent {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .innerContent {
+    transform: none !important;
+    opacity: 1 !important;
+    letter-spacing: inherit !important;
+    transition: none !important;
+  }
+}

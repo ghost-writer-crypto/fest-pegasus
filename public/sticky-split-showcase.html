@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll-Triggered Pinning & Panel Swaps — Sticky Split-Screen</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM: APPLE / STRIPE / FRAMER CALIBRE TYPOGRAPHY & SPACING
+       ========================================================================== */
+    :root {
+      --bg-canvas: #090D14;
+      --bg-surface: #0E1420;
+      --bg-glass: rgba(14, 20, 32, 0.72);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      
+      --text-headline: #FFFFFF;
+      --text-body: #94A3B8;
+      --text-muted: #64748B;
+      --accent-cyan: #38BDF8;
+      --accent-amber: #F59E0B;
+      --accent-crimson: #EF4444;
+
+      --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+      --ease-out-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-press: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--bg-canvas);
+      color: var(--text-headline);
+      font-family: var(--font-display);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Page Intro Stage (To allow pre-scroll immersion) */
+    .intro-hero {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.06), transparent 70%);
+    }
+
+    .intro-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+    }
+
+    .intro-title {
+      font-size: clamp(2.4rem, 5vw, 4.5rem);
+      font-weight: 850;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      max-width: 860px;
+      margin-bottom: 24px;
+    }
+
+    .intro-subtitle {
+      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      color: var(--text-body);
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .scroll-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .scroll-arrow {
+      animation: bounce 1.8s infinite var(--ease-out-editorial);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* ==========================================================================
+       THE CORE STICKY SPLIT-SCREEN LAYOUT
+       ========================================================================== */
+    .sticky-showcase {
+      position: relative;
+      width: 100%;
+      background-color: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sticky-showcase__grid {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      position: relative;
+    }
+
+    /* --------------------------------------------------------------------------
+       Left Column: Scrolling Content (50%)
+       -------------------------------------------------------------------------- */
+    .sticky-showcase__content {
+      width: 50%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .showcase-panel {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 10% 100px 12%;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: opacity 0.45s var(--ease-out-editorial), transform 0.45s var(--ease-out-editorial);
+    }
+
+    .showcase-panel:last-child {
+      border-bottom: none;
+    }
+
+    /* Inactive panel subtle subordination */
+    .showcase-panel {
+      opacity: 0.35;
+      transform: translateY(8px);
+    }
+
+    .showcase-panel.is-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: clamp(2rem, 3.4vw, 3rem);
+      font-weight: 850;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text-headline);
+    }
+
+    .panel-lead {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #E2E8F0;
+      margin-bottom: 32px;
+      max-width: 520px;
+    }
+
+    .panel-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      padding: 24px 0;
+      margin-bottom: 32px;
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 2.2rem;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+      color: var(--text-headline);
+      font-variant-numeric: tabular-nums;
+      display: block;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-unit {
+      font-size: 1.1rem;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      margin-left: 4px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 650;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+    }
+
+    .panel-body {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--text-body);
+      max-width: 500px;
+    }
+
+    /* --------------------------------------------------------------------------
+       Right Column: Pinned Sticky Media (50%)
+       -------------------------------------------------------------------------- */
+    .sticky-showcase__media-viewport {
+      width: 50%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .media-sticky-stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+      background-color: #06090F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    /* HUD Header overlay */
+    .media-hud {
+      position: absolute;
+      top: 32px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hud-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 2px;
+      background: rgba(9, 13, 20, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-strong);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: #FFFFFF;
+    }
+
+    .hud-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .hud-counter {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 2px;
+      background: rgba(9, 13, 20, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* The Layer Stack with Cinematic Crossfade */
+    .media-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.04);
+      transition:
+        opacity 0.65s var(--ease-out-editorial),
+        transform 0.8s var(--ease-out-editorial),
+        visibility 0.65s var(--ease-out-editorial);
+      will-change: opacity, transform;
+    }
+
+    .media-layer.is-active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+      z-index: 2;
+    }
+
+    .media-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    /* Bottom Gradient Vignette & Technical Chyron */
+    .media-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 60px 32px 32px;
+      background: linear-gradient(to top, rgba(6, 9, 15, 0.95) 0%, rgba(6, 9, 15, 0.6) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .caption-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+    }
+
+    .caption-title {
+      font-size: 15px;
+      font-weight: 750;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+
+    /* Outro Stage */
+    .outro-section {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px 24px;
+      background-color: var(--bg-surface);
+    }
+
+    .outro-title {
+      font-size: 2rem;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .outro-desc {
+      color: var(--text-body);
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       MOBILE RESPONSIVE BEHAVIOR (<768px): THE VERTICAL STACK
+       ========================================================================== */
+    @media (max-width: 768px) {
+      .sticky-showcase__grid {
+        flex-direction: column;
+      }
+
+      /* Media Viewport locks to the TOP 50vh */
+      .sticky-showcase__media-viewport {
+        order: -1;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        height: 50vh;
+        height: 50dvh;
+        z-index: 10;
+        border-left: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .media-sticky-stage {
+        height: 50vh;
+        height: 50dvh;
+      }
+
+      .media-hud {
+        top: 16px;
+        left: 16px;
+        right: 16px;
+      }
+
+      .media-caption {
+        padding: 30px 16px 16px;
+      }
+
+      .caption-title {
+        font-size: 13px;
+      }
+
+      /* Text panels scroll underneath through bottom half over solid surface */
+      .sticky-showcase__content {
+        order: 1;
+        width: 100%;
+        position: relative;
+        z-index: 20;
+        background-color: var(--bg-canvas);
+        box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.85);
+      }
+
+      .showcase-panel {
+        min-height: 85vh;
+        min-height: 85dvh;
+        padding: 48px 24px 72px;
+        justify-content: flex-start;
+      }
+
+      .panel-title {
+        font-size: 1.85rem;
+      }
+
+      .panel-lead {
+        font-size: 1rem;
+      }
+
+      .metric-value {
+        font-size: 1.8rem;
+      }
+    }
+
+    /* ==========================================================================
+       ACCESSIBILITY & REDUCED MOTION
+       ========================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      .showcase-panel,
+      .media-layer {
+        transition: none !important;
+        transform: none !important;
+      }
+
+      .hud-dot,
+      .scroll-arrow {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Intro -->
+  <header class="intro-hero">
+    <span class="intro-badge">PRECISION ENGINEERING // SPEC 2026</span>
+    <h1 class="intro-title">The Anatomy of Pure Speed.</h1>
+    <p class="intro-subtitle">
+      Scroll down to experience our sticky split-screen telemetry architecture. The right column pins seamlessly while the left column progresses through structural telemetry panels.
+    </p>
+    <div class="scroll-indicator">
+      <span>EXPLORE TELEMETRY</span>
+      <span class="scroll-arrow" aria-hidden="true">↓</span>
+    </div>
+  </header>
+
+  <!-- Sticky Split-Screen Showcase Section -->
+  <section class="sticky-showcase" id="telemetry-showcase" aria-label="Vehicle Engineering Specifications">
+    <div class="sticky-showcase__grid">
+
+      <!-- Left Column: Scrolling Narrative Text (50%) -->
+      <div class="sticky-showcase__content">
+
+        <!-- Panel 0: Aerodynamics -->
+        <article class="showcase-panel is-active" data-panel="0" id="panel-aerodynamics">
+          <div class="panel-badge">01 / FLUID DYNAMICS</div>
+          <h2 class="panel-title">Active Aerodynamic Vectoring</h2>
+          <p class="panel-lead">
+            Sculpted directly within supersonic wind tunnel simulations. Active vortex generators adapt to yaw angle and corner entry velocity in milliseconds.
+          </p>
+          <div class="panel-metrics">
+            <div class="metric">
+              <span class="metric-value">1,240<span class="metric-unit">kg</span></span>
+              <span class="metric-label">Downforce @ 250 km/h</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">0.28<span class="metric-unit">Cd</span></span>
+              <span class="metric-label">Drag Coefficient</span>
+            </div>
+          </div>
+          <p class="panel-body">
+            Every surface contour routes turbulent air through internal venturi tunnels and variable trailing-edge diffusers, pinning the chassis without inducing parasitic drag.
+          </p>
+        </article>
+
+        <!-- Panel 1: Powertrain -->
+        <article class="showcase-panel" data-panel="1" id="panel-powertrain">
+          <div class="panel-badge">02 / PROPULSION</div>
+          <h2 class="panel-title">Twin-Turbocharged Hybrid V8</h2>
+          <p class="panel-lead">
+            Direct-injected 4.0-liter hot-vee internal combustion engine paired with dual axial-flux electric motors running on an 800-volt high-density architecture.
+          </p>
+          <div class="panel-metrics">
+            <div class="metric">
+              <span class="metric-value">980<span class="metric-unit">hp</span></span>
+              <span class="metric-label">Combined System Output</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">9,200<span class="metric-unit">rpm</span></span>
+              <span class="metric-label">Bespoke Redline</span>
+            </div>
+          </div>
+          <p class="panel-body">
+            Inconel exhaust manifolds with titanium heat shielding deliver instantaneous boost response, delivering linear, continuous acceleration without turbo lag.
+          </p>
+        </article>
+
+        <!-- Panel 2: Track Performance -->
+        <article class="showcase-panel" data-panel="2" id="panel-track">
+          <div class="panel-badge">03 / TRACK CALIBRATION</div>
+          <h2 class="panel-title">Apex Calibration & Telemetry</h2>
+          <p class="panel-lead">
+            Carbon-fiber monocoque torsional rigidity matched with pushrod active magnetorheological damping for sub-millimeter trajectory control at high speed.
+          </p>
+          <div class="panel-metrics">
+            <div class="metric">
+              <span class="metric-value">2.1<span class="metric-unit">G</span></span>
+              <span class="metric-label">Peak Lateral Grip</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">31.2<span class="metric-unit">m</span></span>
+              <span class="metric-label">100–0 km/h Stopping</span>
+            </div>
+          </div>
+          <p class="panel-body">
+            Multi-stage carbon-ceramic 410mm braking discs with dynamic brake-by-wire regeneration maintain zero fade through 24-hour endurance race cycles.
+          </p>
+        </article>
+
+      </div>
+
+      <!-- Right Column: Pinned Sticky Media (50%) -->
+      <aside class="sticky-showcase__media-viewport" aria-label="Interactive Visual Stage">
+        <div class="media-sticky-stage">
+
+          <!-- Telemetry HUD Header -->
+          <div class="media-hud">
+            <span class="hud-status">
+              <span class="hud-dot" aria-hidden="true"></span>
+              TELEMETRY ACTIVE
+            </span>
+            <span class="hud-counter" id="panel-counter" aria-live="polite">01 / 03</span>
+          </div>
+
+          <!-- Media Layer 0: Aerodynamics -->
+          <figure class="media-layer is-active" data-media="0">
+            <img 
+              src="/images/showcase/aerodynamics.jpg" 
+              alt="Active aerodynamic hypercar in wind tunnel testing with blue airflow lines" 
+              class="media-image" 
+              loading="eager"
+            />
+            <figcaption class="media-caption">
+              <span class="caption-tag">WIND TUNNEL // SIMULATION 402</span>
+              <span class="caption-title">Active Boundary Layer Surface Analysis</span>
+            </figcaption>
+          </figure>
+
+          <!-- Media Layer 1: Powertrain -->
+          <figure class="media-layer" data-media="1">
+            <img 
+              src="/images/showcase/powertrain.jpg" 
+              alt="Precision engineered twin-turbo hybrid V8 engine on titanium plinth" 
+              class="media-image" 
+              loading="lazy"
+            />
+            <figcaption class="media-caption">
+              <span class="caption-tag">POWERTRAIN TEST RIG // BENCH 08</span>
+              <span class="caption-title">Twin-Turbocharged Hot-Vee Assembly</span>
+            </figcaption>
+          </figure>
+
+          <!-- Media Layer 2: Track Calibration -->
+          <figure class="media-layer" data-media="2">
+            <img 
+              src="/images/showcase/track.jpg" 
+              alt="Racing sports car cornering at dusk with glowing carbon ceramic brakes" 
+              class="media-image" 
+              loading="lazy"
+            />
+            <figcaption class="media-caption">
+              <span class="caption-tag">CIRCUIT TELEMETRY // SECTOR 3</span>
+              <span class="caption-title">High-Speed Apex Lateral Calibration</span>
+            </figcaption>
+          </figure>
+
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- Page Outro -->
+  <footer class="outro-section">
+    <h2 class="outro-title">Engineering Without Compromise.</h2>
+    <p class="outro-desc">
+      Built with native CSS <code>position: sticky</code> and minimal <code>IntersectionObserver</code> for zero-jank 120 FPS performance.
+    </p>
+  </footer>
+
+  <!-- ==========================================================================
+       MINIMAL, RESILIENT INTERSECTION OBSERVER SCRIPT
+       ========================================================================== -->
+  <script>
+    (function initStickySwap() {
+      const panels = document.querySelectorAll('.showcase-panel');
+      const mediaLayers = document.querySelectorAll('.media-layer');
+      const counter = document.getElementById('panel-counter');
+
+      if (!panels.length || !mediaLayers.length) return;
+
+      let currentIndex = 0;
+
+      function updateActiveStage(newIndex) {
+        if (newIndex === currentIndex || newIndex < 0 || newIndex >= panels.length) return;
+        currentIndex = newIndex;
+
+        // 1. Update text panel emphasis
+        panels.forEach((p, idx) => {
+          p.classList.toggle('is-active', idx === newIndex);
+        });
+
+        // 2. Crossfade media layers
+        mediaLayers.forEach((m, idx) => {
+          m.classList.toggle('is-active', idx === newIndex);
+        });
+
+        // 3. Update HUD counter
+        if (counter) {
+          counter.textContent = `0${newIndex + 1} / 0${panels.length}`;
+        }
+      }
+
+      /* 
+       * RootMargin explanation:
+       * -35% top and -35% bottom creates an active focal band spanning 30% of the viewport height
+       * right across the vertical center. This guarantees instantaneous, jitter-free activation
+       * regardless of scroll velocity or viewport aspect ratio.
+       */
+      const observerOptions = {
+        root: null,
+        rootMargin: '-35% 0px -35% 0px',
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const panelIndex = parseInt(entry.target.getAttribute('data-panel'), 10);
+            if (!isNaN(panelIndex)) {
+              updateActiveStage(panelIndex);
+            }
+          }
+        });
+      }, observerOptions);
+
+      panels.forEach((panel) => observer.observe(panel));
+    })();
+  </script>
+</body>
+</html>

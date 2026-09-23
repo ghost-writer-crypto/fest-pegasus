@@ -1,0 +1,62 @@
+import {
+  getActiveFestival,
+  getTeamsByFestival,
+  getParticipantsByFestivalAdmin,
+  getEventsByFestival,
+  getDivisionsByFestival,
+  getAdminRegistrationsByFestival,
+  getSubstitutionsByFestival,
+  getAuthenticatedProfile,
+} from "@/lib/repositories";
+import TeamManagerClient from "@/components/team-manager/TeamManagerClient";
+
+export const dynamic = "force-dynamic";
+
+export default async function TeamManagerDashboardPage() {
+  const festival = await getActiveFestival();
+  const festivalId = festival?.id || "pegasus-2026";
+
+  const [profile, teams, allParticipants, events, divisions, allRegistrations, allSubstitutions] =
+    await Promise.all([
+      getAuthenticatedProfile(),
+      getTeamsByFestival(festivalId),
+      getParticipantsByFestivalAdmin(festivalId),
+      getEventsByFestival(festivalId),
+      getDivisionsByFestival(festivalId),
+      getAdminRegistrationsByFestival(festivalId),
+      getSubstitutionsByFestival(festivalId),
+    ]);
+
+  // Determine current team: if manager has team_id use it, otherwise default to first team for inspection
+  const managerTeamId = profile?.teamId || teams[0]?.id;
+  const currentTeam = teams.find((t) => t.id === managerTeamId) || teams[0] || null;
+
+  // Filter participants, registrations, substitutions to this team
+  const teamParticipants = currentTeam
+    ? allParticipants.filter((p) => p.team_id === currentTeam.id)
+    : [];
+
+  const teamRegistrations = currentTeam
+    ? allRegistrations.filter((r) => r.teamId === currentTeam.id)
+    : [];
+
+  const teamSubstitutions = currentTeam
+    ? allSubstitutions.filter((s) => s.team_id === currentTeam.id)
+    : [];
+
+  return (
+    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <TeamManagerClient
+        festivalId={festivalId}
+        currentTeam={currentTeam}
+        allTeams={teams}
+        participants={teamParticipants}
+        events={events}
+        divisions={divisions}
+        registrations={teamRegistrations}
+        substitutions={teamSubstitutions}
+        managerName={profile?.fullName || undefined}
+      />
+    </main>
+  );
+}

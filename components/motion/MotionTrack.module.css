@@ -1,0 +1,122 @@
+.trackSpine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.laneBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px;
+  background-color: #1A3663;
+  color: #FFFFFF;
+  border-radius: 2px;
+  width: 44px;
+  margin-top: 32px;
+  box-shadow: 0 2px 8px rgba(26, 54, 99, 0.15);
+}
+
+.laneNum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  color: #F2B84B;
+}
+
+.laneTag {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.trackGuide {
+  position: relative;
+  flex: 1;
+  width: 2px;
+  background-color: #E8EDF3;
+  margin-top: 12px;
+  margin-bottom: 48px;
+}
+
+.trackLineFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  background-color: #1A3663;
+  transition: height 600ms var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  will-change: height;
+}
+
+.trackLineInstant {
+  transition: none !important;
+}
+
+.trackNode {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.nodeIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  transition:
+    border-color var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    background-color var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.nodeLabel {
+  position: absolute;
+  left: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8492A6;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.trackNodeActive .nodeIndicator {
+  border-color: #1A3663;
+  background-color: #E53737;
+  transform: scale(1.25);
+}
+
+.trackNodeActive .nodeLabel {
+  opacity: 1;
+  transform: translateX(0);
+  color: #1A3663;
+}
+
+@media (max-width: 1400px) {
+  .trackSpine {
+    display: none;
+  }
+}

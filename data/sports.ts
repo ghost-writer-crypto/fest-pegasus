@@ -1,66 +1,44 @@
-export type Sport = {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  events: string[];
-};
+import type { Sport } from "@/lib/types";
 
 export const sports: Sport[] = [
   {
     id: "athletics",
     name: "Athletics",
+    slug: "athletics",
+    type: "individual",
     category: "Track & Field",
     description: "Speed, strength, endurance and precision.",
-    events: [
-      "100m",
-      "200m",
-      "400m",
-      "800m",
-      "1500m",
-      "Long Jump",
-      "High Jump",
-      "Shot Put",
-    ],
   },
-
   {
     id: "football",
     name: "Football",
+    slug: "football",
+    type: "team",
     category: "Team Sports",
     description: "The beautiful game. One team, one objective.",
-    events: [
-      "Football",
-    ],
   },
-
   {
     id: "basketball",
     name: "Basketball",
+    slug: "basketball",
+    type: "team",
     category: "Team Sports",
     description: "Speed, movement and relentless competition.",
-    events: [
-      "Basketball",
-    ],
   },
-
   {
     id: "volleyball",
     name: "Volleyball",
+    slug: "volleyball",
+    type: "team",
     category: "Team Sports",
     description: "Precision, teamwork and power.",
-    events: [
-      "Volleyball",
-    ],
   },
-
   {
     id: "cricket",
     name: "Cricket",
+    slug: "cricket",
+    type: "team",
     category: "Team Sports",
     description: "Strategy, skill and patience under pressure.",
-    events: [
-      "Cricket",
-    ],
   },
 ];

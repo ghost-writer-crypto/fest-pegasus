@@ -1,0 +1,528 @@
+/* ===================================================
+   PEGASUS HOME — ANIMATION 04
+   TODAY'S PROGRAM (CHRONOLOGICAL CADENCE)
+   Sequential Temporal Reveal & Time-Anchor Resolution
+   Tokens:
+     Deep Stadium Navy:   #1A3663
+     Atmospheric Sky:     #5B9BD5
+     Ice Support Gray:    #E8EDF3
+     Slate Frame Border:  #C9D3DF
+     Carbon Body:         #26364A
+     Muted Press Slate:   #64748B
+     Pure White:          #FFFFFF
+     Raised Surface:      #F8FAFC
+   =================================================== */
+
+.sectionWrap {
+  position: relative;
+  width: 100%;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E8EDF3;
+  padding: 80px 0 96px;
+  scroll-margin-top: 80px;
+}
+
+.container {
+  width: min(100% - 64px, 1280px);
+  margin: 0 auto;
+}
+
+/* =========================================
+   SECTION HEADER
+   ========================================= */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.headerTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionKicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  color: #1A3663;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 90ms cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  background-color: #1A3663;
+  border-color: #1A3663;
+  color: #FFFFFF;
+}
+
+.sectionLink:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+.sectionLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   ARCHITECTURAL LINE DIVIDER
+   ========================================= */
+
+.sectionDividerTrack {
+  width: 100%;
+  height: 1px;
+  background-color: #E8EDF3;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.sectionDividerLine {
+  width: 100%;
+  height: 100%;
+  background-color: #1A3663;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.pending .sectionDividerLine {
+  transform: scaleX(0);
+}
+
+.resolved .sectionDividerLine {
+  transform: scaleX(1);
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================
+   CHRONOLOGICAL CADENCE TIMETABLE
+   ========================================= */
+
+.sectionContent {
+  width: 100%;
+}
+
+.scheduleTimeline {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: center;
+  gap: 32px;
+  padding: 24px 8px;
+  border-bottom: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scheduleRow:hover {
+  background-color: #F8FAFC;
+  transform: translateX(2px);
+}
+
+.scheduleRow:active {
+  transform: translateX(1px) scale(0.985);
+  transition-duration: 90ms;
+}
+
+/* 1. Time Anchor: Resolves first in the chronological sequence */
+.timeAnchorCol {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  will-change: transform, opacity;
+}
+
+.timePip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #5B9BD5;
+  flex-shrink: 0;
+}
+
+.scheduleTime {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pending .timeAnchorCol {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.resolved .timeAnchorCol {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 85ms);
+}
+
+/* 2. Event Info: Resolves immediately adjacent to time anchor */
+.scheduleEventCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  will-change: transform, opacity;
+}
+
+.scheduleEventName {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  color: #1A3663;
+  text-transform: uppercase;
+}
+
+.scheduleEventMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  color: #64748B;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.metaDot {
+  color: #C9D3DF;
+  font-size: 10px;
+}
+
+.pending .scheduleEventCol {
+  opacity: 0;
+  transform: translateX(4px);
+}
+
+.resolved .scheduleEventCol {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 85ms + 35ms);
+}
+
+/* 3. Status Tag: Resolves alongside event details */
+.scheduleStatusCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  will-change: transform, opacity;
+}
+
+.scheduleStatusTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background-color: #E8EDF3;
+  color: #1A3663;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pending .scheduleStatusCol {
+  opacity: 0;
+  transform: translateX(4px);
+}
+
+.resolved .scheduleStatusCol {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 85ms + 35ms);
+}
+
+/* =========================================
+   FORWARD VECTOR NOTICE (UP NEXT CALLOUT)
+   ========================================= */
+
+.scheduleNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 16px 20px;
+  background-color: #F8FAFC;
+  border: 1px solid #E8EDF3;
+  border-radius: 2px;
+  flex-wrap: wrap;
+  will-change: transform, opacity;
+}
+
+.pending .scheduleNotice {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.resolved .scheduleNotice {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 340ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--notice-index, 3) * 85ms + 40ms);
+}
+
+.scheduleNoticeText {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  color: #26364A;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 240px;
+}
+
+.scheduleNoticeBadge {
+  padding: 3px 8px;
+  background-color: #1A3663;
+  color: #FFFFFF;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   AUTHENTIC EMPTY STATE
+   ========================================= */
+
+.emptyCard {
+  text-align: center;
+  padding: 64px 24px;
+  background-color: #F8FAFC;
+  border: 1px dashed #C9D3DF;
+  border-radius: 2px;
+  margin: 16px 0;
+}
+
+.emptyEyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  color: #64748B;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.emptyTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1A3663;
+  margin: 0 0 8px 0;
+}
+
+.emptyDesc {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  color: #64748B;
+  max-width: 520px;
+  margin: 0 auto 24px auto;
+  line-height: 1.5;
+}
+
+.emptyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #1A3663;
+  background-color: transparent;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.emptyLink:hover {
+  background-color: #1A3663;
+  color: #FFFFFF;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+
+@media (max-width: 900px) {
+  .sectionWrap {
+    padding: 64px 0;
+  }
+
+  .scheduleRow {
+    grid-template-columns: 130px 1fr auto;
+    gap: 20px;
+    padding: 20px 8px;
+  }
+
+  .scheduleTime {
+    font-size: 19px;
+  }
+
+  /* 
+   * CRITICAL CRAFT REQUIREMENT:
+   * Status tag is NEVER hidden on tablet or mobile!
+   */
+  .scheduleStatusCol {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 1.85rem;
+  }
+
+  /* 
+   * MOBILE 2-TIER ROW:
+   * Tier 1: Time anchor on left + Status tag on right
+   * Tier 2: Event name & metadata spanning full width
+   */
+  .scheduleRow {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "time status"
+      "event event";
+    gap: 8px 12px;
+    padding: 16px 4px;
+  }
+
+  .timeAnchorCol {
+    grid-area: time;
+  }
+
+  .scheduleStatusCol {
+    grid-area: status;
+  }
+
+  .scheduleEventCol {
+    grid-area: event;
+  }
+
+  .scheduleTime {
+    font-size: 18px;
+  }
+
+  .scheduleEventName {
+    font-size: 16px;
+  }
+
+  .scheduleNotice {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .scheduleNotice .sectionLink {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================================
+   PREFERS REDUCED MOTION
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionDividerLine,
+  .timeAnchorCol,
+  .scheduleEventCol,
+  .scheduleStatusCol,
+  .scheduleNotice,
+  .scheduleRow,
+  .sectionLink {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+  }
+}

@@ -1,0 +1,438 @@
+/* ===================================================
+   PEGASUS HOME — ANIMATION 03
+   HOUSE STANDINGS (CHAMPIONSHIP RADAR TELEMETRY)
+   Hybrid Progressive Telemetry Calibration
+   Tokens:
+     Deep Stadium Navy:   #1A3663
+     Championship Gold:   #F2B84B
+     Gold Leader Tint:    #FFFDF7
+     Gold Hover Tint:     #FFFBEB
+     Ice Support Gray:    #E8EDF3
+     Atmospheric Sky:     #5B9BD5
+     Carbon Body:         #26364A
+     Muted Press Slate:   #64748B
+     Pure White:          #FFFFFF
+   =================================================== */
+
+.sectionWrap {
+  position: relative;
+  width: 100%;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E8EDF3;
+  padding: 80px 0 96px;
+  scroll-margin-top: 80px;
+}
+
+.stickyStage {
+  width: 100%;
+  position: relative;
+}
+
+@media (min-width: 901px) {
+  .sectionWrap {
+    /* Staging envelope provides disciplined scroll anchor window */
+    min-height: calc(100vh + 220px);
+  }
+
+  .stickyStage {
+    position: sticky;
+    top: 84px; /* Clears sticky navbar with 20px headroom */
+  }
+}
+
+.container {
+  width: min(100% - 64px, 1280px);
+  margin: 0 auto;
+}
+
+/* =========================================
+   SECTION HEADER
+   ========================================= */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.headerTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionKicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  color: #1A3663;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 90ms cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  background-color: #1A3663;
+  border-color: #1A3663;
+  color: #FFFFFF;
+}
+
+.sectionLink:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+.sectionLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   ARCHITECTURAL LINE DIVIDER
+   ========================================= */
+
+.sectionDividerTrack {
+  width: 100%;
+  height: 1px;
+  background-color: #E8EDF3;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.sectionDividerLine {
+  width: 100%;
+  height: 100%;
+  background-color: #1A3663;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.pending .sectionDividerLine {
+  transform: scaleX(0);
+}
+
+.calibrated .sectionDividerLine {
+  transform: scaleX(1);
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================
+   CHAMPIONSHIP STANDINGS TABLE
+   ========================================= */
+
+.standingsTable {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.standingRow {
+  display: grid;
+  grid-template-columns: 80px 1.6fr 2fr 120px;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 12px;
+  border-bottom: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  border-radius: 2px;
+  will-change: transform, opacity;
+}
+
+.pending .standingRow {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.calibrated .standingRow {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--rank-index, 0) * 60ms);
+}
+
+.standingRowLeader {
+  background-color: #FFFDF7;
+  border-bottom-color: #F6E5B8;
+}
+
+.standingRow:hover {
+  background-color: #F8FAFC;
+}
+
+.standingRowLeader:hover {
+  background-color: #FFFBEB;
+}
+
+/* =========================================
+   CELL 1: RANK
+   ========================================= */
+
+.standingRank {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.standingRankLeader {
+  color: #D97706;
+}
+
+.goldStar {
+  font-size: 16px;
+  color: #F2B84B;
+  line-height: 1;
+}
+
+/* =========================================
+   CELL 2: HOUSE IDENTITY & LEADER TAG
+   ========================================= */
+
+.standingHouse {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.standingHouseName {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  color: #1A3663;
+  text-transform: uppercase;
+}
+
+.standingHouseTag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #D97706;
+  text-transform: uppercase;
+}
+
+/* =========================================
+   CELL 3: THE CHAMPIONSHIP RADAR METER
+   ========================================= */
+
+.standingMeterWrap {
+  height: 8px;
+  background-color: #E8EDF3;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.standingMeterFill {
+  height: 100%;
+  width: 100%;
+  background-color: #1A3663;
+  border-radius: 2px;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.standingMeterFillLeader {
+  background-color: #F2B84B;
+}
+
+.pending .standingMeterFill {
+  transform: scaleX(0);
+}
+
+.calibrated .standingMeterFill {
+  transform: scaleX(var(--meter-scale, 1));
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--rank-index, 0) * 60ms);
+}
+
+/* =========================================
+   CELL 4: POINTS
+   ========================================= */
+
+.standingPoints {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.standingPointsVal {
+  color: #1A3663;
+}
+
+.standingPointsUnit {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+  margin-left: 5px;
+  letter-spacing: 0.05em;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN (390px Mobile Target)
+   ========================================= */
+
+@media (max-width: 900px) {
+  .sectionWrap {
+    padding: 64px 0;
+    min-height: auto; /* Unpin on tablets and mobile to avoid sticky traps */
+  }
+
+  .stickyStage {
+    position: static;
+  }
+
+  /* 
+   * CRITICAL CRAFT FIX:
+   * The previous code had `.standingMeterWrap { display: none; }`!
+   * We restore the meter cleanly below the rank/house info on a 2nd row grid.
+   */
+  .standingRow {
+    grid-template-columns: 50px 1fr auto;
+    grid-template-areas:
+      "rank house points"
+      "meter meter meter";
+    gap: 12px 16px;
+    padding: 18px 8px;
+  }
+
+  .standingRank {
+    grid-area: rank;
+    font-size: 22px;
+  }
+
+  .standingHouse {
+    grid-area: house;
+  }
+
+  .standingHouseName {
+    font-size: 16px;
+  }
+
+  .standingPoints {
+    grid-area: points;
+    font-size: 20px;
+  }
+
+  .standingMeterWrap {
+    grid-area: meter;
+    display: block !important; /* Force visibility across all viewports */
+    height: 6px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 1.85rem;
+  }
+
+  .standingRow {
+    padding: 16px 4px;
+  }
+
+  .standingRank {
+    font-size: 20px;
+  }
+
+  .standingHouseName {
+    font-size: 15px;
+  }
+
+  .standingPoints {
+    font-size: 18px;
+  }
+}
+
+/* =========================================
+   PREFERS REDUCED MOTION
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionWrap {
+    min-height: auto !important;
+  }
+
+  .stickyStage {
+    position: static !important;
+  }
+
+  .sectionDividerLine,
+  .standingMeterFill {
+    transform: scaleX(var(--meter-scale, 1)) !important;
+    transition: none !important;
+  }
+
+  .standingRow {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .sectionLink {
+    transition: none !important;
+    transform: none !important;
+  }
+}

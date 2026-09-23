@@ -1,5 +1,9 @@
- import { sports } from "@/data/sports";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { sports } from "@/data/sports";
+import { events } from "@/data/events";
+import { resolveFestivalEvent } from "@/lib/competition/eventResolver";
+import { CODEX_DIVISIONS } from "@/lib/competition/divisions";
 
 type SportPageProps = {
   params: Promise<{
@@ -7,193 +11,162 @@ type SportPageProps = {
   }>;
 };
 
-export default async function SportPage({
-  params,
-}: SportPageProps) {
+export default async function SportPage({ params }: SportPageProps) {
   const { id } = await params;
 
-  const sport = sports.find((item) => item.id === id);
+  const sport = sports.find(
+    (item) => item.id.toLowerCase() === id.toLowerCase() || item.slug?.toLowerCase() === id.toLowerCase(),
+  );
 
   if (!sport) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0A0A0A] text-[#F8F8F6]">
-        <div className="text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/30">
-            Pegasus
-          </p>
-
-          <h1 className="mt-4 text-5xl font-semibold">
-            Sport not found
-          </h1>
-
-          <Link
-            href="/sports"
-            className="mt-8 inline-block rounded-full bg-[#F8F8F6] px-6 py-3 text-sm font-medium text-black"
-          >
-            Back to Sports
-          </Link>
-        </div>
-      </main>
-    );
+    notFound();
   }
 
+  const sportEvents = events.filter(
+    (event) => event.sport.toLowerCase() === sport.name.toLowerCase(),
+  );
+
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-[#F8F8F6]">
+    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--sports pegasus-animate-fade">
+      <Link href="/sports" className="pegasus-back">
+        ← All sports
+      </Link>
 
-      {/* Navigation */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
-
-          <Link
-            href="/"
-            className="text-lg font-semibold tracking-[0.25em]"
-          >
-            PEGASUS
-          </Link>
-
-          <nav className="hidden gap-8 text-sm text-white/60 md:flex">
-            <Link href="/" className="transition hover:text-white">
-              Home
-            </Link>
-
-            <Link href="/sports" className="text-white">
-              Sports
-            </Link>
-
-            <span className="text-white/30">
-              Schedule
-            </span>
-
-            <span className="text-white/30">
-              Results
-            </span>
-
-            <span className="text-white/30">
-              Teams
-            </span>
-          </nav>
-
-          <Link
-            href="/sports"
-            className="rounded-full border border-white/20 px-4 py-2 text-sm transition hover:bg-white hover:text-black"
-          >
-            All Sports
-          </Link>
-
-        </div>
-      </header>
-
-
-      {/* Sport Hero */}
-      <section className="relative overflow-hidden border-b border-white/10">
-
-        <div className="mx-auto max-w-7xl px-6 py-24 lg:px-10 lg:py-32">
-
-          <Link
-            href="/sports"
-            className="text-sm text-white/35 transition hover:text-white"
-          >
-            ← All Sports
-          </Link>
-
-          <div className="mt-12 max-w-5xl">
-
-            <p className="text-sm uppercase tracking-[0.35em] text-white/35">
+      <section className="pegasus-page__header pegasus-sport-hero">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+          <span className="pegasus-eyebrow" style={{ margin: 0 }}>
+            {sport.type} Sport
+          </span>
+          {sport.category && (
+            <span className="pegasus-tag">
               {sport.category}
-            </p>
-
-            <h1 className="mt-5 text-7xl font-semibold leading-[0.9] tracking-[-0.05em] sm:text-8xl lg:text-[10rem]">
-              {sport.name}
-            </h1>
-
-            <p className="mt-8 max-w-xl text-lg leading-8 text-white/50">
-              {sport.description}
-            </p>
-
-          </div>
-
+            </span>
+          )}
         </div>
 
-        <div className="pointer-events-none absolute -right-40 top-20 h-96 w-96 rounded-full bg-white/[0.04] blur-3xl" />
+        <h1 className="pegasus-page-title">{sport.name}</h1>
 
+        {sport.description && (
+          <p className="pegasus-page__description">{sport.description}</p>
+        )}
       </section>
 
+      <section className="pegasus-profile-section">
+        <div className="pegasus-profile-section__heading">
+          <p className="pegasus-eyebrow">COMPETITION SCHEDULE & FORMATS</p>
+          <h2>
+            Configured Events ({sportEvents.length})
+          </h2>
+        </div>
 
-      {/* EVENTS */}
-      <section className="mx-auto max-w-7xl px-6 py-24 lg:px-10 lg:py-32">
-
-        <div className="flex items-end justify-between">
-
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-white/30">
-              Competition
+        {sportEvents.length === 0 ? (
+          <div className="pegasus-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <p className="pegasus-eyebrow" style={{ color: "var(--muted)" }}>
+              No Events Configured
             </p>
-
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-              Events
-            </h2>
+            <h3 style={{ margin: "10px 0 8px", fontSize: "20px" }}>
+              Events for {sport.name} will appear here once scheduled.
+            </h3>
+            <p style={{ margin: 0, fontSize: "14px", color: "var(--muted)" }}>
+              Check back for updated competition schedules and division assignments.
+            </p>
           </div>
+        ) : (
+          <div className="pegasus-events-list">
+            {sportEvents.map((event) => {
+              const resolved = resolveFestivalEvent(event);
+              const division = event.divisionId
+                ? CODEX_DIVISIONS.find((d) => d.id === event.divisionId)
+                : null;
 
-          <span className="text-sm text-white/30">
-            {sport.events.length}{" "}
-            {sport.events.length === 1 ? "event" : "events"}
-          </span>
+              return (
+                <article key={event.id} className="pegasus-event-card">
+                  <div className="pegasus-event-card__header">
+                    <div>
+                      <h3>{event.name}</h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                          {division ? `${division.name} (${division.level})` : event.category}
+                        </span>
+                      </div>
+                    </div>
 
-        </div>
+                    <div className="pegasus-event-card__tags">
+                      <span className="pegasus-tag pegasus-tag--accent">
+                        {event.format}
+                      </span>
+                      <span className="pegasus-tag">
+                        {event.type}
+                      </span>
+                      {resolved?.classification && (
+                        <span className="pegasus-tag">
+                          Class {resolved.classification}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
+                  <div className="pegasus-event-card__details">
+                    <div className="pegasus-event-card__detail-item">
+                      <span className="pegasus-event-card__detail-label">Competition Format</span>
+                      <span className="pegasus-event-card__detail-val" style={{ textTransform: "capitalize" }}>
+                        {event.format.replace("_", " ")}
+                      </span>
+                    </div>
 
-        {/* EVENT LIST */}
-        <div className="mt-12 divide-y divide-white/10 border-y border-white/10">
+                    <div className="pegasus-event-card__detail-item">
+                      <span className="pegasus-event-card__detail-label">Division / Level</span>
+                      <span className="pegasus-event-card__detail-val">
+                        {division ? division.name : event.category}
+                      </span>
+                    </div>
 
-          {sport.events.map((event, index) => (
+                    <div className="pegasus-event-card__detail-item">
+                      <span className="pegasus-event-card__detail-label">Team Quota</span>
+                      <span className="pegasus-event-card__detail-val">
+                        {resolved?.quota ? (
+                          <>
+                            {resolved.quota.mainParticipants} athletes
+                            {resolved.quota.substitutes ? ` (+${resolved.quota.substitutes} subs)` : ""}
+                          </>
+                        ) : (
+                          "Standard entry"
+                        )}
+                      </span>
+                    </div>
 
-            <div
-              key={event}
-              className="flex items-center justify-between py-6"
-            >
+                    <div className="pegasus-event-card__detail-item">
+                      <span className="pegasus-event-card__detail-label">Codex Points</span>
+                      <span className="pegasus-event-card__detail-val">
+                        {resolved?.pointsMatrix ? (
+                          `1st: ${resolved.pointsMatrix.first} • 2nd: ${resolved.pointsMatrix.second} • 3rd: ${resolved.pointsMatrix.third}`
+                        ) : (
+                          <span style={{ color: "var(--muted)" }}>Unconfirmed</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-6">
-
-                <span className="text-sm text-white/25">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-
-                <h3 className="text-xl font-medium sm:text-2xl">
-                  {event}
-                </h3>
-
-              </div>
-
-              <span className="text-sm text-white/25">
-                →
-              </span>
-
-            </div>
-
-          ))}
-
-        </div>
-
+                  {resolved?.quota?.notes && (
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        background: "rgba(255, 255, 255, 0.03)",
+                        border: "1px solid var(--border)",
+                        fontSize: "12px",
+                        color: "var(--muted-strong)",
+                      }}
+                    >
+                      <strong>Rule note:</strong> {resolved.quota.notes}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
-
-
-      {/* Footer */}
-      <footer className="border-t border-white/10">
-
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-10 text-sm text-white/35 sm:flex-row sm:items-center sm:justify-between lg:px-10">
-
-          <span>
-            PEGASUS
-          </span>
-
-          <span>
-            Built for the spirit of competition.
-          </span>
-
-        </div>
-
-      </footer>
-
     </main>
   );
 }

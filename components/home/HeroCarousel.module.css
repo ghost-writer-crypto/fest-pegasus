@@ -1,0 +1,1138 @@
+/* ===================================================
+   PEGASUS HOME 2.0 — HERO STAGE MODULE
+   MOTION EXPERIMENT 01: CONTINUOUS SCENE TRANSITION
+   Sports Broadcast Energy × Apple-Level Interaction Quality
+   =================================================== */
+
+:root {
+  --ease-broadcast-camera: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-press: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  min-height: clamp(540px, 78vh, 760px);
+  background-color: #1A3663;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  outline: none;
+  contain: paint;
+}
+
+.carousel:focus-visible {
+  outline: 2px solid #5B9BD5;
+  outline-offset: -2px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* =========================================
+   01. CONTINUOUS CAMERA VIEWPORT & SHUTTER SWEEP
+   ========================================= */
+
+.cameraViewport {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.sceneLayer {
+  position: absolute;
+  inset: 0;
+  will-change: clip-path, transform;
+}
+
+.sceneResting {
+  z-index: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Entering Scene: Architectural Camera Shutter Sweep */
+.sceneSweepEnterNext {
+  z-index: 3;
+  animation: shutterSweepNext 540ms var(--ease-broadcast-camera) both;
+}
+
+.sceneSweepEnterPrev {
+  z-index: 3;
+  animation: shutterSweepPrev 540ms var(--ease-broadcast-camera) both;
+}
+
+/* Exiting Scene: Controlled Spatial Depth Drift */
+.sceneSweepExitNext {
+  z-index: 2;
+  animation: shutterExitDriftNext 540ms var(--ease-broadcast-camera) both;
+}
+
+.sceneSweepExitPrev {
+  z-index: 2;
+  animation: shutterExitDriftPrev 540ms var(--ease-broadcast-camera) both;
+}
+
+@keyframes shutterSweepNext {
+  from {
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes shutterSweepPrev {
+  from {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes shutterExitDriftNext {
+  from {
+    transform: translateX(0) scale(1.0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-2.5%) scale(0.985);
+    opacity: 0.45;
+  }
+}
+
+@keyframes shutterExitDriftPrev {
+  from {
+    transform: translateX(0) scale(1.0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(2.5%) scale(0.985);
+    opacity: 0.45;
+  }
+}
+
+/* Layer 0: Image Focal Plane with subtle pointer depth */
+.imageFocalPlane {
+  position: absolute;
+  inset: -16px;
+  overflow: hidden;
+  transform: translate3d(calc(var(--depth-x, 0px) * -0.75), calc(var(--depth-y, 0px) * -0.75), 0);
+  transition: transform 320ms var(--ease-broadcast-camera);
+  will-change: transform;
+}
+
+.sceneSweepEnterNext .imageFocalPlane {
+  animation: focalPanNext 540ms var(--ease-broadcast-camera) both;
+}
+
+.sceneSweepEnterPrev .imageFocalPlane {
+  animation: focalPanPrev 540ms var(--ease-broadcast-camera) both;
+}
+
+@keyframes focalPanNext {
+  from {
+    transform: scale(1.04) translateX(2%);
+  }
+  to {
+    transform: scale(1.0) translateX(0);
+  }
+}
+
+@keyframes focalPanPrev {
+  from {
+    transform: scale(1.04) translateX(-2%);
+  }
+  to {
+    transform: scale(1.0) translateX(0);
+  }
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Layer 1: Readability Vignette Gradient */
+.overlayGradient {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: linear-gradient(
+    to top,
+    rgba(26, 54, 99, 0.96) 0%,
+    rgba(26, 54, 99, 0.82) 32%,
+    rgba(26, 54, 99, 0.40) 65%,
+    rgba(26, 54, 99, 0.12) 100%
+  ),
+  linear-gradient(
+    to right,
+    rgba(26, 54, 99, 0.78) 0%,
+    rgba(26, 54, 99, 0.35) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transform: translate3d(calc(var(--depth-x, 0px) * -0.2), calc(var(--depth-y, 0px) * -0.2), 0);
+  transition: transform 320ms var(--ease-broadcast-camera);
+}
+
+.stageArchitecturalLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 84px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(91, 155, 213, 0.2) 15%,
+    rgba(91, 155, 213, 0.65) 50%,
+    rgba(91, 155, 213, 0.2) 85%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 50% 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.stageLineSweepNext {
+  animation: stageLineSweepNext 540ms var(--ease-broadcast-camera) both;
+}
+
+.stageLineSweepPrev {
+  animation: stageLineSweepPrev 540ms var(--ease-broadcast-camera) both;
+}
+
+@keyframes stageLineSweepNext {
+  0% {
+    background-position: 100% 0;
+    opacity: 0.45;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 0;
+    opacity: 0.45;
+  }
+}
+
+@keyframes stageLineSweepPrev {
+  0% {
+    background-position: 0% 0;
+    opacity: 0.45;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 100% 0;
+    opacity: 0.45;
+  }
+}
+
+/* =========================================
+   02. LAYER 2: PERSISTENT TYPOGRAPHY & METADATA STAGE
+   ========================================= */
+
+.contentStage {
+  position: relative;
+  z-index: 10;
+  width: min(100% - 48px, 1280px);
+  margin: 0 auto;
+  padding-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.stageGrid {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: translate3d(calc(var(--depth-x, 0px) * 0.55), calc(var(--depth-y, 0px) * 0.4), 0);
+  transition: transform 320ms var(--ease-broadcast-camera);
+  will-change: transform;
+}
+
+/* Kicker Row: Persistent spatial baseline */
+.kickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kickerBadgeMask {
+  overflow: hidden;
+  position: relative;
+  display: inline-flex;
+  height: 18px;
+  align-items: center;
+}
+
+.kickerBadge {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  will-change: transform, opacity;
+}
+
+.kickerBadgeExiting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.kickerExitNext {
+  animation: kickerRollExitNext 320ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.kickerEnterNext {
+  animation: kickerRollEnterNext 320ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.kickerExitPrev {
+  animation: kickerRollExitPrev 320ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.kickerEnterPrev {
+  animation: kickerRollEnterPrev 320ms var(--ease-broadcast-camera) 40ms both;
+}
+
+@keyframes kickerRollExitNext {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-105%);
+    opacity: 0;
+  }
+}
+
+@keyframes kickerRollEnterNext {
+  from {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes kickerRollExitPrev {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+}
+
+@keyframes kickerRollEnterPrev {
+  from {
+    transform: translateY(-105%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.kickerArchitecturalRule {
+  width: 24px;
+  height: 1px;
+  background-color: rgba(91, 155, 213, 0.5);
+  transform-origin: left;
+  animation: ruleExtend 340ms var(--ease-broadcast-camera) 40ms both;
+}
+
+@keyframes ruleExtend {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+.statusTextMask {
+  overflow: hidden;
+  position: relative;
+  display: inline-flex;
+  height: 14px;
+  align-items: center;
+}
+
+.statusText {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.statusTextExiting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.textExitNext {
+  animation: textRollExitNext 300ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.textEnterNext {
+  animation: textRollEnterNext 300ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.textExitPrev {
+  animation: textRollExitPrev 300ms var(--ease-broadcast-camera) 40ms both;
+}
+
+.textEnterPrev {
+  animation: textRollEnterPrev 300ms var(--ease-broadcast-camera) 40ms both;
+}
+
+@keyframes textRollExitNext {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes textRollEnterNext {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes textRollExitPrev {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes textRollEnterPrev {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #E53737;
+  box-shadow: 0 0 6px #E53737;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+/* Typography as Motion Object: Architectural Mask Window with Coordinated Kinetic Tracking */
+.titleMaskWindow {
+  overflow: hidden;
+  position: relative;
+  display: block;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+  font-weight: 900;
+  line-height: 1.02;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+  will-change: transform, letter-spacing, opacity;
+}
+
+.titleExiting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.titleExitNext {
+  animation: titleExitNext 420ms var(--ease-broadcast-camera) 75ms both;
+}
+
+.titleEnterNext {
+  animation: titleEnterNext 420ms var(--ease-broadcast-camera) 75ms both;
+}
+
+.titleExitPrev {
+  animation: titleExitPrev 420ms var(--ease-broadcast-camera) 75ms both;
+}
+
+.titleEnterPrev {
+  animation: titleEnterPrev 420ms var(--ease-broadcast-camera) 75ms both;
+}
+
+@keyframes titleExitNext {
+  from {
+    transform: translateY(0);
+    letter-spacing: -0.035em;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-105%);
+    letter-spacing: -0.05em;
+    opacity: 0;
+  }
+}
+
+@keyframes titleEnterNext {
+  from {
+    transform: translateY(105%);
+    letter-spacing: -0.055em;
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    letter-spacing: -0.035em;
+    opacity: 1;
+  }
+}
+
+@keyframes titleExitPrev {
+  from {
+    transform: translateY(0);
+    letter-spacing: -0.035em;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(105%);
+    letter-spacing: -0.05em;
+    opacity: 0;
+  }
+}
+
+@keyframes titleEnterPrev {
+  from {
+    transform: translateY(-105%);
+    letter-spacing: -0.055em;
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    letter-spacing: -0.035em;
+    opacity: 1;
+  }
+}
+
+/* Description Mask Window: Smooth Narrative Displacement */
+.descMaskWindow {
+  overflow: hidden;
+  position: relative;
+  display: block;
+}
+
+.heroDescription {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 580px;
+  font-weight: 400;
+  will-change: transform, opacity;
+}
+
+.descExiting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.descExitNext {
+  animation: descRollExitNext 380ms var(--ease-broadcast-camera) 115ms both;
+}
+
+.descEnterNext {
+  animation: descRollEnterNext 380ms var(--ease-broadcast-camera) 115ms both;
+}
+
+.descExitPrev {
+  animation: descRollExitPrev 380ms var(--ease-broadcast-camera) 115ms both;
+}
+
+.descEnterPrev {
+  animation: descRollEnterPrev 380ms var(--ease-broadcast-camera) 115ms both;
+}
+
+@keyframes descRollExitNext {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-18px);
+    opacity: 0;
+  }
+}
+
+@keyframes descRollEnterNext {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes descRollExitPrev {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+}
+
+@keyframes descRollEnterPrev {
+  from {
+    transform: translateY(-18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Persistent Action Hardware */
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  background-color: #E53737;
+  color: #FFFFFF;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 160ms var(--ease-broadcast-camera),
+    transform 160ms var(--ease-broadcast-camera),
+    box-shadow 160ms var(--ease-broadcast-camera);
+  box-shadow: 0 2px 10px rgba(229, 55, 55, 0.35);
+}
+
+.primaryCta:hover {
+  background-color: #C52929;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(229, 55, 55, 0.45);
+}
+
+.primaryCta:active {
+  transform: scale(0.985) translateY(0.5px);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-press);
+}
+
+.primaryCta:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
+}
+
+.ctaLabelWindow {
+  overflow: hidden;
+  position: relative;
+  display: inline-flex;
+  height: 16px;
+  align-items: center;
+}
+
+.ctaLabel {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.ctaLabelExiting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.ctaExitNext {
+  animation: ctaRollExitNext 280ms var(--ease-broadcast-camera) 150ms both;
+}
+
+.ctaEnterNext {
+  animation: ctaRollEnterNext 280ms var(--ease-broadcast-camera) 150ms both;
+}
+
+.ctaExitPrev {
+  animation: ctaRollExitPrev 280ms var(--ease-broadcast-camera) 150ms both;
+}
+
+.ctaEnterPrev {
+  animation: ctaRollEnterPrev 280ms var(--ease-broadcast-camera) 150ms both;
+}
+
+@keyframes ctaRollExitNext {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes ctaRollEnterNext {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ctaRollExitPrev {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes ctaRollEnterPrev {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 160ms var(--ease-broadcast-camera),
+    border-color 160ms var(--ease-broadcast-camera),
+    transform 160ms var(--ease-broadcast-camera);
+}
+
+.secondaryCta:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.secondaryCta:active {
+  transform: scale(0.985) translateY(0.5px);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-press);
+}
+
+.secondaryCta:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
+}
+
+.ctaArrow {
+  font-size: 14px;
+  font-weight: 800;
+  transition: transform 160ms var(--ease-broadcast-camera);
+}
+
+.primaryCta:hover .ctaArrow,
+.secondaryCta:hover .ctaArrow {
+  transform: translate(2px, -2px);
+}
+
+/* =========================================
+   03. LAYER 3: PERSISTENT TIMELINE & HARDWARE
+   ========================================= */
+
+.timelineBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.timelineSegments {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+}
+
+.timelineSegment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  cursor: pointer;
+  flex: 1;
+  max-width: 220px;
+  outline: none;
+  text-align: left;
+  transition: opacity 160ms ease, transform 90ms var(--ease-press);
+}
+
+.timelineSegment:active {
+  transform: scale(0.985);
+}
+
+.timelineSegment:focus-visible {
+  outline: 2px solid #5B9BD5;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.timelineNum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 160ms ease;
+}
+
+.timelineSegmentActive .timelineNum {
+  color: #FFFFFF;
+}
+
+.timelineTrack {
+  position: relative;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-radius: 2px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.timelineFill {
+  height: 100%;
+  width: 100%;
+  background-color: #E53737;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+.timelineFillActive {
+  animation: timelineProgress linear forwards;
+}
+
+.timelineFillPaused {
+  animation: timelineProgress linear forwards;
+  animation-play-state: paused;
+}
+
+.timelineFillCompleted {
+  transform: scaleX(1) !important;
+}
+
+@keyframes timelineProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.manualControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.controlBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color 160ms var(--ease-broadcast-camera),
+    border-color 160ms var(--ease-broadcast-camera),
+    transform 160ms var(--ease-broadcast-camera);
+}
+
+.controlBtn:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.controlBtn:active {
+  transform: scale(0.985) translateY(0.5px);
+  transition-duration: 90ms;
+  transition-timing-function: var(--ease-press);
+}
+
+.controlBtn:focus-visible {
+  outline: 2px solid #5B9BD5;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   04. RESPONSIVE OPTIMIZATION
+   ========================================= */
+
+@media (max-width: 900px) {
+  .carousel {
+    min-height: 520px;
+  }
+
+  .contentStage {
+    width: min(100% - 32px, 1280px);
+    padding-bottom: 24px;
+    gap: 20px;
+  }
+
+  .stageGrid {
+    transform: none !important;
+  }
+
+  .imageFocalPlane {
+    transform: none !important;
+  }
+
+  .overlayGradient {
+    transform: none !important;
+  }
+
+  .heroTitle {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+  }
+
+  .timelineBar {
+    gap: 16px;
+  }
+
+  .timelineSegment {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .carousel {
+    min-height: 500px;
+  }
+
+  .actionRow {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .primaryCta,
+  .secondaryCta {
+    justify-content: center;
+  }
+
+  .timelineSegments {
+    gap: 10px;
+  }
+
+  .timelineNum {
+    display: none;
+  }
+
+  .manualControls {
+    gap: 6px;
+  }
+
+  .controlBtn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* =========================================
+   05. PREFERS REDUCED MOTION
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sceneSweepEnterNext,
+  .sceneSweepEnterPrev,
+  .sceneSweepExitNext,
+  .sceneSweepExitPrev,
+  .titleEnterNext,
+  .titleEnterPrev,
+  .titleExitNext,
+  .titleExitPrev,
+  .descEnterNext,
+  .descEnterPrev,
+  .descExitNext,
+  .descExitPrev,
+  .kickerEnterNext,
+  .kickerEnterPrev,
+  .kickerExitNext,
+  .kickerExitPrev,
+  .textEnterNext,
+  .textEnterPrev,
+  .textExitNext,
+  .textExitPrev,
+  .ctaEnterNext,
+  .ctaEnterPrev,
+  .ctaExitNext,
+  .ctaExitPrev,
+  .stageLineSweepNext,
+  .stageLineSweepPrev,
+  .kickerArchitecturalRule,
+  .timelineFillActive,
+  .timelineFillPaused {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .sceneSweepEnterNext,
+  .sceneSweepEnterPrev,
+  .sceneResting {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%) !important;
+    opacity: 1 !important;
+  }
+
+  .sceneSweepExitNext,
+  .sceneSweepExitPrev,
+  .titleExiting,
+  .descExiting,
+  .kickerBadgeExiting,
+  .statusTextExiting,
+  .ctaLabelExiting {
+    display: none !important;
+  }
+
+  .heroTitle,
+  .heroDescription,
+  .kickerBadge,
+  .statusText,
+  .ctaLabel {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .stageGrid,
+  .imageFocalPlane,
+  .overlayGradient,
+  .stageArchitecturalLine {
+    transform: none !important;
+  }
+
+  .statusDot {
+    animation: none !important;
+  }
+}

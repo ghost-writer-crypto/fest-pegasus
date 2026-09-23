@@ -1,0 +1,432 @@
+/* ===================================================
+   PEGASUS HOME 2.0 — THE SPORTS INDEX
+   ANIMATION 02 V2: SELF-DRAWING GEOMETRY
+   Core Principle: "THE LINE IS THE MOTION. EVERYTHING ELSE FOLLOWS THE LINE."
+   Hardware-Accelerated Pure CSS Transforms & Opacity
+   =================================================== */
+
+.sectionWrap {
+  padding: 80px 0 96px;
+  background-color: #FFFFFF;
+  position: relative;
+  overflow: clip;
+}
+
+.container {
+  width: min(100% - 48px, 1280px);
+  margin: 0 auto;
+}
+
+/* =========================================
+   01. SECTION HEADER & PRIMARY RULE
+   ========================================= */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.headerTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionKicker {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #5B9BD5; /* Atmospheric Sky Blue per DESIGN.md */
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: #1A3663; /* Deep Stadium Navy */
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 1px solid #E8EDF3;
+  border-radius: 2px;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 90ms cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  background-color: #1A3663;
+  border-color: #1A3663;
+  color: #FFFFFF;
+}
+
+.sectionLink:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+.sectionLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+/* Primary Horizontal Architectural Rule */
+.sectionDividerTrack {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  background-color: transparent;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.sectionDividerLine {
+  position: absolute;
+  inset: 0;
+  background-color: #E8EDF3;
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+/* =========================================
+   02. SPORTS INDEX LIST & ROWS
+   ========================================= */
+
+.sportsList {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sportRowItem {
+  position: relative;
+  display: block;
+}
+
+.sportRow {
+  display: grid;
+  grid-template-columns: 80px 1.4fr 2fr 160px 40px;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 8px;
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+/* Editorial row hover: restrained 2px translation */
+.sportRow:hover {
+  background-color: #F8FAFC;
+  transform: translateX(2px);
+}
+
+.sportRow:active {
+  transform: translateX(1px) scale(0.985);
+  transition-duration: 90ms;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.sportRow:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: -2px;
+  background-color: #F8FAFC;
+}
+
+/* Row Drawing Line: Constructs beneath each sport row */
+.rowRuleTrack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rowRuleLine {
+  width: 100%;
+  height: 100%;
+  background-color: #E8EDF3;
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sportRowItem:hover .rowRuleLine {
+  background-color: #C9D3DF;
+}
+
+/* Index Anchor Number: Coordinates of the Information System */
+.sportIndex {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  color: #5B9BD5; /* Atmospheric Sky Blue */
+  transition: color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+}
+
+.sportRow:hover .sportIndex {
+  color: #1A3663;
+}
+
+/* Sport Identity Column */
+.sportNameCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sportName {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #1A3663;
+}
+
+.sportCategory {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748B;
+  display: block;
+}
+
+/* Narrative Description */
+.sportDesc {
+  margin: 0;
+  font-size: 14px;
+  color: #26364A;
+  line-height: 1.45;
+}
+
+/* Metadata Events Count Pill & Arrow Action */
+.sportMetaCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  grid-column: 4 / 6;
+}
+
+.sportCountPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  background-color: #E8EDF3;
+  color: #1A3663;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sportArrow {
+  font-size: 18px;
+  font-weight: 800;
+  color: #8492A6;
+  text-align: right;
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sportRow:hover .sportArrow {
+  color: #1A3663;
+  transform: translate(2px, -2px);
+}
+
+/* =========================================
+   03. ANIMATION 02 V2: SYNCHRONIZED CHOREOGRAPHY
+   "THE LINE IS THE MOTION. EVERYTHING ELSE FOLLOWS THE LINE."
+   ========================================= */
+
+/* State: Pending viewport entry (graceful resting preparation without blanking) */
+.initialPending .sectionHeader,
+.initialPending .sportRow {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.initialPending .sectionDividerLine,
+.initialPending .rowRuleLine {
+  transform: scaleX(0);
+}
+
+/* State: Constructed (Triggered by IntersectionObserver) */
+
+/* Header emerges as a unified group at T+0ms */
+.constructed .sectionHeader {
+  animation: headerSettle 320ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+}
+
+/* Primary Architectural Divider sweeps across at T+40ms */
+.constructed .sectionDividerLine {
+  animation: ruleSweep 360ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
+}
+
+/* The Line is the Motion: Baseline rule sweeps across from left to right */
+.constructed .rowRuleLine {
+  animation: ruleSweep 300ms cubic-bezier(0.16, 1, 0.3, 1) var(--row-delay, 100ms) both;
+}
+
+/* Synchronized Row Settle: Row content emerges in lockstep with the line */
+.constructed .sportRow {
+  animation: rowSettle 300ms cubic-bezier(0.16, 1, 0.3, 1) var(--row-delay, 100ms) both;
+}
+
+/* KEYFRAMES: Horizontal Line Sweep (Primary Kinetic Driver) */
+@keyframes ruleSweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* KEYFRAMES: Unified Row Settle (In Lockstep with the Line) */
+@keyframes rowSettle {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* KEYFRAMES: Section Header Settle */
+@keyframes headerSettle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   04. RESPONSIVE DESIGN (390px MOBILE SAFE)
+   ========================================= */
+
+@media (max-width: 960px) {
+  .sportRow {
+    grid-template-columns: 60px 1.5fr 1fr;
+    gap: 16px;
+    padding: 20px 4px;
+  }
+
+  .sportDesc {
+    display: none;
+  }
+
+  .sportMetaCol {
+    grid-column: 3 / 4;
+  }
+}
+
+@media (max-width: 640px) {
+  .sectionWrap {
+    padding: 56px 0 64px;
+  }
+
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .sportRow {
+    grid-template-columns: 44px 1fr auto;
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .sportIndex {
+    font-size: 22px;
+  }
+
+  .sportName {
+    font-size: 16px;
+  }
+
+  .sportCategory {
+    font-size: 11px;
+  }
+
+  .sportCountPill {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .sportArrow {
+    font-size: 15px;
+  }
+}
+
+/* =========================================
+   05. ACCESSIBILITY / PREFERS REDUCED MOTION
+   Instant resting layout, zero animation
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionDividerLine,
+  .rowRuleLine {
+    transform: scaleX(1) !important;
+    animation: none !important;
+  }
+
+  .sectionHeader,
+  .sportRow {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

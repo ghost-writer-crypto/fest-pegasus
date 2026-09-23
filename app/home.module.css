@@ -1,0 +1,734 @@
+/* ===================================================
+   PEGASUS HOME 2.0 — MOTION SYSTEM 1.0 STYLESHEET
+   Apple × Streaming × Sports Motion Quality
+   Motion Tokens:
+     --motion-instant: 90ms (tap, press feedback)
+     --motion-fast: 160ms (hover, focus, nudges)
+     --motion-standard: 320ms (content entrance, reveals)
+     --motion-cinematic: 600ms (hero crossfade, depth)
+     --ease-out-editorial: cubic-bezier(0.16, 1, 0.3, 1)
+     --ease-press: cubic-bezier(0.25, 1, 0.5, 1)
+   =================================================== */
+
+.homeRoot {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  color: #1A3663;
+  overflow-x: clip;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+/* =========================================
+   CONTAINER & SECTION COMMON RHYTHM
+   ========================================= */
+
+.container {
+  width: min(100% - 64px, 1280px);
+  margin: 0 auto;
+}
+
+/* Generous vertical whitespace & architectural hairline dividers */
+.sectionWrap {
+  padding: 96px 0;
+  border-bottom: 1px solid #E8EDF3;
+}
+
+/* Restrained Viewport-Entry Choreography:
+   Header -> Divider -> Primary Content
+   (Unified content entry - children are NOT individually animated) */
+:global(.sectionPending) .sectionHeader {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+:global(.sectionPending) .sectionDivider {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+:global(.sectionPending) .sectionContent {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+:global(.sectionRevealed) .sectionHeader {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+:global(.sectionRevealed) .sectionDivider {
+  transform: scaleX(1);
+  transform-origin: left;
+  transition: transform var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  transition-delay: 40ms;
+}
+
+:global(.sectionRevealed) .sectionContent {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-standard, 320ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+  transition-delay: 80ms;
+}
+
+.sectionDivider {
+  height: 1px;
+  background-color: #1A3663;
+  width: 100%;
+  margin-bottom: 0;
+  transform-origin: left;
+  will-change: transform;
+}
+
+.sectionMotionDivider {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.sectionContent {
+  width: 100%;
+  will-change: opacity, transform;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  will-change: opacity, transform;
+}
+
+.sectionKicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  margin: 0 0 8px 0;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  color: #1A3663;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-instant, 90ms) var(--ease-press, cubic-bezier(0.25, 1, 0.5, 1));
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  background-color: #1A3663;
+  border-color: #1A3663;
+  color: #FFFFFF;
+}
+
+.sectionLink:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+.sectionLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   03. LIVE NOW (SPORTS BROADCAST STRIP)
+   ========================================= */
+
+.broadcastStrip {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E8EDF3;
+  padding: 24px 0;
+}
+
+.broadcastInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.broadcastLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.broadcastKicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.broadcastEventRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.broadcastTitle {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #1A3663;
+  text-transform: uppercase;
+}
+
+.broadcastMeta {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.broadcastRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  background-color: #E53737;
+  color: #FFFFFF;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.livePulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+}
+
+.broadcastAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid #E8EDF3;
+  border-radius: 2px;
+  transition:
+    border-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    background-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-instant, 90ms) var(--ease-press, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.broadcastAction:hover {
+  border-color: #1A3663;
+  background-color: #F8FAFC;
+}
+
+.broadcastAction:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+/* =========================================
+   04. THE SPORTS (EDITORIAL DISCOVERY)
+   ========================================= */
+
+.sportsList {
+  display: flex;
+  flex-direction: column;
+  will-change: opacity, transform;
+}
+
+.sportRow {
+  display: grid;
+  grid-template-columns: 80px 1.4fr 2fr 160px 40px;
+  align-items: center;
+  gap: 28px;
+  padding: 26px 8px;
+  border-bottom: 1px solid #E8EDF3;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Editorial row hover: restrained 2px translation */
+.sportRow:hover {
+  background-color: #F8FAFC;
+  transform: translateX(2px);
+}
+
+.sportRow:active {
+  transform: translateX(1px) scale(0.985);
+  transition-duration: var(--motion-instant, 90ms);
+  transition-timing-function: var(--ease-press, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.sportRow:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: -2px;
+  background-color: #F8FAFC;
+}
+
+.sportIndex {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  color: #5B9BD5;
+  transition: color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.sportRow:hover .sportIndex {
+  color: #1A3663;
+}
+
+.sportNameCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sportName {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: #1A3663;
+}
+
+.sportCategory {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748B;
+}
+
+.sportDesc {
+  margin: 0;
+  font-size: 14px;
+  color: #26364A;
+  line-height: 1.45;
+}
+
+.sportCountPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  background-color: #E8EDF3;
+  color: #1A3663;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sportArrow {
+  font-size: 18px;
+  font-weight: 800;
+  color: #8492A6;
+  text-align: right;
+  transition:
+    transform var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.sportRow:hover .sportArrow {
+  color: #1A3663;
+  transform: translate(2px, -2px);
+}
+
+
+/* =========================================
+   06. HOUSE STANDINGS (BIG NUMBERS, TABULAR)
+   ========================================= */
+
+.standingsTable {
+  display: flex;
+  flex-direction: column;
+  will-change: opacity, transform;
+}
+
+.standingRow {
+  display: grid;
+  grid-template-columns: 80px 1.6fr 2fr 120px;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 8px;
+  border-bottom: 1px solid #E8EDF3;
+  transition:
+    background-color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.standingRowLeader {
+  background-color: #FFFDF7;
+}
+
+.standingRow:hover {
+  background-color: #F8FAFC;
+  transform: translateX(2px);
+}
+
+.standingRowLeader:hover {
+  background-color: #FFFBEB;
+  transform: translateX(2px);
+}
+
+.standingRow:active {
+  transform: translateX(1px) scale(0.985);
+  transition-duration: var(--motion-instant, 90ms);
+  transition-timing-function: var(--ease-press, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.standingRank {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+}
+
+.standingRankLeader {
+  color: #F2B84B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.goldStar {
+  font-size: 15px;
+  color: #F2B84B;
+}
+
+.standingHouse {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.standingHouseName {
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  color: #1A3663;
+  text-transform: uppercase;
+}
+
+.standingHouseTag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #D97706;
+  text-transform: uppercase;
+}
+
+/* Meaningful competition meter communicating proportion to 1st place */
+.standingMeterWrap {
+  height: 6px;
+  background-color: #E8EDF3;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.standingMeterFill {
+  height: 100%;
+  background-color: #1A3663;
+  border-radius: 2px;
+  transition: width 650ms var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.standingMeterFillLeader {
+  background-color: #F2B84B;
+}
+
+.standingPoints {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+  text-align: right;
+}
+
+.standingPointsUnit {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+  margin-left: 4px;
+}
+
+
+/* =========================================
+   08. FOOTER (REFINED COLOPHON)
+   ========================================= */
+
+.homeFooter {
+  background-color: #FFFFFF;
+  border-top: 1px solid #E8EDF3;
+  padding: 60px 0 36px 0;
+}
+
+.footerInner {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.footerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footerBrandGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footerBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: #1A3663;
+  text-transform: uppercase;
+}
+
+.footerBrandMark {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background-color: #1A3663;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 900;
+  border-radius: 2px;
+}
+
+.footerTagline {
+  font-size: 12px;
+  color: #64748B;
+  letter-spacing: 0.04em;
+  font-weight: 550;
+}
+
+.footerNav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.footerNavLink {
+  font-size: 13px;
+  font-weight: 650;
+  color: #64748B;
+  text-decoration: none;
+  transition:
+    color var(--motion-fast, 160ms) var(--ease-out-editorial, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--motion-instant, 90ms) var(--ease-press, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.footerNavLink:hover {
+  color: #1A3663;
+}
+
+.footerNavLink:active {
+  transform: scale(0.985);
+}
+
+.footerNavLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid #E8EDF3;
+  font-size: 12px;
+  color: #8492A6;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN (390px Mobile Target)
+   ========================================= */
+
+@media (max-width: 900px) {
+  .sectionWrap {
+    padding: 64px 0;
+  }
+
+  .sportRow {
+    grid-template-columns: 50px 1fr 30px;
+    gap: 16px;
+    padding: 20px 4px;
+  }
+
+  .sportDesc,
+  .sportCountPill {
+    display: none;
+  }
+
+
+  .standingRow {
+    grid-template-columns: 50px 1fr 90px;
+    gap: 16px;
+    padding: 18px 4px;
+  }
+
+  .standingMeterWrap {
+    display: none;
+  }
+
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .sectionTitle {
+    font-size: 1.85rem;
+  }
+
+  .broadcastInner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .broadcastAction {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .footerTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .footerNav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* =========================================
+   PREFERS REDUCED MOTION
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.sectionPending) .sectionHeader,
+  :global(.sectionPending) .sectionDivider,
+  :global(.sectionPending) .sectionContent,
+  :global(.sectionRevealed) .sectionHeader,
+  :global(.sectionRevealed) .sectionDivider,
+  :global(.sectionRevealed) .sectionContent {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .sportRow,
+  .scheduleRow,
+  .standingRow,
+  .sectionLink,
+  .broadcastAction,
+  .standingMeterFill {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .livePulseDot {
+    animation: none !important;
+  }
+}

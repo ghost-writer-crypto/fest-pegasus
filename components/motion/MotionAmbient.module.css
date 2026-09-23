@@ -1,0 +1,39 @@
+.ambientCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  opacity: 0.04;
+}
+
+.ambientSvg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: ambientShift 32s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes ambientShift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.008);
+  }
+  100% {
+    transform: translateY(4px) scale(0.995);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientSvg {
+    animation: none !important;
+    transform: none !important;
+  }
+}

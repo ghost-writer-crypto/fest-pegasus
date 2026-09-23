@@ -1,4 +1,6 @@
-export const venues = [
+import type { Venue } from "@/lib/types";
+
+export const venues: Venue[] = [
   {
     id: "main-ground",
     name: "Main Ground",

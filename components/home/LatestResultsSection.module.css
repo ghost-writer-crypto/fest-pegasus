@@ -1,0 +1,625 @@
+/* ===================================================
+   PEGASUS HOME — ANIMATION 05
+   LATEST RESULTS (EMPIRICAL SETTLEMENT)
+   Verification → Settlement → Record
+   Tokens:
+     Deep Stadium Navy:   #1A3663
+     Competition Crimson: #E53737
+     Atmospheric Sky:     #5B9BD5
+     Championship Gold:   #F2B84B
+     Ice Support Gray:    #E8EDF3
+     Slate Frame Border:  #C9D3DF
+     Carbon Body:         #26364A
+     Muted Press Slate:   #64748B
+     Pure White:          #FFFFFF
+     Raised Surface:      #F8FAFC
+   =================================================== */
+
+.sectionWrap {
+  position: relative;
+  width: 100%;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E8EDF3;
+  padding: 80px 0 96px;
+  scroll-margin-top: 80px;
+}
+
+.container {
+  width: min(100% - 64px, 1280px);
+  margin: 0 auto;
+}
+
+/* =========================================
+   SECTION HEADER
+   ========================================= */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.headerTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionKicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  color: #1A3663;
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 90ms cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+
+.sectionLink:hover {
+  background-color: #1A3663;
+  border-color: #1A3663;
+  color: #FFFFFF;
+}
+
+.sectionLink:active {
+  transform: scale(0.985) translateY(0.5px);
+}
+
+.sectionLink:focus-visible {
+  outline: 2px solid #1A3663;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   ARCHITECTURAL LINE DIVIDER
+   ========================================= */
+
+.sectionDividerTrack {
+  width: 100%;
+  height: 1px;
+  background-color: #E8EDF3;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.sectionDividerLine {
+  width: 100%;
+  height: 100%;
+  background-color: #1A3663;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.pending .sectionDividerLine {
+  transform: scaleX(0);
+}
+
+.settled .sectionDividerLine {
+  transform: scaleX(1);
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================
+   EMPIRICAL SETTLEMENT LEDGER
+   ========================================= */
+
+.sectionContent {
+  width: 100%;
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.resultRow {
+  display: grid;
+  grid-template-columns: 56px 110px 1fr 180px 120px;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 8px;
+  border-bottom: 1px solid #E8EDF3;
+  background-color: #FFFFFF;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resultRow:hover {
+  background-color: #F8FAFC;
+  transform: translateX(2px);
+}
+
+.resultRow:active {
+  transform: translateX(1px) scale(0.985);
+  transition-duration: 90ms;
+}
+
+/* 1. Rank Anchor: Settles vertically into position with authoritative micro-drop */
+.rankCol {
+  display: flex;
+  align-items: center;
+  will-change: transform, opacity;
+}
+
+.rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  background-color: #E8EDF3;
+  color: #1A3663;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid #C9D3DF;
+}
+
+.rankPodiumGold {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border-color: #F2B84B;
+}
+
+.pending .rankCol {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.96);
+}
+
+.settled .rankCol {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 75ms);
+}
+
+/* 2. Sport Discipline Tag */
+.sportCol {
+  display: flex;
+  align-items: center;
+  will-change: transform, opacity;
+}
+
+.resultSportTag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5B9BD5;
+  white-space: nowrap;
+}
+
+.pending .sportCol {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+
+.settled .sportCol {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 75ms + 20ms);
+}
+
+/* 3. Athlete, House & Event Information */
+.resultInfoCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  will-change: transform, opacity;
+}
+
+.athleteRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.athleteName {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  color: #1A3663;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.houseName {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chestNumber {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8492A6;
+  font-variant-numeric: tabular-nums;
+}
+
+.eventRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  color: #64748B;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.eventName {
+  color: #26364A;
+}
+
+.metaDot {
+  color: #C9D3DF;
+  font-size: 10px;
+}
+
+.eventMeta {
+  color: #8492A6;
+}
+
+.pending .resultInfoCol {
+  opacity: 0;
+  transform: translateX(-6px);
+}
+
+.settled .resultInfoCol {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 75ms + 30ms);
+}
+
+/* 4. Empirical Performance Metric */
+.resultPerfCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  will-change: transform, opacity;
+}
+
+.perfValue {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1A3663;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.pointsBadge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #5B9BD5;
+  white-space: nowrap;
+}
+
+.pending .resultPerfCol {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+.settled .resultPerfCol {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--row-index, 0) * 75ms + 50ms);
+}
+
+/* 5. Adjudication Seal (Status & Meet Record) */
+.resultStatusCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  will-change: transform, opacity;
+}
+
+.statusStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.resultStatusTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background-color: #E8EDF3;
+  color: #1A3663;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.meetRecordBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background-color: #FEE2E2;
+  color: #E53737;
+  border: 1px solid rgba(229, 55, 55, 0.3);
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pending .resultStatusCol {
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+.settled .resultStatusCol {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 200ms cubic-bezier(0, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  transition-delay: calc(var(--row-index, 0) * 75ms + 80ms);
+}
+
+/* =========================================
+   AUTHENTIC EMPTY STATE
+   ========================================= */
+
+.emptyCard {
+  text-align: center;
+  padding: 64px 24px;
+  background-color: #F8FAFC;
+  border: 1px dashed #C9D3DF;
+  border-radius: 2px;
+  margin: 16px 0;
+}
+
+.emptyEyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  color: #64748B;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.emptyTitle {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1A3663;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.emptyDesc {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  color: #64748B;
+  max-width: 520px;
+  margin: 0 auto 24px auto;
+  line-height: 1.5;
+}
+
+.emptyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1A3663;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 1px solid #1A3663;
+  background-color: transparent;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.emptyLink:hover {
+  background-color: #1A3663;
+  color: #FFFFFF;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+
+@media (max-width: 960px) {
+  .sectionWrap {
+    padding: 64px 0;
+  }
+
+  .resultRow {
+    grid-template-columns: 48px 90px 1fr 140px 100px;
+    gap: 16px;
+    padding: 20px 6px;
+  }
+
+  .perfValue {
+    font-size: 20px;
+  }
+
+  .athleteName {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 1.85rem;
+  }
+
+  /* 
+   * MOBILE 2-TIER ARCHITECTURE:
+   * Tier 1: Rank (#1) on left + Athlete / House in middle + Status tag on right
+   * Tier 2: Sport discipline on left + Performance & Meet record on right
+   * Guaranteed: ZERO hidden elements on mobile!
+   */
+  .resultRow {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "rank info status"
+      "sport perf perf";
+    gap: 10px 12px;
+    align-items: center;
+    padding: 16px 4px;
+  }
+
+  .rankCol {
+    grid-area: rank;
+  }
+
+  .sportCol {
+    grid-area: sport;
+    display: flex !important;
+  }
+
+  .resultInfoCol {
+    grid-area: info;
+  }
+
+  .resultPerfCol {
+    grid-area: perf;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .perfValue {
+    font-size: 18px;
+  }
+
+  .resultStatusCol {
+    grid-area: status;
+    display: flex !important;
+  }
+
+  .statusStack {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .athleteName {
+    font-size: 15px;
+  }
+
+  .houseName {
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   PREFERS REDUCED MOTION
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionDividerLine,
+  .rankCol,
+  .sportCol,
+  .resultInfoCol,
+  .resultPerfCol,
+  .resultStatusCol,
+  .resultRow,
+  .sectionLink {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+  }
+}
