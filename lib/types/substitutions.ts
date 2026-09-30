@@ -39,6 +39,7 @@ export type CreateSubstitutionInput = {
   replacementParticipantId: string;
   reason: string;
   scheduledAt?: string | null; // Used to calculate timing (>= 12h = normal ₹20, < 12h = emergency ₹50)
+  metadata?: Record<string, unknown>;
 };
 
 export type ReviewSubstitutionInput = {

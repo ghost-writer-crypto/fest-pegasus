@@ -78,7 +78,7 @@ export function getParticipantEvents(
     return [];
   }
   return participant.eventIds
-    .map((eventId) => eventList.find((e) => e.id === eventId))
+    .map((eventId: string) => eventList.find((e: FestivalEvent) => e.id === eventId))
     .filter((e): e is FestivalEvent => Boolean(e));
 }
 

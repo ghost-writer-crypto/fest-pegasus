@@ -6,6 +6,8 @@ import {
   getDivisionsByFestival,
   getAdminRegistrationsByFestival,
   getSubstitutionsByFestival,
+  getAppealsByFestival,
+  getPublishedResultsByFestival,
   getAuthenticatedProfile,
 } from "@/lib/repositories";
 import TeamManagerClient from "@/components/team-manager/TeamManagerClient";
@@ -16,16 +18,27 @@ export default async function TeamManagerDashboardPage() {
   const festival = await getActiveFestival();
   const festivalId = festival?.id || "pegasus-2026";
 
-  const [profile, teams, allParticipants, events, divisions, allRegistrations, allSubstitutions] =
-    await Promise.all([
-      getAuthenticatedProfile(),
-      getTeamsByFestival(festivalId),
-      getParticipantsByFestivalAdmin(festivalId),
-      getEventsByFestival(festivalId),
-      getDivisionsByFestival(festivalId),
-      getAdminRegistrationsByFestival(festivalId),
-      getSubstitutionsByFestival(festivalId),
-    ]);
+  const [
+    profile,
+    teams,
+    allParticipants,
+    events,
+    divisions,
+    allRegistrations,
+    allSubstitutions,
+    allAppeals,
+    allPublishedResults,
+  ] = await Promise.all([
+    getAuthenticatedProfile(),
+    getTeamsByFestival(festivalId),
+    getParticipantsByFestivalAdmin(festivalId),
+    getEventsByFestival(festivalId),
+    getDivisionsByFestival(festivalId),
+    getAdminRegistrationsByFestival(festivalId),
+    getSubstitutionsByFestival(festivalId),
+    getAppealsByFestival(festivalId),
+    getPublishedResultsByFestival(festivalId),
+  ]);
 
   // Determine current team: if manager has team_id use it, otherwise default to first team for inspection
   const managerTeamId = profile?.teamId || teams[0]?.id;
@@ -44,6 +57,14 @@ export default async function TeamManagerDashboardPage() {
     ? allSubstitutions.filter((s) => s.team_id === currentTeam.id)
     : [];
 
+  const teamAppeals = currentTeam
+    ? allAppeals.filter((a) => a.team_id === currentTeam.id)
+    : [];
+
+  const teamPublishedResults = currentTeam
+    ? allPublishedResults.filter((r) => r.team_id === currentTeam.id)
+    : [];
+
   return (
     <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <TeamManagerClient
@@ -55,6 +76,8 @@ export default async function TeamManagerDashboardPage() {
         divisions={divisions}
         registrations={teamRegistrations}
         substitutions={teamSubstitutions}
+        appeals={teamAppeals}
+        publishedResults={teamPublishedResults}
         managerName={profile?.fullName || undefined}
       />
     </main>

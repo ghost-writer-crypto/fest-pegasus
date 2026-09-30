@@ -124,52 +124,70 @@ export default function TodaysProgramSection({
             <div
               className={styles.scheduleTimeline}
               role="table"
-              aria-label="Today's event timetable"
+              aria-label="Upcoming event timetable"
             >
-              {items.map((item, idx) => (
-                <div
-                  key={item.id}
-                  className={styles.scheduleRow}
-                  role="row"
-                  aria-label={`${item.timeSlot}: ${item.eventName} at ${item.venueName}, Status ${item.status}`}
-                  style={
-                    {
-                      "--row-index": idx,
-                    } as React.CSSProperties
-                  }
-                >
-                  {/* Time Anchor: Resolves first in the cadence */}
-                  <div className={styles.timeAnchorCol} role="cell">
-                    <span className={styles.timePip} aria-hidden="true" />
-                    <span className={styles.scheduleTime}>{item.timeSlot}</span>
-                  </div>
+              {/* Operational Column Header */}
+              <div className="hidden lg:grid grid-cols-12 gap-4 pb-3 border-b border-[#1A3663]/15 text-[11px] font-mono font-bold tracking-widest text-[#5B9BD5] uppercase px-2">
+                <span className="col-span-4">EVENT</span>
+                <span className="col-span-2">SPORT</span>
+                <span className="col-span-2">DIVISION</span>
+                <span className="col-span-2">VENUE</span>
+                <span className="col-span-1">TIME</span>
+                <span className="col-span-1 text-right">STATUS</span>
+              </div>
 
-                  {/* Event Information: Resolves adjacent to time anchor */}
-                  <div className={styles.scheduleEventCol} role="cell">
-                    <span className={styles.scheduleEventName}>
-                      {item.eventName}
-                    </span>
-                    <div className={styles.scheduleEventMeta}>
-                      <span>{item.venueName}</span>
-                      <span aria-hidden="true" className={styles.metaDot}>
-                        •
+              {items.map((item, idx) => {
+                const kickerNum = String(idx + 1).padStart(2, "0");
+                return (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 py-4 px-2 border-b border-[#E8EDF3] hover:bg-[#F8FAFC] transition-colors items-center"
+                    role="row"
+                    aria-label={`${item.timeSlot}: ${item.eventName} (${item.sportName}, ${item.category}) at ${item.venueName}, Status ${item.status}`}
+                  >
+                    {/* EVENT with numbered kicker */}
+                    <div className="lg:col-span-4 flex items-center gap-3">
+                      <span className="font-mono text-xs font-bold text-[#5B9BD5] tracking-widest shrink-0">
+                        {kickerNum} //
                       </span>
-                      <span>{item.sportName}</span>
-                      <span aria-hidden="true" className={styles.metaDot}>
-                        •
+                      <span className="font-bold text-[#1A3663] text-sm sm:text-base">
+                        {item.eventName}
                       </span>
+                    </div>
+
+                    {/* SPORT */}
+                    <div className="lg:col-span-2 text-xs font-mono text-[#26364A]">
+                      <span className="lg:hidden text-[#94A3B8] mr-2">SPORT:</span>
+                      <span className="font-semibold uppercase">{item.sportName}</span>
+                    </div>
+
+                    {/* DIVISION */}
+                    <div className="lg:col-span-2 text-xs font-mono text-[#64748B]">
+                      <span className="lg:hidden text-[#94A3B8] mr-2">DIV:</span>
                       <span>{item.category}</span>
                     </div>
-                  </div>
 
-                  {/* Operational Status Tag: Fully visible across all viewports */}
-                  <div className={styles.scheduleStatusCol} role="cell">
-                    <span className={styles.scheduleStatusTag}>
-                      {item.status}
-                    </span>
+                    {/* VENUE */}
+                    <div className="lg:col-span-2 text-xs font-mono text-[#64748B]">
+                      <span className="lg:hidden text-[#94A3B8] mr-2">VENUE:</span>
+                      <span>{item.venueName}</span>
+                    </div>
+
+                    {/* TIME */}
+                    <div className="lg:col-span-1 text-xs sm:text-sm font-mono font-bold text-[#1A3663]">
+                      <span className="lg:hidden text-[#94A3B8] mr-2">TIME:</span>
+                      <span>{item.timeSlot}</span>
+                    </div>
+
+                    {/* STATUS */}
+                    <div className="lg:col-span-1 flex lg:justify-end">
+                      <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase rounded-xs bg-[#0F2242] text-white">
+                        {item.status}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

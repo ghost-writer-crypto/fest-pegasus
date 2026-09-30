@@ -7,4 +7,6 @@ export * from "./quotas";
 export * from "./quotaEngine";
 export * from "./divisions";
 export * from "./pointsAggregation";
+export * from "./teamMatchResolution";
+export * from "./tugOfWarWeight";
 

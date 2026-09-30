@@ -5,8 +5,12 @@ import {
   getTeamsByFestival,
   getPublishedResultsByFestival,
   getActivePenaltiesByFestival,
+  getParticipantsByFestival,
 } from "@/lib/repositories";
-import { calculateTeamPointsBreakdown } from "@/lib/competition/pointsAggregation";
+import {
+  calculateTeamPointsBreakdown,
+  ParticipantResolutionError,
+} from "@/lib/competition/pointsAggregation";
 import type { Result } from "@/lib/types";
 
 type LeaderboardDisplayTeam = {
@@ -19,30 +23,45 @@ type LeaderboardDisplayTeam = {
   points: number; // Net points
 };
 
-async function getDynamicLeaderboard(): Promise<LeaderboardDisplayTeam[]> {
+type DynamicLeaderboardResult = {
+  standings: LeaderboardDisplayTeam[];
+  integrityError?: string;
+};
+
+async function getDynamicLeaderboard(): Promise<DynamicLeaderboardResult> {
   try {
     const festival = await getActiveFestival();
     if (!festival) {
-      return staticLeaderboard.map((t) => ({
-        ...t,
-        grossPoints: t.points,
-        penaltyDeductions: 0,
-      }));
+      return {
+        standings: staticLeaderboard.map((t) => ({
+          ...t,
+          grossPoints: t.points,
+          penaltyDeductions: 0,
+        })),
+      };
     }
 
-    const [teams, resultRows, penalties] = await Promise.all([
+    const [teams, resultRows, penalties, participants] = await Promise.all([
       getTeamsByFestival(festival.id),
       getPublishedResultsByFestival(festival.id),
       getActivePenaltiesByFestival(festival.id),
+      getParticipantsByFestival(festival.id),
     ]);
 
     if (!teams || teams.length === 0) {
-      return staticLeaderboard.map((t) => ({
-        ...t,
-        grossPoints: t.points,
-        penaltyDeductions: 0,
-      }));
+      return {
+        standings: staticLeaderboard.map((t) => ({
+          ...t,
+          grossPoints: t.points,
+          penaltyDeductions: 0,
+        })),
+      };
     }
+
+    // Canonical database-backed participant -> team lookup
+    const participantTeamMap = new Map<string, string | null>(
+      participants.map((p) => [p.id, p.team_id]),
+    );
 
     // Map ResultRow to minimal Result format for points calculation
     const domainResults: Result[] = resultRows.map((r) => ({
@@ -64,12 +83,13 @@ async function getDynamicLeaderboard(): Promise<LeaderboardDisplayTeam[]> {
       updatedAt: r.updated_at,
     }));
 
-    // Calculate points for each team
+    // Calculate points for each team using canonical database resolution
     const teamScores = teams.map((team) => {
       const breakdown = calculateTeamPointsBreakdown(
         domainResults,
         team.id,
         penalties,
+        participantTeamMap,
       );
 
       return {
@@ -94,33 +114,72 @@ async function getDynamicLeaderboard(): Promise<LeaderboardDisplayTeam[]> {
       return a.name.localeCompare(b.name);
     });
 
-    return teamScores.map((t, index) => ({
-      id: t.id,
-      name: t.name,
-      code: t.code,
-      rank: index + 1,
-      grossPoints: t.grossPoints,
-      penaltyDeductions: t.penaltyDeductions,
-      points: t.points,
-    }));
+    return {
+      standings: teamScores.map((t, index) => ({
+        id: t.id,
+        name: t.name,
+        code: t.code,
+        rank: index + 1,
+        grossPoints: t.grossPoints,
+        penaltyDeductions: t.penaltyDeductions,
+        points: t.points,
+      })),
+    };
   } catch (error) {
     console.error("[LeaderboardPage] Error fetching dynamic standings:", error);
-    return staticLeaderboard.map((t) => ({
-      ...t,
-      grossPoints: t.points,
-      penaltyDeductions: 0,
-    }));
+    const integrityError =
+      error instanceof ParticipantResolutionError
+        ? error.message
+        : error instanceof Error
+        ? error.message
+        : "An unknown data resolution error occurred.";
+
+    return {
+      standings: staticLeaderboard.map((t) => ({
+        ...t,
+        grossPoints: t.points,
+        penaltyDeductions: 0,
+      })),
+      integrityError,
+    };
   }
 }
 
 export default async function LeaderboardPage() {
-  const standings = await getDynamicLeaderboard();
+  const { standings, integrityError } = await getDynamicLeaderboard();
 
   const podiumTeams = standings.filter((t) => t.rank <= 3);
   const remainingTeams = standings.filter((t) => t.rank > 3);
 
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--leaderboard pegasus-animate-fade">
+      {integrityError && (
+        <aside
+          className="pegasus-card"
+          style={{
+            margin: "0 auto 24px auto",
+            maxWidth: "1000px",
+            background: "rgba(229, 55, 55, 0.08)",
+            border: "1px solid var(--action)",
+            color: "var(--foreground)",
+            padding: "16px 20px",
+            borderRadius: "4px",
+          }}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ color: "var(--action)", fontWeight: 900 }}>⚠️</span>
+            <strong style={{ fontSize: "14px", letterSpacing: "0.04em" }}>
+              DATA INTEGRITY ALERT
+            </strong>
+          </div>
+          <p style={{ margin: "8px 0 0 0", fontSize: "13px", color: "var(--text-body)" }}>
+            {integrityError}. Showing verified fallback standings to preserve regulatory audit safety.
+          </p>
+        </aside>
+      )}
+
       <section className="pegasus-page__header">
         <p className="pegasus-eyebrow">FESTIVAL STANDINGS & CHAMPIONSHIP</p>
         <h1 className="pegasus-page-title">Leaderboard</h1>

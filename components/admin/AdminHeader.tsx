@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { logoutAction } from "@/app/admin/actions";
+import ShowQrButton from "@/components/qr/ShowQrButton";
 import type { AdminUserIdentity } from "./AdminShellClient";
 
 interface AdminHeaderProps {
@@ -136,6 +137,23 @@ export default function AdminHeader({
           >
             ENV: LOCAL DEV
           </span>
+        )}
+
+        {/* On-demand Admin QR Action */}
+        {user && user.qrToken && (
+          <ShowQrButton
+            data={{
+              name: user.fullName,
+              role: "admin",
+              roleLabel: "Festival Administrator",
+              identifier: `ID: ${user.userId.startsWith("a") ? user.userId.toUpperCase() : `A-${user.userId.slice(0, 6).toUpperCase()}`}`,
+              qrUrl: `/qr/${user.qrToken}`,
+              isPrivileged: true,
+            }}
+            label="Show Admin QR"
+            variant="subtle"
+            style={{ fontSize: "11px", padding: "5px 10px", minHeight: "30px" }}
+          />
         )}
 
         <span

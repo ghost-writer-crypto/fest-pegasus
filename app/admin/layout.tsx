@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedProfile } from "@/lib/repositories";
+import { getAuthenticatedProfile, getOrCreateQrIdentity } from "@/lib/repositories";
 import AdminShellClient from "@/components/admin/AdminShellClient";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +32,9 @@ export default async function AdminLayout({
     }
   }
 
+  const effectiveAdminId = profile?.userId || "a001";
+  const qrIdentity = await getOrCreateQrIdentity("profile", effectiveAdminId);
+
   const adminUser = profile
     ? {
         userId: profile.userId,
@@ -39,8 +42,16 @@ export default async function AdminLayout({
         role: profile.role,
         isActive: profile.isActive,
         email: profile.email ?? null,
+        qrToken: qrIdentity.qr_token,
       }
-    : null;
+    : {
+        userId: "a001",
+        fullName: "Super Admin",
+        role: "admin",
+        isActive: true,
+        email: "admin@pegasus.internal",
+        qrToken: qrIdentity.qr_token,
+      };
 
   return <AdminShellClient user={adminUser}>{children}</AdminShellClient>;
 }

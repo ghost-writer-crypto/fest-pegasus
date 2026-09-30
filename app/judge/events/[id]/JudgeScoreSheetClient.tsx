@@ -8,12 +8,14 @@ import {
 
 import type { ScoreSheetEntry } from "@/lib/results";
 import type { ResultDisposition, ResultStatus } from "@/lib/types";
+import { resolveMatchOutcome } from "@/lib/competition/teamMatchResolution";
 
 export type CompetitorItem = {
   id: string; // participant id
   name: string;
   chestNumber: string;
   teamName: string;
+  teamId?: string;
   category: string;
   existingResultId?: string;
   existingRank?: number | null;
@@ -24,6 +26,8 @@ export type CompetitorItem = {
 
 export type FixtureItem = {
   id: string; // fixture id
+  homeTeamId?: string;
+  awayTeamId?: string;
   homeTeamName: string;
   awayTeamName: string;
   homeTeamCode: string;
@@ -34,6 +38,10 @@ export type FixtureItem = {
   scoreHome?: number | null;
   scoreAway?: number | null;
   existingResultId?: string;
+  homeResultId?: string;
+  awayResultId?: string;
+  homeRank?: number | null;
+  awayRank?: number | null;
   existingStatus?: ResultStatus;
 };
 
@@ -163,21 +171,89 @@ export default function JudgeScoreSheetClient({
       return competitorEntries.map((c) => ({
         resultId: c.existingResultId,
         participantId: c.id,
+        teamId: c.teamId,
         rank: c.existingRank ?? null,
         performanceRaw: c.existingPerformance ?? "",
         disposition: c.existingDisposition || "normal",
       }));
     } else {
-      return fixtureEntries.map((f) => ({
-        resultId: f.existingResultId,
-        fixtureId: f.id,
-        rank: null,
-        performanceRaw:
-          f.scoreHome !== null && f.scoreAway !== null
-            ? `${f.scoreHome} - ${f.scoreAway}`
-            : "",
-        disposition: "normal",
-      }));
+      const entries: ScoreSheetEntry[] = [];
+      for (const f of fixtureEntries) {
+        const outcome = resolveMatchOutcome({
+          homeTeamId: f.homeTeamId,
+          awayTeamId: f.awayTeamId,
+          scoreHome: f.scoreHome,
+          scoreAway: f.scoreAway,
+          round: f.round,
+        });
+
+        if (outcome.isComplete && outcome.winnerTeamId && outcome.loserTeamId) {
+          const isHomeWinner = outcome.winnerTeamId === f.homeTeamId;
+          const homeRank = isHomeWinner ? outcome.winnerRank : outcome.loserRank;
+          const awayRank = isHomeWinner ? outcome.loserRank : outcome.winnerRank;
+
+          if (f.homeTeamId) {
+            entries.push({
+              resultId:
+                f.homeResultId ||
+                (f.existingResultId && !f.awayResultId
+                  ? f.existingResultId
+                  : undefined),
+              fixtureId: f.id,
+              teamId: f.homeTeamId,
+              rank: homeRank,
+              performanceRaw: `${f.scoreHome} - ${f.scoreAway}`,
+              disposition: "normal",
+            });
+          }
+          if (f.awayTeamId) {
+            entries.push({
+              resultId: f.awayResultId,
+              fixtureId: f.id,
+              teamId: f.awayTeamId,
+              rank: awayRank,
+              performanceRaw: `${f.scoreAway} - ${f.scoreHome}`,
+              disposition: "normal",
+            });
+          }
+        } else {
+          // Unresolved, tied, or unscored match: emit entries with null rank to preserve auditability without fabricating points
+          if (f.homeTeamId) {
+            entries.push({
+              resultId:
+                f.homeResultId ||
+                (f.existingResultId && !f.awayResultId
+                  ? f.existingResultId
+                  : undefined),
+              fixtureId: f.id,
+              teamId: f.homeTeamId,
+              rank: null,
+              performanceRaw: outcome.performanceRaw,
+              disposition: "normal",
+            });
+          }
+          if (f.awayTeamId) {
+            entries.push({
+              resultId: f.awayResultId,
+              fixtureId: f.id,
+              teamId: f.awayTeamId,
+              rank: null,
+              performanceRaw: outcome.performanceRaw,
+              disposition: "normal",
+            });
+          }
+          if (!f.homeTeamId && !f.awayTeamId) {
+            entries.push({
+              resultId: f.existingResultId,
+              fixtureId: f.id,
+              rank: null,
+              performanceRaw: outcome.performanceRaw,
+              disposition: "normal",
+            });
+          }
+        }
+      }
+      return entries;
     }
   };
 
@@ -752,125 +828,206 @@ export default function JudgeScoreSheetClient({
             </div>
           ) : (
             <div style={{ display: "grid", gap: "12px" }}>
-              {fixtureEntries.map((fixture) => (
-                <article
-                  key={fixture.id}
-                  className="pegasus-card"
-                  style={{
-                    padding: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "16px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderBottom: "1px solid var(--border)",
-                      paddingBottom: "10px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                      {fixture.venueName ?? "Venue TBD"} • {fixture.round ?? "Match"}
-                    </span>
-                    <span className="pegasus-status pegasus-status--upcoming">
-                      <span className="pegasus-status__dot" />
-                      {fixture.status.toUpperCase()}
-                    </span>
-                  </div>
+              {fixtureEntries.map((fixture) => {
+                const outcome = resolveMatchOutcome({
+                  homeTeamId: fixture.homeTeamId,
+                  awayTeamId: fixture.awayTeamId,
+                  scoreHome: fixture.scoreHome,
+                  scoreAway: fixture.scoreAway,
+                  round: fixture.round,
+                });
 
-                  <div
+                const isHomeWinner =
+                  outcome.isComplete &&
+                  outcome.winnerTeamId === fixture.homeTeamId;
+                const isAwayWinner =
+                  outcome.isComplete &&
+                  outcome.winnerTeamId === fixture.awayTeamId;
+
+                const homeRank = outcome.isComplete
+                  ? isHomeWinner
+                    ? outcome.winnerRank
+                    : outcome.loserRank
+                  : null;
+                const awayRank = outcome.isComplete
+                  ? isAwayWinner
+                    ? outcome.winnerRank
+                    : outcome.loserRank
+                  : null;
+
+                const homePointsPreview = getPreviewPoints(
+                  pointClass,
+                  homeRank,
+                  "normal",
+                );
+                const awayPointsPreview = getPreviewPoints(
+                  pointClass,
+                  awayRank,
+                  "normal",
+                );
+
+                return (
+                  <article
+                    key={fixture.id}
+                    className="pegasus-card"
                     style={{
+                      padding: "20px",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      flexWrap: "wrap",
-                      gap: "20px",
+                      flexDirection: "column",
+                      gap: "16px",
+                      border: outcome.isComplete
+                        ? "1px solid var(--accent)"
+                        : "1px solid var(--border)",
                     }}
                   >
-                    {/* Home Team */}
-                    <div style={{ flex: 1, minWidth: "140px" }}>
-                      <strong style={{ fontSize: "18px", display: "block" }}>
-                        {fixture.homeTeamName}
-                      </strong>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid var(--border)",
+                        paddingBottom: "10px",
+                      }}
+                    >
                       <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                        {fixture.homeTeamCode}
+                        {fixture.venueName ?? "Venue TBD"} • {fixture.round ?? "Match"}
+                      </span>
+                      <span className="pegasus-status pegasus-status--upcoming">
+                        <span className="pegasus-status__dot" />
+                        {fixture.status.toUpperCase()}
                       </span>
                     </div>
 
-                    {/* Score Inputs */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "12px",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "20px",
                       }}
                     >
-                      <input
-                        type="number"
-                        min="0"
-                        value={fixture.scoreHome ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value ? parseInt(e.target.value, 10) : null;
-                          updateFixtureScore(fixture.id, "scoreHome", val);
-                        }}
-                        disabled={isLocked || isPending}
-                        placeholder="0"
+                      {/* Home Team */}
+                      <div style={{ flex: 1, minWidth: "140px" }}>
+                        <strong style={{ fontSize: "18px", display: "block" }}>
+                          {fixture.homeTeamName}
+                        </strong>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                          {fixture.homeTeamCode}
+                        </span>
+                      </div>
+
+                      {/* Score Inputs */}
+                      <div
                         style={{
-                          height: "48px",
-                          width: "60px",
-                          textAlign: "center",
-                          fontSize: "20px",
-                          fontWeight: 800,
-                          background: "var(--surface-raised)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "6px",
-                          color: "var(--foreground)",
-                          fontFamily: "monospace",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
                         }}
-                      />
-                      <span style={{ fontSize: "16px", fontWeight: 800, color: "var(--muted)" }}>
-                        :
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={fixture.scoreAway ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value ? parseInt(e.target.value, 10) : null;
-                          updateFixtureScore(fixture.id, "scoreAway", val);
-                        }}
-                        disabled={isLocked || isPending}
-                        placeholder="0"
-                        style={{
-                          height: "48px",
-                          width: "60px",
-                          textAlign: "center",
-                          fontSize: "20px",
-                          fontWeight: 800,
-                          background: "var(--surface-raised)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "6px",
-                          color: "var(--foreground)",
-                          fontFamily: "monospace",
-                        }}
-                      />
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          value={fixture.scoreHome ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value, 10) : null;
+                            updateFixtureScore(fixture.id, "scoreHome", val);
+                          }}
+                          disabled={isLocked || isPending}
+                          placeholder="0"
+                          style={{
+                            height: "48px",
+                            width: "60px",
+                            textAlign: "center",
+                            fontSize: "20px",
+                            fontWeight: 800,
+                            background: "var(--surface-raised)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "6px",
+                            color: "var(--foreground)",
+                            fontFamily: "monospace",
+                          }}
+                        />
+                        <span style={{ fontSize: "16px", fontWeight: 800, color: "var(--muted)" }}>
+                          :
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={fixture.scoreAway ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value, 10) : null;
+                            updateFixtureScore(fixture.id, "scoreAway", val);
+                          }}
+                          disabled={isLocked || isPending}
+                          placeholder="0"
+                          style={{
+                            height: "48px",
+                            width: "60px",
+                            textAlign: "center",
+                            fontSize: "20px",
+                            fontWeight: 800,
+                            background: "var(--surface-raised)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "6px",
+                            color: "var(--foreground)",
+                            fontFamily: "monospace",
+                          }}
+                        />
+                      </div>
+
+                      {/* Away Team */}
+                      <div style={{ flex: 1, minWidth: "140px", textAlign: "right" }}>
+                        <strong style={{ fontSize: "18px", display: "block" }}>
+                          {fixture.awayTeamName}
+                        </strong>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                          {fixture.awayTeamCode}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Away Team */}
-                    <div style={{ flex: 1, minWidth: "140px", textAlign: "right" }}>
-                      <strong style={{ fontSize: "18px", display: "block" }}>
-                        {fixture.awayTeamName}
-                      </strong>
-                      <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                        {fixture.awayTeamCode}
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                    {/* Live Match Outcome Projection */}
+                    {outcome.isComplete && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          background: "rgba(255, 255, 255, 0.03)",
+                          padding: "8px 14px",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          borderTop: "1px solid var(--border)",
+                        }}
+                      >
+                        <span style={{ color: isHomeWinner ? "var(--accent)" : "var(--muted)" }}>
+                          {isHomeWinner ? "🏆 Winner" : "Runner-up"}: Rank {homeRank} ({homePointsPreview.label})
+                        </span>
+                        <span style={{ color: isAwayWinner ? "var(--accent)" : "var(--muted)" }}>
+                          {isAwayWinner ? "🏆 Winner" : "Runner-up"}: Rank {awayRank} ({awayPointsPreview.label})
+                        </span>
+                      </div>
+                    )}
+                    {outcome.isDraw && (
+                      <div
+                        style={{
+                          textAlign: "center",
+                          background: "rgba(255, 255, 255, 0.03)",
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          color: "var(--muted)",
+                          borderTop: "1px solid var(--border)",
+                        }}
+                      >
+                        Match score tied — Awaiting tiebreaker / shootout resolution
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

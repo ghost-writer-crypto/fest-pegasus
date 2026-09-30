@@ -74,6 +74,12 @@ export {
   updateParticipantRecord,
   updateParticipantStatusRecord,
   updateParticipantChestNumberRecord,
+  getParticipantDependencies,
+  deleteParticipantRecord,
+  validateAndPrepareParticipant,
+  type ParticipantDependencies,
+  type RawParticipantInput,
+  type ValidatedParticipantPayload,
 } from "./participantRepository";
 
 // ============================================================================
@@ -121,6 +127,22 @@ export {
   calculateSubstitutionTiming,
   type AdminSubstitutionRow,
 } from "./substitutionRepository";
+
+// ============================================================================
+// Appeal Repository
+// ============================================================================
+
+export {
+  getAppealsByFestival,
+  getAppealsByTeam,
+  getAppealById,
+  createAppealRecord,
+  reviewAppealRecord,
+  type AppealRow,
+  type AdminAppealRow,
+  type CreateAppealInput,
+  type ReviewAppealInput,
+} from "./appealRepository";
 
 
 // ============================================================================
@@ -237,4 +259,22 @@ export {
   type CreatePenaltyRecordInput,
   type ReversePenaltyRecordInput,
 } from "./penaltyRepository";
+
+// ============================================================================
+// QR Repository
+// ============================================================================
+
+export {
+  getOrCreateQrIdentity,
+  revokeQrIdentity,
+  rotateQrIdentity,
+  resolveQrToken,
+  generateSecureQrToken,
+  type QrIdentityRow,
+  type QrResolutionResult,
+  type QrEntityType,
+  type QrStatus,
+} from "./qrRepository";
+
+
 

@@ -8,7 +8,10 @@ import {
   updateParticipantAction,
   updateParticipantStatusAction,
   updateParticipantChestNumberAction,
+  deleteParticipantAction,
+  checkParticipantDependenciesAction,
 } from "@/app/admin/actions";
+import ShowQrButton from "@/components/qr/ShowQrButton";
 import {
   getParticipantInitials,
   getParticipantStatusLabel,
@@ -19,6 +22,7 @@ import type {
   TeamRow,
   DivisionRow,
   EventRow,
+  ParticipantDependencies,
 } from "@/lib/repositories";
 import type { ParticipantStatus } from "@/lib/types";
 
@@ -58,6 +62,13 @@ export default function AdminParticipantsClient({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] =
     useState<AdminParticipantRow | null>(null);
+  const [viewingParticipant, setViewingParticipant] =
+    useState<AdminParticipantRow | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<AdminParticipantRow | null>(null);
+  const [deleteDeps, setDeleteDeps] =
+    useState<ParticipantDependencies | null>(null);
+  const [isCheckingDeps, setIsCheckingDeps] = useState(false);
   const [chestModalParticipant, setChestModalParticipant] =
     useState<AdminParticipantRow | null>(null);
   const [quickChestInput, setQuickChestInput] = useState("");
@@ -190,6 +201,98 @@ export default function AdminParticipantsClient({
     setSelectedDivision("all");
     setSelectedStatus("all");
     setSelectedEvent("all");
+  };
+
+  // Open Detail Drawer/Modal
+  const handleOpenView = (p: AdminParticipantRow) => {
+    setViewingParticipant(p);
+  };
+
+  // Open Delete/Deactivation Audit Modal
+  const handleOpenDelete = (p: AdminParticipantRow) => {
+    setDeleteTarget(p);
+    setDeleteDeps(null);
+    setIsCheckingDeps(true);
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await checkParticipantDependenciesAction(p.id);
+      if (res.success) {
+        setDeleteDeps(res.dependencies);
+      } else {
+        setDeleteDeps({
+          registrationCount: 0,
+          resultCount: 0,
+          substitutionCount: 0,
+          totalCount: 0,
+        });
+      }
+      setIsCheckingDeps(false);
+    });
+  };
+
+  // Execute Safe Permanent Deletion
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    const targetId = deleteTarget.id;
+    const targetName = deleteTarget.name;
+
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await deleteParticipantAction(targetId);
+      if (res.success) {
+        setFeedback({
+          type: "success",
+          message: `Athlete "${targetName}" was permanently deleted.`,
+        });
+        setParticipants((prev) => prev.filter((p) => p.id !== targetId));
+        setDeleteTarget(null);
+        setDeleteDeps(null);
+        if (viewingParticipant?.id === targetId) {
+          setViewingParticipant(null);
+        }
+      } else {
+        setFeedback({
+          type: "error",
+          message: res.error || "Failed to delete participant record.",
+        });
+        if (res.dependencies) {
+          setDeleteDeps(res.dependencies);
+        }
+      }
+    });
+  };
+
+  // Execute Safe Deactivate Instead
+  const handleDeactivateInstead = () => {
+    if (!deleteTarget) return;
+    const targetId = deleteTarget.id;
+    const targetName = deleteTarget.name;
+
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await updateParticipantStatusAction(targetId, "withdrawn");
+      if (res.success) {
+        setFeedback({
+          type: "success",
+          message: `Athlete "${targetName}" deactivated (Status set to Withdrawn). History preserved.`,
+        });
+        setParticipants((prev) =>
+          prev.map((p) => (p.id === targetId ? { ...p, status: "withdrawn" } : p)),
+        );
+        setDeleteTarget(null);
+        setDeleteDeps(null);
+        if (viewingParticipant?.id === targetId) {
+          setViewingParticipant((prev) =>
+            prev ? { ...prev, status: "withdrawn" } : null,
+          );
+        }
+      } else {
+        setFeedback({
+          type: "error",
+          message: res.error || "Failed to deactivate athlete.",
+        });
+      }
+    });
   };
 
   // Open Edit Modal with participant data
@@ -997,6 +1100,19 @@ export default function AdminParticipantsClient({
                           <div style={{ display: "inline-flex", gap: "6px" }}>
                             <button
                               type="button"
+                              onClick={() => handleOpenView(participant)}
+                              className="pegasus-button pegasus-button--secondary"
+                              style={{
+                                fontSize: "11px",
+                                padding: "6px 10px",
+                                minHeight: "30px",
+                              }}
+                              title="View athlete details"
+                            >
+                              Details
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => handleOpenEdit(participant)}
                               className="pegasus-button pegasus-button--subtle"
                               style={{
@@ -1004,8 +1120,23 @@ export default function AdminParticipantsClient({
                                 padding: "6px 10px",
                                 minHeight: "30px",
                               }}
+                              title="Edit athlete information"
                             >
                               Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDelete(participant)}
+                              className="pegasus-button pegasus-button--subtle"
+                              style={{
+                                fontSize: "11px",
+                                padding: "6px 10px",
+                                minHeight: "30px",
+                                color: "var(--destructive, #ef4444)",
+                              }}
+                              title="Delete or deactivate athlete"
+                            >
+                              Delete
                             </button>
                             <Link
                               href={`/participants/${participant.id}`}
@@ -1018,8 +1149,9 @@ export default function AdminParticipantsClient({
                                 alignItems: "center",
                                 gap: "2px",
                               }}
+                              title="Open public profile"
                             >
-                              View <span>↗</span>
+                              ↗
                             </Link>
                           </div>
                         </td>
@@ -1199,30 +1331,59 @@ export default function AdminParticipantsClient({
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "4px" }}>
                     <button
                       type="button"
-                      onClick={() => handleOpenEdit(participant)}
+                      onClick={() => handleOpenView(participant)}
                       className="pegasus-button pegasus-button--secondary"
                       style={{
-                        minHeight: "40px",
+                        minHeight: "38px",
                         fontSize: "12px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      Edit Details
+                      Details
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(participant)}
+                      className="pegasus-button pegasus-button--subtle"
+                      style={{
+                        minHeight: "38px",
+                        fontSize: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDelete(participant)}
+                      className="pegasus-button pegasus-button--subtle"
+                      style={{
+                        minHeight: "38px",
+                        fontSize: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--destructive, #ef4444)",
+                      }}
+                    >
+                      Delete
                     </button>
                     <Link
                       href={`/participants/${participant.id}`}
                       className="pegasus-button pegasus-button--subtle"
                       style={{
-                        minHeight: "40px",
+                        minHeight: "38px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         fontSize: "12px",
                       }}
                     >
-                      View Profile <span>↗</span>
+                      Profile ↗
                     </Link>
                   </div>
                 </article>
@@ -1798,6 +1959,531 @@ export default function AdminParticipantsClient({
                 {isPending ? "Assigning..." : "Save Chest"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* ATHLETE DETAIL MODAL / DRAWER                               */}
+      {/* ============================================================ */}
+      {viewingParticipant && (
+        <div
+          className="pegasus-modal-backdrop"
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setViewingParticipant(null);
+          }}
+        >
+          <div
+            className="pegasus-card pegasus-animate-fade"
+            style={{
+              width: "100%",
+              maxWidth: "600px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+              background: "#121214",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7)",
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+                {viewingParticipant.profile_image_url ? (
+                  <Image
+                    src={viewingParticipant.profile_image_url}
+                    alt={viewingParticipant.name}
+                    width={48}
+                    height={48}
+                    style={{
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                ) : (
+                  <span
+                    className="pegasus-admin-avatar-initials"
+                    style={{ width: "48px", height: "48px", fontSize: "16px", borderRadius: "8px" }}
+                  >
+                    {getParticipantInitials(viewingParticipant.name)}
+                  </span>
+                )}
+                <div>
+                  <p className="pegasus-eyebrow" style={{ margin: 0 }}>ATHLETE DOSSIER</p>
+                  <h3 style={{ margin: "2px 0 0", fontSize: "20px", fontWeight: 800, color: "var(--foreground)" }}>
+                    {viewingParticipant.name}
+                  </h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontFamily: "monospace",
+                        color: "var(--muted)",
+                      }}
+                    >
+                      {viewingParticipant.public_id}
+                    </span>
+                    {viewingParticipant.chest_number && (
+                      <span className="pegasus-admin-chest-badge" style={{ fontSize: "10px" }}>
+                        CHEST #{viewingParticipant.chest_number}
+                      </span>
+                    )}
+                    <span className={`pegasus-status ${getParticipantStatusBadgeClass(viewingParticipant.status)}`}>
+                      {getParticipantStatusLabel(viewingParticipant.status)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setViewingParticipant(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--muted)",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                  padding: "4px",
+                }}
+                aria-label="Close details"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Classification: Team and Division */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div
+                style={{
+                  padding: "12px 14px",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                }}
+              >
+                <span style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
+                  Official Team / House
+                </span>
+                <p style={{ margin: "4px 0 0", fontSize: "15px", fontWeight: 800, color: "var(--foreground)" }}>
+                  {viewingParticipant.team_id ? teamMap.get(viewingParticipant.team_id)?.name ?? "—" : "No Team Assigned"}
+                </p>
+                {viewingParticipant.team_id && (
+                  <span style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--muted)" }}>
+                    Code: {teamMap.get(viewingParticipant.team_id)?.code ?? "—"}
+                  </span>
+                )}
+              </div>
+
+              <div
+                style={{
+                  padding: "12px 14px",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                }}
+              >
+                <span style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
+                  Academic Division
+                </span>
+                <p style={{ margin: "4px 0 0", fontSize: "15px", fontWeight: 800, color: "var(--foreground)" }}>
+                  {viewingParticipant.division_id ? divisionMap.get(viewingParticipant.division_id)?.name ?? "—" : "No Division"}
+                </p>
+                {viewingParticipant.division_id && (
+                  <span style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--muted)", textTransform: "capitalize" }}>
+                    Level: {divisionMap.get(viewingParticipant.division_id)?.code ?? "—"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Private Contact & Personal Info */}
+            <div
+              style={{
+                padding: "14px",
+                background: "rgba(255, 255, 255, 0.02)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Operational & Contact Records (Admin Private)
+                </span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px", fontSize: "13px" }}>
+                <div>
+                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "block" }}>Phone:</span>
+                  <strong>{viewingParticipant.phone || "—"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "block" }}>Email:</span>
+                  <strong>{viewingParticipant.email || "—"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "block" }}>Date of Birth:</span>
+                  <strong>{viewingParticipant.date_of_birth ? viewingParticipant.date_of_birth.split("T")[0] : "—"}</strong>
+                </div>
+              </div>
+              {viewingParticipant.notes && (
+                <div style={{ paddingTop: "6px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "block" }}>Desk Notes:</span>
+                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--foreground)", fontStyle: "italic" }}>
+                    {viewingParticipant.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Event Enrollments */}
+            <div>
+              <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: "8px" }}>
+                Registered Events ({viewingParticipant.registeredEventIds?.length || 0})
+              </span>
+              {(!viewingParticipant.registeredEventIds || viewingParticipant.registeredEventIds.length === 0) ? (
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)", fontStyle: "italic" }}>
+                  No event registrations assigned to this athlete.
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {viewingParticipant.registeredEventIds.map((id) => {
+                    const evt = eventMap.get(id);
+                    return (
+                      <div
+                        key={id}
+                        style={{
+                          padding: "6px 10px",
+                          background: "rgba(255, 255, 255, 0.04)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <strong style={{ color: "var(--foreground)" }}>{evt?.name ?? id}</strong>
+                        {evt?.code && (
+                          <span style={{ marginLeft: "6px", fontSize: "10px", fontFamily: "monospace", color: "var(--muted)" }}>
+                            ({evt.code})
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* QR Identity Section */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 14px",
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+              }}
+            >
+              <div>
+                <strong style={{ fontSize: "13px", display: "block" }}>On-Demand Profile QR</strong>
+                <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                  Verified identity badge for venue verification and scan routing.
+                </span>
+              </div>
+              <ShowQrButton
+                data={{
+                  name: viewingParticipant.name,
+                  role: "student",
+                  roleLabel: "Festival Competitor",
+                  identifier: viewingParticipant.public_id,
+                  subIdentifier: viewingParticipant.chest_number ? `CHEST #${viewingParticipant.chest_number}` : undefined,
+                  qrUrl: `/participants/${viewingParticipant.id}`,
+                  isPrivileged: false,
+                }}
+                label="Show Identity QR"
+                variant="primary"
+              />
+            </div>
+
+            {/* Bottom Actions */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid var(--border)", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = viewingParticipant;
+                    setViewingParticipant(null);
+                    handleOpenEdit(p);
+                  }}
+                  className="pegasus-button pegasus-button--secondary"
+                  style={{ fontSize: "12px" }}
+                >
+                  Edit Athlete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = viewingParticipant;
+                    setViewingParticipant(null);
+                    handleOpenDelete(p);
+                  }}
+                  className="pegasus-button pegasus-button--subtle"
+                  style={{ fontSize: "12px", color: "var(--destructive, #ef4444)" }}
+                >
+                  Delete / Deactivate
+                </button>
+              </div>
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Link
+                  href={`/participants/${viewingParticipant.id}`}
+                  className="pegasus-button pegasus-button--subtle"
+                  style={{ fontSize: "12px" }}
+                >
+                  Full Profile Page ↗
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setViewingParticipant(null)}
+                  className="pegasus-button pegasus-button--primary"
+                  style={{ fontSize: "12px" }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* SAFE DELETE / DEACTIVATION AUDIT MODAL                       */}
+      {/* ============================================================ */}
+      {deleteTarget && (
+        <div
+          className="pegasus-modal-backdrop"
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.82)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isPending) {
+              setDeleteTarget(null);
+              setDeleteDeps(null);
+            }
+          }}
+        >
+          <div
+            className="pegasus-card pegasus-animate-fade"
+            style={{
+              width: "100%",
+              maxWidth: "480px",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              background: "#121214",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7)",
+            }}
+          >
+            {/* Modal Header */}
+            <div>
+              <p className="pegasus-eyebrow" style={{ margin: 0, color: "var(--destructive, #ef4444)" }}>
+                SAFETY AUDIT • ATHLETE REMOVAL
+              </p>
+              <h3 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 800 }}>
+                {deleteTarget.name}
+              </h3>
+              <p style={{ margin: "4px 0 0", fontSize: "12px", fontFamily: "monospace", color: "var(--muted)" }}>
+                {deleteTarget.public_id} {deleteTarget.chest_number ? `• Chest #${deleteTarget.chest_number}` : ""}
+              </p>
+            </div>
+
+            {/* Dependency State Body */}
+            {isCheckingDeps ? (
+              <div style={{ padding: "24px 0", textAlign: "center", color: "var(--muted)" }}>
+                <p style={{ margin: 0, fontSize: "14px" }}>Auditing festival history and dependencies...</p>
+              </div>
+            ) : deleteDeps && deleteDeps.totalCount > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div
+                  style={{
+                    padding: "12px 14px",
+                    background: "rgba(239, 68, 68, 0.1)",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    borderRadius: "8px",
+                    color: "var(--destructive, #ef4444)",
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <strong>⚠️ Permanent Deletion Blocked</strong>
+                  <p style={{ margin: "4px 0 0" }}>
+                    This athlete has active festival history and cannot be hard-deleted without destroying historical records and audit trails.
+                  </p>
+                </div>
+
+                {/* Dependency Counters */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: "8px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "10px 8px",
+                      background: "rgba(255, 255, 255, 0.04)",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", display: "block" }}>
+                      Registrations
+                    </span>
+                    <strong style={{ fontSize: "18px", color: "var(--foreground)" }}>
+                      {deleteDeps.registrationCount}
+                    </strong>
+                  </div>
+                  <div
+                    style={{
+                      padding: "10px 8px",
+                      background: "rgba(255, 255, 255, 0.04)",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", display: "block" }}>
+                      Scored Results
+                    </span>
+                    <strong style={{ fontSize: "18px", color: "var(--foreground)" }}>
+                      {deleteDeps.resultCount}
+                    </strong>
+                  </div>
+                  <div
+                    style={{
+                      padding: "10px 8px",
+                      background: "rgba(255, 255, 255, 0.04)",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", display: "block" }}>
+                      Substitutions
+                    </span>
+                    <strong style={{ fontSize: "18px", color: "var(--foreground)" }}>
+                      {deleteDeps.substitutionCount}
+                    </strong>
+                  </div>
+                </div>
+
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>
+                  Recommendation: Deactivate this athlete instead. This transitions their status to <strong>Withdrawn</strong> while safely preserving festival results, points, and score integrity.
+                </p>
+
+                {/* Action Buttons for blocked deletion */}
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px" }}>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => {
+                      setDeleteTarget(null);
+                      setDeleteDeps(null);
+                    }}
+                    className="pegasus-button pegasus-button--subtle"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleDeactivateInstead}
+                    className="pegasus-button pegasus-button--primary"
+                  >
+                    {isPending ? "Deactivating..." : "Deactivate Athlete Instead"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div
+                  style={{
+                    padding: "12px 14px",
+                    background: "rgba(16, 185, 129, 0.1)",
+                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                    borderRadius: "8px",
+                    color: "var(--success, #10b981)",
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <strong>✓ 0 Dependencies Found</strong>
+                  <p style={{ margin: "4px 0 0" }}>
+                    This athlete has no registered events, scored results, or substitution records. They can be safely deleted.
+                  </p>
+                </div>
+
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)" }}>
+                  Are you sure you want to permanently delete <strong>{deleteTarget.name}</strong>? This action cannot be undone.
+                </p>
+
+                {/* Action Buttons for safe deletion */}
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px" }}>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => {
+                      setDeleteTarget(null);
+                      setDeleteDeps(null);
+                    }}
+                    className="pegasus-button pegasus-button--subtle"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleConfirmDelete}
+                    className="pegasus-button pegasus-button--primary"
+                    style={{ background: "var(--destructive, #ef4444)", borderColor: "var(--destructive, #ef4444)" }}
+                  >
+                    {isPending ? "Deleting..." : "Delete Permanently"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

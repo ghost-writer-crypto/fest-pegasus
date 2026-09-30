@@ -12,6 +12,9 @@ import {
   updateParticipantRecord,
   updateParticipantStatusRecord,
   updateParticipantChestNumberRecord,
+  deleteParticipantRecord,
+  getParticipantDependencies,
+  type ParticipantDependencies,
   createVenueRecord,
   updateVenueRecord,
   updateVenueStatusRecord,
@@ -35,6 +38,12 @@ import {
   withdrawRegistrationRecord,
   createSubstitutionRecord,
   reviewSubstitutionRecord,
+  reviewAppealRecord,
+  revokeQrIdentity,
+  rotateQrIdentity,
+  type QrEntityType,
+  type ReviewAppealInput,
+  type CreateAppealInput,
   type CreateParticipantInput,
   type UpdateParticipantInput,
   type CreateVenueInput,
@@ -339,6 +348,53 @@ export async function updateParticipantChestNumberAction(
   revalidatePath("/my-result");
 
   return { success: true };
+}
+
+/**
+ * Server action to safely delete an athlete record.
+ * Fails safely with detailed dependency breakdown if active history exists.
+ * Strictly requires authenticated session with role === 'admin' and is_active === true.
+ */
+export async function deleteParticipantAction(
+  participantId: string,
+): Promise<AdminActionResult & { dependencies?: ParticipantDependencies }> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to delete athletes.",
+    };
+  }
+
+  const res = await deleteParticipantRecord(participantId);
+  if (!res.success) {
+    return { success: false, error: res.error, dependencies: res.dependencies };
+  }
+
+  revalidatePath("/admin/participants");
+  revalidatePath("/admin");
+  revalidatePath("/participants");
+  revalidatePath("/my-result");
+
+  return { success: true, dependencies: res.dependencies };
+}
+
+/**
+ * Server action to check athlete dependencies prior to deletion prompt.
+ */
+export async function checkParticipantDependenciesAction(
+  participantId: string,
+): Promise<{ success: boolean; dependencies: ParticipantDependencies }> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      dependencies: { registrationCount: 0, resultCount: 0, substitutionCount: 0, totalCount: 0 },
+    };
+  }
+
+  const dependencies = await getParticipantDependencies(participantId);
+  return { success: true, dependencies };
 }
 
 // ============================================================================
@@ -1040,6 +1096,106 @@ export async function reviewSubstitutionAction(
   revalidatePath("/participants");
   return { success: true };
 }
+
+/**
+ * Server action for Jury of Appeal / Administrators to review and adjudicate formal appeals.
+ */
+export async function reviewAppealAction(
+  input: ReviewAppealInput,
+): Promise<AdminActionResult> {
+  const profile = await getAuthenticatedProfile();
+  if (
+    !profile ||
+    (profile.role !== "admin" && profile.role !== "desk_operator") ||
+    !profile.isActive
+  ) {
+    return {
+      success: false,
+      error:
+        "Unauthorized: Only administrators and desk operators (Jury of Appeal) may adjudicate appeals.",
+    };
+  }
+
+  const res = await reviewAppealRecord(input, {
+    userId: profile.userId,
+    fullName: profile.fullName,
+    role: profile.role,
+  });
+
+  if (!res.success) {
+    return { success: false, error: res.error };
+  }
+
+  revalidatePath("/admin/appeals");
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/verification");
+  revalidatePath("/admin/publish");
+  revalidatePath("/results");
+  revalidatePath("/leaderboard");
+  revalidatePath("/team-manager");
+  revalidatePath("/participants");
+  return { success: true };
+}
+
+// ============================================================================
+// 14. QR IDENTITY ACTIONS
+// ============================================================================
+
+/**
+ * Server action to revoke a QR identity token.
+ * Strictly restricted to active administrators.
+ */
+export async function revokeQrAction(
+  qrToken: string,
+): Promise<AdminActionResult> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to revoke QR codes.",
+    };
+  }
+
+  const res = await revokeQrIdentity(qrToken);
+  if (!res.success) {
+    return { success: false, error: res.error };
+  }
+
+  revalidatePath("/admin/participants");
+  revalidatePath("/admin");
+  revalidatePath("/participants");
+
+  return { success: true };
+}
+
+/**
+ * Server action to rotate / regenerate a QR identity token for an entity.
+ * Strictly restricted to active administrators.
+ */
+export async function rotateQrAction(
+  entityType: QrEntityType,
+  entityId: string,
+): Promise<AdminActionResult & { newToken?: string }> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to regenerate QR codes.",
+    };
+  }
+
+  const res = await rotateQrIdentity(entityType, entityId);
+  if (!res.success) {
+    return { success: false, error: res.error };
+  }
+
+  revalidatePath("/admin/participants");
+  revalidatePath("/admin");
+  revalidatePath("/participants");
+
+  return { success: true, newToken: res.newIdentity?.qr_token };
+}
+
 
 
 

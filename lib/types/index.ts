@@ -387,3 +387,10 @@ export type JudgeAssignment = {
 
 export * from "./substitutions";
 
+// ============================================================================
+// 10. APPEALS & DISPUTES DOMAIN TYPES
+// ============================================================================
+
+export * from "./appeals";
+
+

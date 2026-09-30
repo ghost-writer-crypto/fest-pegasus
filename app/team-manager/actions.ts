@@ -7,9 +7,11 @@ import {
   updateParticipantRecord,
   createRegistrationRecord,
   createSubstitutionRecord,
+  createAppealRecord,
   type CreateParticipantInput,
   type UpdateParticipantInput,
   type CreateRegistrationInput,
+  type CreateAppealInput,
 } from "@/lib/repositories";
 
 export type TeamManagerActionResult = {
@@ -24,6 +26,7 @@ export type RequestSubstitutionInput = {
   replacementParticipantId: string;
   reason: string;
   scheduledAt?: string | null;
+  metadata?: Record<string, any>;
 };
 
 /**
@@ -147,6 +150,7 @@ export async function requestSubstitutionAction(
       replacementParticipantId: input.replacementParticipantId,
       reason: input.reason,
       scheduledAt: input.scheduledAt,
+      metadata: input.metadata,
     },
     profile.userId,
   );
@@ -159,3 +163,40 @@ export async function requestSubstitutionAction(
   revalidatePath("/admin/substitutions");
   return { success: true };
 }
+
+/**
+ * Server action for Team Manager to submit a formal appeal regarding an official result.
+ */
+export async function submitAppealAction(
+  input: CreateAppealInput,
+): Promise<TeamManagerActionResult> {
+  const profile = await getActiveTeamManagerProfile();
+  if (!profile) {
+    return {
+      success: false,
+      error: "Unauthorized: Active team manager session required.",
+    };
+  }
+
+  const res = await createAppealRecord(
+    {
+      ...input,
+      teamId: profile.teamId!,
+    },
+    {
+      userId: profile.userId,
+      fullName: profile.fullName || "Team Manager",
+      role: "team_manager",
+      teamId: profile.teamId,
+    },
+  );
+
+  if (!res.success) {
+    return { success: false, error: res.error };
+  }
+
+  revalidatePath("/team-manager");
+  revalidatePath("/admin/appeals");
+  return { success: true };
+}
+

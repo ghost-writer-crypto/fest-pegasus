@@ -90,7 +90,7 @@ export default function HouseStandingsSection({
             </div>
 
             <Link href="/leaderboard" className={styles.sectionLink}>
-              <span>Full Points Table</span>
+              <span>VIEW FULL LEADERBOARD</span>
               <span aria-hidden="true">↗</span>
             </Link>
           </div>
@@ -172,6 +172,17 @@ export default function HouseStandingsSection({
                 </div>
               );
             })}
+          </div>
+
+          {/* Prominent Operational CTA */}
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1A3663] hover:bg-[#0F2242] text-white text-xs font-mono font-bold tracking-widest uppercase transition-colors rounded-xs shadow-sm hover:shadow-md"
+            >
+              <span>VIEW FULL LEADERBOARD</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
           </div>
         </div>
       </div>

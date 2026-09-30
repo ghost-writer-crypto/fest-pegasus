@@ -1,4 +1,4 @@
-import type { Registration } from "@/lib/types";
+import type { Registration } from "../lib/types/index.ts";
 
 export const registrations: Registration[] = [
   {

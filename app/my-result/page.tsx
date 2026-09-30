@@ -13,6 +13,8 @@ import {
 import { CODEX_DIVISIONS } from "@/lib/competition/divisions";
 import { formatPerformance } from "@/lib/results/resultStatus";
 import type { Performance } from "@/lib/types";
+import { leaderboard } from "@/data/leaderboard";
+import AchievementPosterModal from "@/components/achievements/AchievementPosterModal";
 import MyResultSearchForm from "./MyResultSearchForm";
 
 export const dynamic = "force-dynamic";
@@ -129,39 +131,80 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
     : null;
   const divisionName = division?.name ?? participant?.division_id ?? "Unassigned Division";
 
+  // Accrued metrics
+  const totalPoints = publishedResults.reduce((acc, r) => acc + (r.points || 0), 0);
+  const houseStanding = leaderboard.find(
+    (l) => l.id === team?.id || l.name.toLowerCase() === team?.name?.toLowerCase()
+  );
+
+  const achievements = publishedResults.map((r) => {
+    const ev = eventMap.get(r.event_id);
+    const pos = r.rank ?? 1;
+    const medal =
+      pos === 1
+        ? "Gold Medalist"
+        : pos === 2
+        ? "Silver Medalist"
+        : pos === 3
+        ? "Bronze Medalist"
+        : `Finisher Rank #${pos}`;
+    return {
+      id: `ach-${r.id}`,
+      achievement: `${ev?.name || "Event"} ${medal}`,
+      competition: ev?.name || "Championship Event",
+      position: pos,
+      house: team?.name || "Official House",
+      festival: "Pegasus Sports Festival 2026",
+      date: r.published_at
+        ? new Date(r.published_at).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "September 18, 2026",
+      athleteName: participant?.name || "Official Athlete",
+      chestNumber: participant?.chest_number || undefined,
+      performance: formatPerformance(r.performance as unknown as Performance),
+    };
+  });
+
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--my-result pegasus-animate-fade">
       {/* Page Header */}
       <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">ATHLETE RESULTS DESK</p>
-        <h1 className="pegasus-page-title">My Result</h1>
+        <p className="pegasus-eyebrow">MY PEGASUS // ATHLETE COMMAND OS</p>
+        <h1 className="pegasus-page-title">Participant Dashboard</h1>
         <p className="pegasus-page__description">
-          Fast public lookup for official individual marks, championship
-          rankings, and points across the Pegasus Sports Festival.
+          Official athlete telemetry, personal competition marks, house point
+          contributions, and official podium achievement posters.
         </p>
       </section>
 
       {/* Search Input Utility */}
-      <section style={{ marginBottom: "36px" }}>
+      <section style={{ marginBottom: "32px" }}>
         <MyResultSearchForm initialQuery={trimmedQuery} />
       </section>
 
       {/* Lookup State: Searched and Participant Found */}
       {trimmedQuery && participant && (
         <section style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-          {/* Athlete Identity Summary Card */}
+          {/* 01. MY PROFILE & MY HOUSE */}
           <div
             className="pegasus-card"
             style={{
               padding: "28px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "20px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "24px",
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
             }}
           >
+            {/* Athlete Profile Column */}
             <div>
+              <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider block mb-2">
+                01 // MY PROFILE
+              </span>
               <div
                 style={{
                   display: "flex",
@@ -172,12 +215,15 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
                 }}
               >
                 {participant.chest_number && (
-                  <span className="pegasus-chest-badge">
+                  <span className="pegasus-chest-badge font-mono">
                     CHEST #{participant.chest_number}
                   </span>
                 )}
-                <span className="pegasus-participant-card__id">
+                <span className="pegasus-participant-card__id font-mono">
                   {participant.public_id}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase bg-[#1A3663] text-white rounded-xs">
+                  CONFIRMED ATHLETE
                 </span>
               </div>
 
@@ -201,27 +247,164 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
                   color: "var(--muted)",
                 }}
               >
-                <span>{team?.name ?? "Unassigned Team"}</span>
+                <span className="font-semibold text-[#1A3663]">{team?.name ?? "Unassigned Team"}</span>
                 <span>•</span>
                 <span>{divisionName}</span>
               </div>
             </div>
 
-            <Link
-              href={`/participants/${encodeURIComponent(participant.public_id)}`}
-              className="pegasus-button pegasus-button--secondary"
-              style={{ fontSize: "13px", minHeight: "40px" }}
-            >
-              View Full Profile <span>↗</span>
-            </Link>
+            {/* My House Column */}
+            <div className="border-t sm:border-t-0 sm:border-l border-white/10 sm:pl-6 pt-4 sm:pt-0 flex flex-col justify-between">
+              <div>
+                <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider block mb-2">
+                  02 // MY HOUSE
+                </span>
+                <h3 className="text-xl font-extrabold text-[#1A3663]">
+                  {team?.name || "Official House"}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  House Championship Shield Standing
+                </p>
+              </div>
+
+              <div className="flex items-center gap-6 mt-4">
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-muted-foreground block">
+                    Shield Rank
+                  </span>
+                  <span className="text-2xl font-mono font-black text-[#F2B84B]">
+                    #{houseStanding?.rank || 1}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-muted-foreground block">
+                    House Points
+                  </span>
+                  <span className="text-2xl font-mono font-black text-[#1A3663]">
+                    {houseStanding?.points || 20} PTS
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Published Results Section */}
+          {/* 02. MY POINTS & SUMMARY METRICS */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "12px",
+            }}
+          >
+            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
+              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+                MY ACCRUED POINTS
+              </span>
+              <strong className="text-3xl font-black font-mono text-[#E53737] block mt-1">
+                +{totalPoints} PTS
+              </strong>
+              <span className="text-[11px] text-muted-foreground">
+                Authoritative points earned
+              </span>
+            </div>
+
+            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
+              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+                VERIFIED OUTCOMES
+              </span>
+              <strong className="text-3xl font-black font-mono text-[#1A3663] block mt-1">
+                {publishedResults.length}
+              </strong>
+              <span className="text-[11px] text-muted-foreground">
+                Final published marks
+              </span>
+            </div>
+
+            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
+              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+                PODIUM FINISHES
+              </span>
+              <strong className="text-3xl font-black font-mono text-[#F2B84B] block mt-1">
+                {achievements.filter((a) => typeof a.position === "number" && a.position <= 3).length}
+              </strong>
+              <span className="text-[11px] text-muted-foreground">
+                Medal positions
+              </span>
+            </div>
+          </div>
+
+          {/* 03. MY ACHIEVEMENTS (OFFICIAL POSTER GENERATION FLOW) */}
+          <div>
+            <div style={{ marginBottom: "16px" }}>
+              <p className="pegasus-eyebrow">PODIUM & HONORS</p>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "2px 0 0" }}>
+                My Achievements ({achievements.length})
+              </h3>
+            </div>
+
+            {achievements.length === 0 ? (
+              <div
+                className="pegasus-card"
+                style={{ padding: "32px", textAlign: "center", color: "var(--muted)" }}
+              >
+                No podium marks recorded yet. Achievements unlock upon published official finish.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {achievements.map((ach) => (
+                  <div
+                    key={ach.id}
+                    className="pegasus-card"
+                    style={{
+                      padding: "20px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      gap: "16px",
+                      border: "1px solid rgba(242, 184, 75, 0.3)",
+                      background: "rgba(15, 34, 66, 0.03)",
+                    }}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider">
+                          {ach.competition}
+                        </span>
+                        <span className="font-mono text-xs font-bold px-2 py-0.5 bg-[#F2B84B]/15 text-[#b07d1d] border border-[#F2B84B]/40 rounded-xs">
+                          {typeof ach.position === "number" ? `#${ach.position} PODIUM` : ach.position}
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold text-[#1A3663] mb-1">
+                        {ach.achievement}
+                      </h4>
+                      <p className="text-xs font-mono text-[#64748B]">
+                        {ach.house} • {ach.festival} • {ach.date}
+                      </p>
+                      {ach.performance && (
+                        <div className="mt-3 inline-block px-3 py-1 bg-white border border-[#E8EDF3] rounded-xs font-mono text-sm font-bold text-[#1A3663]">
+                          Mark: {ach.performance}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-[#E8EDF3] flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-muted-foreground uppercase">
+                        CERTIFICATE READY
+                      </span>
+                      <AchievementPosterModal achievement={ach} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 04. MY RESULTS & COMPETITIONS */}
           <div>
             <div style={{ marginBottom: "16px" }}>
               <p className="pegasus-eyebrow">VERIFIED OUTCOMES</p>
               <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "2px 0 0" }}>
-                Competition Results
+                My Competition Results
               </h3>
             </div>
 
@@ -376,6 +559,37 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
               </div>
             )}
           </div>
+
+          {/* 05. NOTIFICATIONS */}
+          <div className="pegasus-card p-6">
+            <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider block mb-2">
+              05 // NOTIFICATIONS & MARSHALING
+            </span>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xs border border-white/10">
+                <span className="text-[#5B9BD5] text-sm">ℹ</span>
+                <div>
+                  <strong className="text-sm font-bold text-[#1A3663] block">
+                    Official Timing Certified
+                  </strong>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Your sprint and field marks have been audited by Chief Scorer and locked to the official tournament records.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xs border border-white/10">
+                <span className="text-[#F2B84B] text-sm">★</span>
+                <div>
+                  <strong className="text-sm font-bold text-[#1A3663] block">
+                    Podium Ceremony Assembly
+                  </strong>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Medal presentation is scheduled at the Central Victory Stand. Check with House Manager for staging instructions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
@@ -505,6 +719,23 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
             >
               View Full Leaderboard <span>→</span>
             </Link>
+          </div>
+
+          <div style={{ marginTop: "12px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
+            <span className="font-mono text-xs text-[#5B9BD5] uppercase font-bold block mb-2">
+              QUICK ACCESS VERIFIED ATHLETES:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/my-result?q=PGS-0001" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-xs font-mono text-[#F2B84B] border border-white/10 rounded-xs">
+                PGS-0001 (Participant One · Gold)
+              </Link>
+              <Link href="/my-result?q=PGS-0002" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-xs font-mono text-[#5B9BD5] border border-white/10 rounded-xs">
+                PGS-0002 (Participant Two · Silver)
+              </Link>
+              <Link href="/my-result?q=PGS-0003" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-xs font-mono text-[#E8EDF3] border border-white/10 rounded-xs">
+                PGS-0003 (Participant Three)
+              </Link>
+            </div>
           </div>
         </section>
       )}

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Skiper3 } from "@/components/ui/skiper-ui/skiper3";
 import styles from "./HeroCarousel.module.css";
 
 export interface HeroSlide {
@@ -20,26 +21,26 @@ export interface HeroSlide {
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    id: "slide-track",
-    tag: "PEGASUS 2026 // OPENING SESSION",
-    title: "THE MEET IS ON.",
-    subtitle: "DISCIPLINE IN CONDUCT. PRECISION ON THE FIELD.",
+    id: "slide-motion",
+    tag: "PEGASUS / SPORTS FEST OPERATING SYSTEM",
+    title: "THE FEST.\nIN MOTION.",
+    subtitle: "AUTHENTIC TIMING // VERIFIED RESULTS // CHAMPIONSHIP RADAR",
     description:
-      "Sports. Competition. Community. Four houses in contention across certified running lanes and tournament arenas.",
-    ctaLabel: "Explore Sports",
-    ctaHref: "/sports",
+      "PEGASUS powers competitions, live results, teams, fixtures and standings across certified collegiate athletics.",
+    ctaLabel: "VIEW SCHEDULE",
+    ctaHref: "/schedules",
     image: "/images/hero/track-stadium.jpg",
     badge: "ELECTRONIC CHIP TIMING",
     displayOrder: 1,
   },
   {
     id: "slide-turf",
-    tag: "TOURNAMENT APEX // TEAM SPORTS",
+    tag: "PEGASUS / ARENA KNOCKOUTS",
     title: "PRECISION ON THE TURF.",
     subtitle: "KNOCKOUT ROUNDS UNDER THE LIGHTS",
     description:
-      "High-stakes competition across Football, Volleyball, Basketball, Cricket and Tug of War under evening stadium floodlights.",
-    ctaLabel: "View Schedules",
+      "High-stakes competition across Football, Volleyball, Basketball, Cricket, and the Tug of War 600kg arena.",
+    ctaLabel: "VIEW SCHEDULE",
     ctaHref: "/schedules",
     image: "/images/hero/football-arena.jpg",
     badge: "OFFICIAL MATCH DRAWS",
@@ -47,13 +48,13 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: "slide-trophy",
-    tag: "CHAMPIONSHIP APEX // THE FESTIVAL SHIELD",
+    tag: "PEGASUS / CHAMPIONSHIP SHIELD",
     title: "FOUR HOUSES. ONE SHIELD.",
     subtitle: "AGGREGATED MULTI-DISCIPLINE POINTS",
     description:
       "Every sprint cleared and goal scored accumulates toward the overall House Championship Trophy. Track certified standings in real time.",
-    ctaLabel: "House Standings",
-    ctaHref: "/leaderboard",
+    ctaLabel: "VIEW SCHEDULE",
+    ctaHref: "/schedules",
     image: "/images/hero/championship-trophy.jpg",
     badge: "LIVE POINTS AGGREGATION",
     displayOrder: 3,
@@ -391,6 +392,9 @@ export default function HeroCarousel({
                 </span>
               </div>
             )}
+            <div className="ml-auto hidden md:flex items-center">
+              <Skiper3 />
+            </div>
           </div>
 
           {/* Typography as Motion Object: Architectural Mask Window with Kinetic Tracking */}
@@ -477,8 +481,8 @@ export default function HeroCarousel({
               </span>
             </Link>
 
-            <Link href="/my-result" className={styles.secondaryCta}>
-              <span>Check My Result</span>
+            <Link href="/results" className={styles.secondaryCta}>
+              <span>LIVE RESULTS</span>
               <span className={styles.ctaArrow} aria-hidden="true">
                 →
               </span>

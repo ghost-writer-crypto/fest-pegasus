@@ -37,6 +37,7 @@ interface AdminCompetitionDetailClientProps {
 }
 
 export default function AdminCompetitionDetailClient({
+  festivalId,
   competition,
   event,
   division,
@@ -640,7 +641,7 @@ export default function AdminCompetitionDetailClient({
                 No fixtures configured yet
               </strong>
               <p style={{ margin: "4px 0 16px", fontSize: "13px" }}>
-                Use &ldquo;Generate Knockout Pairs&rdquo; or &ldquo;Add Single Fixture&rdquo; to configure match pairings.
+                Use "Generate Knockout Pairs" or "Add Single Fixture" to configure match pairings.
               </p>
             </div>
           ) : (
@@ -702,14 +703,6 @@ export default function AdminCompetitionDetailClient({
                       </div>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <button
-                          type="button"
-                          onClick={() => setEditingFixture(fixture)}
-                          className="pegasus-button pegasus-button--subtle"
-                          style={{ padding: "2px 8px", fontSize: "11px" }}
-                        >
-                          Edit
-                        </button>
                         <select
                           value={fixture.status}
                           onChange={(e) =>
@@ -1418,175 +1411,7 @@ export default function AdminCompetitionDetailClient({
           </div>
         </div>
       )}
-
-      {/* ============================================================ */}
-      {/* EDIT FIXTURE MODAL */}
-      {/* ============================================================ */}
-      {editingFixture && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "16px",
-          }}
-        >
-          <div className="pegasus-card" style={{ maxWidth: "520px", width: "100%", padding: "24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>Edit Fixture Matchup</h3>
-              <button
-                type="button"
-                onClick={() => setEditingFixture(null)}
-                style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateFixtureSubmit}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                    Round / Match Label
-                  </label>
-                  <input
-                    type="text"
-                    value={(editingFixture.metadata?.round as string) || ""}
-                    onChange={(e) =>
-                      setEditingFixture({
-                        ...editingFixture,
-                        metadata: { ...editingFixture.metadata, round: e.target.value },
-                      })
-                    }
-                    placeholder="e.g. Semi Final 1"
-                    className="pegasus-input"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Home Team (Side A)
-                    </label>
-                    <select
-                      value={editingFixture.home_team_id || ""}
-                      onChange={(e) =>
-                        setEditingFixture({
-                          ...editingFixture,
-                          home_team_id: e.target.value || null,
-                        })
-                      }
-                      className="pegasus-select"
-                      style={{ width: "100%" }}
-                    >
-                      <option value="">TBD / Open</option>
-                      {teams.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name} ({t.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Away Team (Side B)
-                    </label>
-                    <select
-                      value={editingFixture.away_team_id || ""}
-                      onChange={(e) =>
-                        setEditingFixture({
-                          ...editingFixture,
-                          away_team_id: e.target.value || null,
-                        })
-                      }
-                      className="pegasus-select"
-                      style={{ width: "100%" }}
-                    >
-                      <option value="">TBD / Open</option>
-                      {teams.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name} ({t.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                    Venue / Court
-                  </label>
-                  <select
-                    value={editingFixture.venue_id || ""}
-                    onChange={(e) =>
-                      setEditingFixture({
-                        ...editingFixture,
-                        venue_id: e.target.value || null,
-                      })
-                    }
-                    className="pegasus-select"
-                    style={{ width: "100%" }}
-                  >
-                    <option value="">Venue Allocation Pending</option>
-                    {venues.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                    Scheduled Time
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={
-                      editingFixture.scheduled_at
-                        ? new Date(editingFixture.scheduled_at).toISOString().slice(0, 16)
-                        : ""
-                    }
-                    onChange={(e) =>
-                      setEditingFixture({
-                        ...editingFixture,
-                        scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : null,
-                      })
-                    }
-                    className="pegasus-input"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" }}>
-                  <button
-                    type="button"
-                    onClick={() => setEditingFixture(null)}
-                    disabled={isPending}
-                    className="pegasus-button pegasus-button--subtle"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className="pegasus-button pegasus-button--primary"
-                  >
-                    {isPending ? "Saving..." : "Save Fixture"}
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+

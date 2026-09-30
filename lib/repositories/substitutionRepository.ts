@@ -5,6 +5,12 @@ import type {
   ReviewSubstitutionInput,
   SubstitutionTiming,
 } from "@/lib/types";
+import { validateRosterQuota } from "@/lib/competition/quotaEngine";
+import {
+  isTugOfWarEvent,
+  extractWeightFromMetadata,
+  validateTugOfWarSubstitutionWeight,
+} from "@/lib/competition/tugOfWarWeight";
 
 export type AdminSubstitutionRow = RegistrationSubstitutionRow & {
   originalParticipantName?: string;
@@ -299,6 +305,7 @@ export async function createSubstitutionRecord(
     status: "pending",
     reason: input.reason.trim(),
     requested_by: actorId || null,
+    metadata: input.metadata ?? {},
   };
 
   const { data, error } = await supabase
@@ -366,7 +373,132 @@ export async function reviewSubstitutionRecord(
     return { success: true };
   }
 
-  // 2. Execute Approval Workflow:
+  // 2. Validate Original Registration & Prospective Roster Quota
+  const { data: origReg, error: origRegErr } = await supabase
+    .from("registrations")
+    .select("id, status, event_id, participant_id, metadata")
+    .eq("id", sub.original_registration_id)
+    .maybeSingle();
+
+  if (origRegErr || !origReg) {
+    return { success: false, error: "Original registration record not found." };
+  }
+
+  // Fetch event row for name/code
+  const { data: eventRow } = await supabase
+    .from("events")
+    .select("id, code, name")
+    .eq("id", sub.event_id)
+    .maybeSingle();
+
+  // Check custom database quota if defined
+  let dbMaxQuota: number | null = null;
+  const { data: eqRow } = await supabase
+    .from("event_quotas")
+    .select("maximum_count, substitutes_count")
+    .eq("event_id", sub.event_id)
+    .maybeSingle();
+  if (eqRow && eqRow.maximum_count != null) {
+    dbMaxQuota = eqRow.maximum_count + (eqRow.substitutes_count ?? 0);
+  }
+
+  // Count current active registrations for this house in this event
+  const { data: activeTeamRegs } = await supabase
+    .from("registrations")
+    .select("id, status, participants!inner(team_id)")
+    .eq("event_id", sub.event_id)
+    .eq("participants.team_id", sub.team_id)
+    .in("status", ["approved", "submitted", "draft"]);
+
+  const currentCount = activeTeamRegs?.length ?? 0;
+  // If original was active, it will be withdrawn (-1). If it was already inactive, withdrawing it subtracts 0.
+  const isOriginalActive =
+    origReg.status === "approved" ||
+    origReg.status === "submitted" ||
+    origReg.status === "draft";
+  const withdrawnCount = isOriginalActive ? 1 : 0;
+
+  const quotaResult = validateRosterQuota({
+    eventName: eventRow?.name || eventRow?.code || "Event",
+    eventId: eventRow?.code || sub.event_id,
+    divisionId: null,
+    currentRosterCount: currentCount,
+    incomingCount: 1,
+    withdrawnCount,
+    customMaxQuota: dbMaxQuota,
+  });
+
+  if (!quotaResult.allowed) {
+    return {
+      success: false,
+      error: `Roster limit exceeded: Cannot approve substitution. ${quotaResult.error}`,
+    };
+  }
+
+  // 2b. Tug-of-War 600kg Weight Validation (for active main-team substitutions)
+  let replacementWeight: number | null = null;
+  const isTow = isTugOfWarEvent(eventRow?.code || sub.event_id);
+  const origIsSubstitute = Boolean((origReg.metadata as Record<string, unknown> | null)?.isSubstitute);
+
+  if (isTow && !origIsSubstitute) {
+    // 1. Resolve replacement athlete's weight
+    replacementWeight = extractWeightFromMetadata(sub.metadata);
+    if (replacementWeight === null) {
+      // Check if replacement participant has an existing registration row (e.g. registered as reserve/substitute)
+      const { data: repExistingReg } = await supabase
+        .from("registrations")
+        .select("metadata")
+        .eq("participant_id", sub.replacement_participant_id)
+        .eq("event_id", sub.event_id)
+        .maybeSingle();
+
+      if (repExistingReg) {
+        replacementWeight = extractWeightFromMetadata(repExistingReg.metadata);
+      }
+    }
+
+    if (replacementWeight === null) {
+      return {
+        success: false,
+        error:
+          "Cannot approve Tug-of-War substitution: Replacement athlete does not have a valid weigh-in record.",
+      };
+    }
+
+    // 2. Resolve outgoing athlete's weight
+    const outgoingWeight = extractWeightFromMetadata(origReg.metadata) ?? 0;
+
+    // 3. Query existing active main team registrations
+    const { data: currentTowRegs } = await supabase
+      .from("registrations")
+      .select("id, status, metadata, participants!inner(team_id)")
+      .eq("event_id", sub.event_id)
+      .eq("participants.team_id", sub.team_id)
+      .in("status", ["approved", "submitted", "draft"]);
+
+    const currentMainWeights = (currentTowRegs ?? [])
+      .filter((r: any) => !r.metadata?.isSubstitute)
+      .map((r: any) => ({
+        participantId: r.id,
+        weightKg: extractWeightFromMetadata(r.metadata),
+        isSubstitute: false,
+      }));
+
+    const subWeightResult = validateTugOfWarSubstitutionWeight({
+      currentMainWeights,
+      outgoingWeightKg: outgoingWeight,
+      incomingWeightKg: replacementWeight,
+    });
+
+    if (!subWeightResult.valid) {
+      return {
+        success: false,
+        error: `Weight limit exceeded: Cannot approve substitution. ${subWeightResult.error}`,
+      };
+    }
+  }
+
+  // 3. Execute Approval Workflow:
   // a) Mark original registration as 'withdrawn'
   const { error: withdrawErr } = await supabase
     .from("registrations")
@@ -405,6 +537,8 @@ export async function reviewSubstitutionRecord(
         substituted_in: true,
         substitution_id: sub.id,
         replaced_participant_id: sub.original_participant_id,
+        isSubstitute: false,
+        ...(replacementWeight !== null ? { weightKg: replacementWeight } : {}),
       },
     })
     .select("id")

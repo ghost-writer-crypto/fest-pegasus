@@ -8,14 +8,28 @@ import type {
   DivisionRow,
   AdminRegistrationRow,
   AdminSubstitutionRow,
+  ResultRow,
 } from "@/lib/repositories";
-import type { ParticipantStatus } from "@/lib/types";
+import type {
+  ParticipantStatus,
+  AdminAppealRow,
+  AppealReasonCategory,
+} from "@/lib/types";
 import {
   createTeamParticipantAction,
   updateTeamParticipantAction,
   createTeamRegistrationAction,
   requestSubstitutionAction,
+  submitAppealAction,
 } from "@/app/team-manager/actions";
+import { getEffectiveEventQuota } from "@/lib/competition/quotaEngine";
+import {
+  isTugOfWarEvent,
+  extractWeightFromMetadata,
+  calculateTugOfWarWeight,
+  roundWeight,
+} from "@/lib/competition/tugOfWarWeight";
+import { calculateAppealWindow } from "@/lib/appeals/appealEngine";
 
 interface TeamManagerClientProps {
   festivalId: string;
@@ -26,6 +40,8 @@ interface TeamManagerClientProps {
   divisions: DivisionRow[];
   registrations: AdminRegistrationRow[];
   substitutions: AdminSubstitutionRow[];
+  appeals?: AdminAppealRow[];
+  publishedResults?: ResultRow[];
   managerName?: string;
 }
 
@@ -38,9 +54,19 @@ export default function TeamManagerClient({
   divisions,
   registrations,
   substitutions,
+  appeals = [],
+  publishedResults = [],
   managerName,
 }: TeamManagerClientProps) {
-  const [activeTab, setActiveTab] = useState<"roster" | "registrations" | "substitutions">("roster");
+  const [activeTab, setActiveTab] = useState<"roster" | "registrations" | "substitutions" | "appeals" | "results">("roster");
+
+  // Appeal Modal
+  const [isAppealModalOpen, setIsAppealModalOpen] = useState(false);
+  const [appealResultId, setAppealResultId] = useState(publishedResults[0]?.id || "");
+  const [appealTitle, setAppealTitle] = useState("");
+  const [appealCategory, setAppealCategory] = useState<AppealReasonCategory>("scoring_discrepancy");
+  const [appealDescription, setAppealDescription] = useState("");
+  const [appealEvidence, setAppealEvidence] = useState("");
 
   // Athlete Modal
   const [isAthleteModalOpen, setIsAthleteModalOpen] = useState(false);
@@ -56,12 +82,15 @@ export default function TeamManagerClient({
   const [isRegModalOpen, setIsRegModalOpen] = useState(false);
   const [regParticipantId, setRegParticipantId] = useState("");
   const [regEventId, setRegEventId] = useState(events[0]?.id || "");
+  const [regWeightKg, setRegWeightKg] = useState("");
+  const [regIsSubstitute, setRegIsSubstitute] = useState(false);
 
   // Substitution Modal
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [subOrigParticipantId, setSubOrigParticipantId] = useState("");
   const [subEventId, setSubEventId] = useState("");
   const [subRepParticipantId, setSubRepParticipantId] = useState("");
+  const [subReplacementWeightKg, setSubReplacementWeightKg] = useState("");
   const [subReason, setSubReason] = useState("");
 
   const [isPending, startTransition] = useTransition();
@@ -144,6 +173,8 @@ export default function TeamManagerClient({
   function openAddRegistrationModal(athleteId?: string) {
     setRegParticipantId(athleteId || participants[0]?.id || "");
     setRegEventId(events[0]?.id || "");
+    setRegWeightKg("");
+    setRegIsSubstitute(false);
     setErrorMessage(null);
     setIsRegModalOpen(true);
   }
@@ -152,12 +183,34 @@ export default function TeamManagerClient({
     e.preventDefault();
     setErrorMessage(null);
 
+    const evObj = events.find((ev) => ev.id === regEventId);
+    const isTow = isTugOfWarEvent(evObj?.code || evObj?.id);
+
+    const metadata: Record<string, unknown> = {};
+    if (regIsSubstitute) {
+      metadata.isSubstitute = true;
+    }
+    if (regWeightKg) {
+      const parsed = parseFloat(regWeightKg);
+      if (!isNaN(parsed) && parsed > 0) {
+        metadata.weightKg = roundWeight(parsed);
+      }
+    }
+
+    if (isTow && !regIsSubstitute && !metadata.weightKg) {
+      setErrorMessage(
+        "Official athlete weigh-in (weight in kg) is strictly required for Tug-of-War main team registration."
+      );
+      return;
+    }
+
     startTransition(async () => {
       const res = await createTeamRegistrationAction({
         festivalId,
         participantId: regParticipantId,
         eventId: regEventId,
         status: "approved",
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       });
       if (!res.success) {
         setErrorMessage(res.error || "Failed to create registration.");
@@ -171,6 +224,7 @@ export default function TeamManagerClient({
     setSubOrigParticipantId(origPartId || participants[0]?.id || "");
     setSubEventId(eventId || events[0]?.id || "");
     setSubRepParticipantId("");
+    setSubReplacementWeightKg("");
     setSubReason("");
     setErrorMessage(null);
     setIsSubModalOpen(true);
@@ -185,6 +239,24 @@ export default function TeamManagerClient({
       return;
     }
 
+    const subEvObj = events.find((ev) => ev.id === subEventId);
+    const isTow = isTugOfWarEvent(subEvObj?.code || subEvObj?.id);
+
+    const metadata: Record<string, unknown> = {};
+    if (subReplacementWeightKg) {
+      const parsed = parseFloat(subReplacementWeightKg);
+      if (!isNaN(parsed) && parsed > 0) {
+        metadata.weightKg = roundWeight(parsed);
+      }
+    }
+
+    if (isTow && !metadata.weightKg) {
+      setErrorMessage(
+        "Replacement athlete weigh-in (weight in kg) is strictly required for Tug-of-War substitutions."
+      );
+      return;
+    }
+
     startTransition(async () => {
       const res = await requestSubstitutionAction({
         festivalId,
@@ -192,11 +264,63 @@ export default function TeamManagerClient({
         originalParticipantId: subOrigParticipantId,
         replacementParticipantId: subRepParticipantId,
         reason: subReason,
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       });
       if (!res.success) {
         setErrorMessage(res.error || "Failed to submit substitution.");
         return;
       }
+      window.location.reload();
+    });
+  }
+
+  function openCreateAppealModal(resultId?: string) {
+    setAppealResultId(resultId || publishedResults[0]?.id || "");
+    setAppealTitle("");
+    setAppealCategory("scoring_discrepancy");
+    setAppealDescription("");
+    setAppealEvidence("");
+    setErrorMessage(null);
+    setIsAppealModalOpen(true);
+  }
+
+  function handleSubmitAppeal(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (!currentTeam) {
+      setErrorMessage("No team assigned to current manager.");
+      return;
+    }
+
+    const targetResult = publishedResults.find((r) => r.id === appealResultId);
+    if (!targetResult) {
+      setErrorMessage("Please select an official result to appeal.");
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await submitAppealAction({
+        festivalId,
+        eventId: targetResult.event_id,
+        competitionId: targetResult.competition_id,
+        fixtureId: targetResult.fixture_id,
+        resultId: targetResult.id,
+        teamId: currentTeam.id,
+        participantId: targetResult.participant_id,
+        title: appealTitle.trim(),
+        reasonCategory: appealCategory,
+        description: appealDescription.trim(),
+        evidenceReferences: appealEvidence.trim()
+          ? appealEvidence.split("\n").map((s) => s.trim()).filter(Boolean)
+          : undefined,
+      });
+
+      if (!res.success) {
+        setErrorMessage(res.error || "Failed to lodge appeal.");
+        return;
+      }
+
       window.location.reload();
     });
   }
@@ -273,6 +397,20 @@ export default function TeamManagerClient({
           style={{ fontSize: "13px", padding: "6px 16px" }}
         >
           Substitutions ({substitutions.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("appeals")}
+          className={`pegasus-button ${activeTab === "appeals" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
+          style={{ fontSize: "13px", padding: "6px 16px" }}
+        >
+          Appeals & Protests ({appeals.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("results")}
+          className={`pegasus-button ${activeTab === "results" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
+          style={{ fontSize: "13px", padding: "6px 16px" }}
+        >
+          House Results ({publishedResults.length})
         </button>
       </div>
 
@@ -447,6 +585,131 @@ export default function TeamManagerClient({
         </div>
       )}
 
+      {/* TAB 4: APPEALS & PROTESTS */}
+      {activeTab === "appeals" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+            <div>
+              <h3 style={{ fontSize: "16px", fontWeight: 800, margin: 0 }}>Official House Appeals & Protests</h3>
+              <p style={{ fontSize: "13px", color: "var(--muted)", margin: "2px 0 0" }}>
+                Protests must be submitted within 30 minutes of result publication (Codex fee: ₹70).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => openCreateAppealModal()}
+              className="pegasus-button pegasus-button--primary"
+              style={{ fontSize: "13px", padding: "6px 14px" }}
+            >
+              + Lodge Official Appeal
+            </button>
+          </div>
+
+          {appeals.length === 0 ? (
+            <div className="pegasus-card" style={{ padding: "32px", textAlign: "center" }}>
+              <p style={{ color: "var(--muted)", fontSize: "14px", margin: 0 }}>
+                No appeals or protests have been filed by {currentTeam.name}.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {appeals.map((a) => (
+                <div key={a.id} className="pegasus-card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", padding: "2px 8px", borderRadius: "4px", background: "rgba(255,255,255,0.06)", border: "1px solid var(--border)" }}>
+                          {a.status.replace("_", " ").toUpperCase()}
+                        </span>
+                        <span style={{ fontSize: "11px", color: "var(--accent)", fontWeight: 700 }}>
+                          {a.reason_category.replace("_", " ").toUpperCase()}
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: "15px", fontWeight: 800, margin: "2px 0" }}>{a.title}</h4>
+                      <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                        Event: <strong>{a.eventName || a.eventCode}</strong> • Lodged by: <strong>{a.submitter_name}</strong> • Fee: ₹{a.fee_amount} ({a.fee_status.toUpperCase()})
+                      </div>
+                    </div>
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      {new Date(a.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+
+                  <div style={{ background: "rgba(255,255,255,0.02)", padding: "10px 12px", borderRadius: "6px", fontSize: "13px", lineHeight: "1.4" }}>
+                    {a.description}
+                  </div>
+
+                  {a.decision_notes && (
+                    <div style={{ background: "rgba(0,188,212,0.06)", border: "1px solid rgba(0,188,212,0.2)", padding: "10px 12px", borderRadius: "6px", fontSize: "13px" }}>
+                      <strong style={{ color: "var(--accent)", display: "block", marginBottom: "2px" }}>Jury of Appeal Verdict:</strong>
+                      {a.decision_notes}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 5: RESULTS */}
+      {activeTab === "results" && (
+        <div className="pegasus-table-container">
+          {publishedResults.length === 0 ? (
+            <div className="pegasus-card" style={{ padding: "32px", textAlign: "center", color: "var(--muted)" }}>
+              No official results published for your house yet. Results will populate as heats and finals conclude.
+            </div>
+          ) : (
+            <table className="pegasus-table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Athlete</th>
+                  <th>Position / Mark</th>
+                  <th>Points</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {publishedResults.map((r) => {
+                  const ev = events.find((e) => e.id === r.event_id);
+                  const athlete = participants.find((p) => p.id === r.participant_id);
+                  const perfStr = typeof r.performance === "string" ? r.performance : (r.performance as any)?.raw || "Official Mark";
+                  return (
+                    <tr key={r.id}>
+                      <td>
+                        <strong>{ev?.name || r.event_id}</strong>
+                      </td>
+                      <td>{athlete?.name || "Team Squad"}</td>
+                      <td>
+                        <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--accent)" }}>
+                          #{r.rank} · {perfStr}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: r.points > 0 ? "var(--accent)" : "var(--muted)" }}>
+                          +{r.points} pts
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => openCreateAppealModal(r.id)}
+                          className="pegasus-button pegasus-button--secondary"
+                          style={{ fontSize: "11px", padding: "4px 10px" }}
+                        >
+                          File Protest / Appeal
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
       {/* ATHLETE MODAL */}
       {isAthleteModalOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
@@ -599,13 +862,161 @@ export default function TeamManagerClient({
                     </option>
                   ))}
                 </select>
+                {(() => {
+                  const evObj = events.find((e) => e.id === regEventId) || events[0];
+                  const athleteObj = participants.find((p) => p.id === regParticipantId) || participants[0];
+                  const divCode = athleteObj?.division_id ? divMap.get(athleteObj.division_id)?.toLowerCase() : undefined;
+                  const qInfo = evObj ? getEffectiveEventQuota(evObj.code, divCode) : null;
+                  const activeCount = registrations.filter(
+                    (r) => r.event_id === regEventId && (r.status === "approved" || r.status === "submitted")
+                  ).length;
+                  const isFull = qInfo?.maxSlots != null && activeCount >= qInfo.maxSlots;
+
+                  if (qInfo?.maxSlots == null) return null;
+
+                  return (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        marginTop: "6px",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        background: isFull ? "rgba(255,107,107,0.12)" : "rgba(255,255,255,0.04)",
+                        border: `1px solid ${isFull ? "rgba(255,107,107,0.3)" : "var(--border)"}`,
+                        color: isFull ? "#ff6b6b" : "var(--muted)",
+                      }}
+                    >
+                      {isFull ? (
+                        <span>⚠️ <strong>Roster Full:</strong> {activeCount}/{qInfo.maxSlots} slots filled for {evObj?.name}. No additional entries allowed.</span>
+                      ) : (
+                        <span>House Roster: <strong>{activeCount}/{qInfo.maxSlots}</strong> slots filled ({qInfo.maxSlots - activeCount} remaining).</span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
+
+              {/* Tug-of-War Weight & Role Controls */}
+              {(() => {
+                const evObj = events.find((e) => e.id === regEventId);
+                const isTow = isTugOfWarEvent(evObj?.code || evObj?.id);
+                if (!isTow) return null;
+
+                const towRegs = registrations.filter(
+                  (r) => r.event_id === regEventId && (r.status === "approved" || r.status === "submitted")
+                );
+                const activeTowRegs = towRegs.filter((r) => !r.metadata?.isSubstitute);
+                const currentMainWeight = calculateTugOfWarWeight(
+                  activeTowRegs.map((r) => extractWeightFromMetadata(r.metadata) ?? 0)
+                );
+                const incomingWeight = !regIsSubstitute && regWeightKg ? (parseFloat(regWeightKg) || 0) : 0;
+                const prospectiveWeight = roundWeight(currentMainWeight + incomingWeight);
+                const maxLimit = 600;
+                const isOverweight = prospectiveWeight > maxLimit;
+
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        Tug-of-War 600kg Ceiling
+                      </span>
+                      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer", color: "var(--foreground)" }}>
+                        <input
+                          type="checkbox"
+                          checked={regIsSubstitute}
+                          onChange={(e) => setRegIsSubstitute(e.target.checked)}
+                        />
+                        <span>Reserve / Substitute</span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                        Athlete Weigh-in (kg) {regIsSubstitute ? "(Optional for Reserve)" : "*"}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="30"
+                        max="200"
+                        value={regWeightKg}
+                        onChange={(e) => setRegWeightKg(e.target.value)}
+                        placeholder="e.g. 74.5"
+                        className="pegasus-input"
+                        style={{ width: "100%" }}
+                        required={!regIsSubstitute}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        background: isOverweight ? "rgba(255,107,107,0.15)" : "rgba(0,255,150,0.08)",
+                        border: `1px solid ${isOverweight ? "rgba(255,107,107,0.4)" : "rgba(0,255,150,0.2)"}`,
+                        color: isOverweight ? "#ff6b6b" : "var(--foreground)",
+                      }}
+                    >
+                      <div>
+                        Active 8-Person Weight: <strong>{currentMainWeight.toFixed(1)} / {maxLimit} kg</strong>
+                        {activeTowRegs.length > 0 && ` (${activeTowRegs.length} weighed)`}
+                      </div>
+                      {!regIsSubstitute && regWeightKg && (
+                        <div style={{ marginTop: "4px", fontWeight: 600 }}>
+                          {isOverweight ? (
+                            <span>🚨 Exceeds 600kg limit by <strong>{(prospectiveWeight - maxLimit).toFixed(1)} kg</strong> (Prospective: {prospectiveWeight.toFixed(1)} kg)</span>
+                          ) : (
+                            <span>✅ Prospective Total: <strong>{prospectiveWeight.toFixed(1)} kg</strong> ({(maxLimit - prospectiveWeight).toFixed(1)} kg remaining)</span>
+                          )}
+                        </div>
+                      )}
+                      {regIsSubstitute && (
+                        <div style={{ marginTop: "4px", color: "var(--muted)", fontSize: "11px" }}>
+                          ℹ️ Substitutes are held in reserve and do not count toward the active 600 kg limit until fielded.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px" }}>
                 <button type="button" onClick={() => setIsRegModalOpen(false)} className="pegasus-button pegasus-button--secondary" disabled={isPending}>
                   Cancel
                 </button>
-                <button type="submit" className="pegasus-button pegasus-button--primary" disabled={isPending}>
+                <button
+                  type="submit"
+                  className="pegasus-button pegasus-button--primary"
+                  disabled={(() => {
+                    if (isPending) return true;
+                    const evObj = events.find((e) => e.id === regEventId) || events[0];
+                    const athleteObj = participants.find((p) => p.id === regParticipantId) || participants[0];
+                    const divCode = athleteObj?.division_id ? divMap.get(athleteObj.division_id)?.toLowerCase() : undefined;
+                    const qInfo = evObj ? getEffectiveEventQuota(evObj.code, divCode) : null;
+                    const activeCount = registrations.filter(
+                      (r) => r.event_id === regEventId && (r.status === "approved" || r.status === "submitted")
+                    ).length;
+                    const isRosterFull = qInfo?.maxSlots != null && activeCount >= qInfo.maxSlots;
+                    if (isRosterFull) return true;
+
+                    // Tug-of-War weight check
+                    if (isTugOfWarEvent(evObj?.code || evObj?.id)) {
+                      if (!regIsSubstitute) {
+                        const parsed = parseFloat(regWeightKg);
+                        if (isNaN(parsed) || parsed <= 0) return true;
+                        const towRegs = registrations.filter(
+                          (r) => r.event_id === regEventId && (r.status === "approved" || r.status === "submitted")
+                        );
+                        const currentMainWeight = calculateTugOfWarWeight(
+                          towRegs.filter((r) => !r.metadata?.isSubstitute).map((r) => extractWeightFromMetadata(r.metadata) ?? 0)
+                        );
+                        if (roundWeight(currentMainWeight + parsed) > 600) return true;
+                      }
+                    }
+                    return false;
+                  })()}
+                >
                   {isPending ? "Submitting..." : "Submit Registration"}
                 </button>
               </div>
@@ -701,12 +1112,247 @@ export default function TeamManagerClient({
                 />
               </div>
 
+              {/* Tug-of-War Substitution Weight */}
+              {(() => {
+                const evObj = events.find((e) => e.id === subEventId);
+                const isTow = isTugOfWarEvent(evObj?.code || evObj?.id);
+                if (!isTow) return null;
+
+                const origReg = registrations.find(
+                  (r) => r.participant_id === subOrigParticipantId && r.event_id === subEventId
+                );
+                const origWeight = extractWeightFromMetadata(origReg?.metadata) ?? 0;
+
+                const towRegs = registrations.filter(
+                  (r) => r.event_id === subEventId && (r.status === "approved" || r.status === "submitted")
+                );
+                const otherActiveRegs = towRegs.filter(
+                  (r) => r.participant_id !== subOrigParticipantId && !r.metadata?.isSubstitute
+                );
+                const otherWeight = calculateTugOfWarWeight(
+                  otherActiveRegs.map((r) => extractWeightFromMetadata(r.metadata) ?? 0)
+                );
+                const incomingWeight = subReplacementWeightKg ? (parseFloat(subReplacementWeightKg) || 0) : 0;
+                const prospectiveWeight = roundWeight(otherWeight + incomingWeight);
+                const isOver = prospectiveWeight > 600;
+
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "6px", border: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      Tug-of-War Substitution Weigh-in
+                    </span>
+
+                    <div>
+                      <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                        Replacement Athlete Weigh-in (kg) *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="30"
+                        max="200"
+                        value={subReplacementWeightKg}
+                        onChange={(e) => setSubReplacementWeightKg(e.target.value)}
+                        placeholder="e.g. 73.0"
+                        className="pegasus-input"
+                        style={{ width: "100%" }}
+                        required
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        background: isOver ? "rgba(255,107,107,0.15)" : "rgba(0,255,150,0.08)",
+                        border: `1px solid ${isOver ? "rgba(255,107,107,0.4)" : "rgba(0,255,150,0.2)"}`,
+                        color: isOver ? "#ff6b6b" : "var(--foreground)",
+                      }}
+                    >
+                      <div>
+                        Outgoing Athlete Weight: <strong>{origWeight > 0 ? `${origWeight} kg` : "Unweighed"}</strong>
+                      </div>
+                      {subReplacementWeightKg && (
+                        <div style={{ marginTop: "4px", fontWeight: 600 }}>
+                          {isOver ? (
+                            <span>🚨 Prospective Team Weight: <strong>{prospectiveWeight.toFixed(1)} kg</strong> (Exceeds 600 kg limit by {(prospectiveWeight - 600).toFixed(1)} kg)</span>
+                          ) : (
+                            <span>✅ Prospective Team Weight: <strong>{prospectiveWeight.toFixed(1)} / 600 kg</strong> ({(600 - prospectiveWeight).toFixed(1)} kg remaining)</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px" }}>
                 <button type="button" onClick={() => setIsSubModalOpen(false)} className="pegasus-button pegasus-button--secondary" disabled={isPending}>
                   Cancel
                 </button>
-                <button type="submit" className="pegasus-button pegasus-button--primary" disabled={isPending}>
+                <button
+                  type="submit"
+                  className="pegasus-button pegasus-button--primary"
+                  disabled={(() => {
+                    if (isPending) return true;
+                    const subEvObj = events.find((ev) => ev.id === subEventId);
+                    if (isTugOfWarEvent(subEvObj?.code || subEvObj?.id)) {
+                      const parsed = parseFloat(subReplacementWeightKg);
+                      if (isNaN(parsed) || parsed <= 0) return true;
+
+                      const towRegs = registrations.filter(
+                        (r) => r.event_id === subEventId && (r.status === "approved" || r.status === "submitted")
+                      );
+                      const otherActiveRegs = towRegs.filter(
+                        (r) => r.participant_id !== subOrigParticipantId && !r.metadata?.isSubstitute
+                      );
+                      const otherWeight = calculateTugOfWarWeight(
+                        otherActiveRegs.map((r) => extractWeightFromMetadata(r.metadata) ?? 0)
+                      );
+                      if (roundWeight(otherWeight + parsed) > 600) return true;
+                    }
+                    return false;
+                  })()}
+                >
                   {isPending ? "Submitting..." : "Submit to Desk"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* APPEAL MODAL */}
+      {isAppealModalOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
+          <div className="pegasus-card" style={{ width: "100%", maxWidth: "520px", padding: "24px", background: "var(--surface)" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 4px" }}>Lodge Official Appeal / Protest</h3>
+            <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 16px" }}>
+              Appeals are governed by the Pegasus Codex 2026. A non-refundable fee of ₹70 applies. Must be lodged within 30 minutes of result publication.
+            </p>
+
+            {errorMessage && (
+              <div style={{ padding: "10px", background: "rgba(255,68,68,0.1)", border: "1px solid rgba(255,68,68,0.3)", borderRadius: "6px", color: "#ff6b6b", fontSize: "13px", marginBottom: "14px" }}>
+                {errorMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitAppeal} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                  Select Published Result *
+                </label>
+                {publishedResults.length === 0 ? (
+                  <p style={{ fontSize: "13px", color: "var(--muted)", margin: "4px 0" }}>
+                    No published results available to appeal at this time.
+                  </p>
+                ) : (
+                  <select
+                    value={appealResultId}
+                    onChange={(e) => setAppealResultId(e.target.value)}
+                    className="pegasus-input"
+                    style={{ width: "100%" }}
+                    required
+                  >
+                    {publishedResults.map((r) => {
+                      const ev = events.find((e) => e.id === r.event_id);
+                      return (
+                        <option key={r.id} value={r.id}>
+                          {ev ? `${ev.name} (${ev.code})` : r.event_id} — Rank: {r.rank ?? "N/A"}, Pts: {r.points}
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}
+                {(() => {
+                  const selRes = publishedResults.find((r) => r.id === appealResultId);
+                  if (!selRes?.published_at) return null;
+                  const win = calculateAppealWindow(selRes.published_at);
+                  return (
+                    <div style={{ fontSize: "11px", marginTop: "4px", color: win.isExpired ? "#ff6b6b" : "var(--accent)" }}>
+                      {win.isExpired
+                        ? `⏱️ Protest window expired ${Math.abs(win.remainingMinutes)} minutes ago.`
+                        : `⏱️ Window closes in ${win.remainingMinutes} minutes (${win.deadlineAt ? new Date(win.deadlineAt).toLocaleTimeString() : ""}).`}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                    Reason Category *
+                  </label>
+                  <select
+                    value={appealCategory}
+                    onChange={(e) => setAppealCategory(e.target.value as AppealReasonCategory)}
+                    className="pegasus-input"
+                    style={{ width: "100%" }}
+                    required
+                  >
+                    <option value="scoring_discrepancy">Scoring Discrepancy</option>
+                    <option value="ineligible_participant">Ineligible Participant</option>
+                    <option value="technical_rule_violation">Rule Violation</option>
+                    <option value="equipment_infraction">Equipment Infraction</option>
+                    <option value="conduct_violation">Conduct Violation</option>
+                    <option value="timing_measurement_error">Timing / Measurement Error</option>
+                    <option value="other">Other Official Ground</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                    Appeal Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={appealTitle}
+                    onChange={(e) => setAppealTitle(e.target.value)}
+                    placeholder="e.g. Disputed 3rd leg finish time"
+                    className="pegasus-input"
+                    style={{ width: "100%" }}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                  Detailed Description & Grounds *
+                </label>
+                <textarea
+                  value={appealDescription}
+                  onChange={(e) => setAppealDescription(e.target.value)}
+                  placeholder="Provide precise details, heat number, rule clause, or discrepancies observed..."
+                  className="pegasus-input"
+                  style={{ width: "100%", minHeight: "80px" }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                  Evidence References (Optional, 1 per line)
+                </label>
+                <textarea
+                  value={appealEvidence}
+                  onChange={(e) => setAppealEvidence(e.target.value)}
+                  placeholder="e.g. Video timestamp 14:32, Chief Timer Sheet #2"
+                  className="pegasus-input"
+                  style={{ width: "100%", minHeight: "50px" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px" }}>
+                <button type="button" onClick={() => setIsAppealModalOpen(false)} className="pegasus-button pegasus-button--secondary" disabled={isPending}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="pegasus-button pegasus-button--primary"
+                  disabled={isPending || !appealResultId || publishedResults.length === 0}
+                >
+                  {isPending ? "Submitting..." : "Lodge Appeal (₹70)"}
                 </button>
               </div>
             </form>

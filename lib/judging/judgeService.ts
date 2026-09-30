@@ -195,7 +195,12 @@ export async function saveJudgeScoreSheetDraft(
   }
 
   // Pre-validate entries
-  const validation = validateScoreSheetEntries(entries, "individual", false);
+  const isTeam =
+    entries.some((e) => e.teamId && !e.participantId) ||
+    entries.some((e) => Boolean(e.fixtureId));
+  const eventType: "individual" | "team" = isTeam ? "team" : "individual";
+
+  const validation = validateScoreSheetEntries(entries, eventType, false);
   if (!validation.valid) {
     return {
       success: false,
@@ -261,7 +266,12 @@ export async function submitJudgeScoreSheet(
   }
 
   // Pre-validate entries for final submission
-  const validation = validateScoreSheetEntries(entries, "individual", true);
+  const isTeam =
+    entries.some((e) => e.teamId && !e.participantId) ||
+    entries.some((e) => Boolean(e.fixtureId));
+  const eventType: "individual" | "team" = isTeam ? "team" : "individual";
+
+  const validation = validateScoreSheetEntries(entries, eventType, true);
   if (!validation.valid) {
     return {
       success: false,

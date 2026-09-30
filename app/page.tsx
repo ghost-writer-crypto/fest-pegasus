@@ -1,5 +1,7 @@
 import Link from "next/link";
 import HeroCarousel from "@/components/home/HeroCarousel";
+import LiveStatusStrip from "@/components/home/LiveStatusStrip";
+import { Skiper16 } from "@/components/ui/skiper-ui/skiper16";
 import SportsIndexSection from "@/components/home/SportsIndexSection";
 import TodaysProgramSection from "@/components/home/TodaysProgramSection";
 import HouseStandingsSection from "@/components/home/HouseStandingsSection";
@@ -26,6 +28,54 @@ export default function HomePage() {
     if (perf.score !== undefined) return `${perf.score} pts`;
     return "Official Finish";
   };
+
+  // Operational Live Status Strip Data
+  const activeComp = competitions.find(
+    (c) => (c.status as string) === "in_progress" || (c.status as string) === "live"
+  );
+  const liveEvent = activeComp
+    ? {
+        name: events.find((e) => e.id === activeComp.eventId)?.name || "Live Session",
+        venue: venues.find((v) => v.id === activeComp.venueId)?.name || "Main Campus",
+        status: "LIVE",
+        time: activeComp.scheduledAt
+          ? new Date(activeComp.scheduledAt).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "IN PROGRESS",
+      }
+    : null;
+
+  const upcomingEvent = {
+    name: "Tug-of-War 600kg Arena Finals",
+    venue: "Central Arena Pit",
+    time: "06:00 PM",
+    sport: "Tug of War",
+  };
+
+  const topPublishedResult = results[0];
+  const topAthlete = participants.find((p) => p.id === topPublishedResult?.participantId);
+  const topAthleteTeam = teams.find((t) => t.id === topAthlete?.teamId);
+  const topEvent = events.find((e) => e.id === topPublishedResult?.eventId);
+  const latestResult = topPublishedResult
+    ? {
+        eventName: topEvent?.name || "100m Sprint",
+        performance: formatPerformance(topPublishedResult.performance),
+        houseOrAthlete: topAthleteTeam ? topAthleteTeam.name : topAthlete?.name || "Official Athlete",
+        position: topPublishedResult.position ?? 1,
+      }
+    : null;
+
+  const leader = leaderboard[0]
+    ? {
+        name: leaderboard[0].name,
+        points: leaderboard[0].points,
+        rank: 1,
+        leadMargin: leaderboard[1] ? leaderboard[0].points - leaderboard[1].points : 0,
+      }
+    : null;
 
   // Verified competition scoreboard from track & field
   const verifiedScoreboard = competitions.map((comp) => {
@@ -110,33 +160,18 @@ export default function HomePage() {
       {/* 02. FEATURED HERO CAROUSEL */}
       <HeroCarousel />
 
-      {/* 03. LIVE NOW (SPORTS BROADCAST STRIP) */}
-      <aside className={styles.broadcastStrip} aria-label="Live competition status bar">
-        <div className={styles.container}>
-          <div className={styles.broadcastInner}>
-            <div className={styles.broadcastLeft}>
-              <span className={styles.broadcastKicker}>LIVE NOW</span>
-              <div className={styles.broadcastEventRow}>
-                <span className={styles.broadcastTitle}>100M FINAL</span>
-                <span className={styles.broadcastMeta}>TRACK 01 // MAIN CAMPUS · 10:00 AM</span>
-              </div>
-            </div>
+      {/* 03. LIVE / STATUS STRIP */}
+      <LiveStatusStrip
+        liveEvent={liveEvent}
+        upcomingEvent={upcomingEvent}
+        latestResult={latestResult}
+        leader={leader}
+      />
 
-            <div className={styles.broadcastRight}>
-              <span className={styles.livePill}>
-                <span className={styles.livePulseDot} aria-hidden="true" />
-                LIVE
-              </span>
-              <Link href="/schedules" className={styles.broadcastAction}>
-                <span>View Schedules</span>
-                <span aria-hidden="true">↗</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </aside>
+      {/* 04. THE SPORTS & COMPETITIONS (SKIPER16 STICKY DECK) */}
+      <Skiper16 />
 
-      {/* 04. THE SPORTS (SELF-CONSTRUCTING SPORTS INDEX) */}
+      {/* SPORTS INDEX LIST */}
       <SportsIndexSection sports={sports} events={events} />
 
       {/* 05. TODAY'S SCHEDULE (CHRONOLOGICAL CADENCE) */}
@@ -148,7 +183,7 @@ export default function HomePage() {
       {/* 07. LATEST RESULTS (EMPIRICAL SETTLEMENT) */}
       <LatestResultsSection items={latestResults} />
 
-      {/* 08. FOOTER (MINIMAL, PREMIUM COLOPHON) */}
+      {/* 07. PUBLIC FOOTER */}
       <footer className={styles.homeFooter} aria-label="Site footer">
         <div className={styles.container}>
           <div className={styles.footerInner}>
@@ -167,14 +202,11 @@ export default function HomePage() {
                 <Link href="/" className={styles.footerNavLink}>
                   Home
                 </Link>
-                <Link href="/sports" className={styles.footerNavLink}>
-                  Sports
-                </Link>
                 <Link href="/schedules" className={styles.footerNavLink}>
-                  Schedules
+                  Schedule
                 </Link>
-                <Link href="/fixtures" className={styles.footerNavLink}>
-                  Fixtures
+                <Link href="/results?live=true" className={styles.footerNavLink}>
+                  Live
                 </Link>
                 <Link href="/results" className={styles.footerNavLink}>
                   Results
@@ -182,14 +214,8 @@ export default function HomePage() {
                 <Link href="/leaderboard" className={styles.footerNavLink}>
                   Leaderboard
                 </Link>
-                <Link href="/participants" className={styles.footerNavLink}>
-                  Participants
-                </Link>
                 <Link href="/teams" className={styles.footerNavLink}>
                   Teams
-                </Link>
-                <Link href="/my-result" className={styles.footerNavLink}>
-                  My Result
                 </Link>
               </nav>
             </div>

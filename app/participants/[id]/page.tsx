@@ -7,6 +7,7 @@ import {
   getTeamById,
   getPublishedResultsByParticipant,
   getEventById,
+  getOrCreateQrIdentity,
   type ParticipantRow,
   type TeamRow,
   type EventRow,
@@ -15,6 +16,7 @@ import {
 import { CODEX_DIVISIONS } from "@/lib/competition/divisions";
 import { formatPerformance } from "@/lib/results/resultStatus";
 import type { Performance } from "@/lib/types";
+import ShowQrButton from "@/components/qr/ShowQrButton";
 
 type ParticipantPageProps = {
   params: Promise<{ id: string }>;
@@ -107,6 +109,9 @@ export default async function ParticipantPage({ params }: ParticipantPageProps) 
       team = null;
     }
   }
+
+  // Resolve or create on-demand QR identity
+  const qrIdentity = await getOrCreateQrIdentity("participant", participant.id);
 
   // Resolve human-readable division name
   const division = CODEX_DIVISIONS.find(
@@ -229,8 +234,21 @@ export default async function ParticipantPage({ params }: ParticipantPageProps) 
             </span>
           </div>
 
-          {/* Quick Action: My Result */}
-          <div style={{ marginTop: "12px" }}>
+          {/* Quick Actions: Show QR & My Result */}
+          <div style={{ marginTop: "14px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <ShowQrButton
+              data={{
+                name: participant.name,
+                role: "student",
+                roleLabel: "Student Competitor",
+                identifier: `ID: ${participant.public_id}`,
+                subIdentifier: participant.chest_number ? `Chest #${participant.chest_number}` : undefined,
+                qrUrl: `/qr/${qrIdentity.qr_token}`,
+                isPrivileged: false,
+              }}
+              label="Show QR Code"
+              variant="primary"
+            />
             <Link
               href={`/my-result?q=${encodeURIComponent(participant.public_id)}`}
               className="pegasus-button pegasus-button--secondary"

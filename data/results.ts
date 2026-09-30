@@ -1,5 +1,5 @@
-import type { Result } from "@/lib/types";
-import { getEventPoints } from "@/lib/competition/engine";
+import type { Result } from "../lib/types/index.ts";
+import { getEventPoints } from "../lib/competition/engine.ts";
 
 const published = (eventId: string, position: number) => ({
   points: getEventPoints(eventId, position),

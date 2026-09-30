@@ -139,6 +139,7 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
         name: p.name,
         chestNumber: p.chest_number ?? "",
         teamName: team?.name ?? "Independent",
+        teamId: p.team_id ?? undefined,
         category: p.division_id ? `Division ${p.division_id}` : eventCategory,
         existingResultId: existingResult?.id,
         existingRank: existingResult?.rank,
@@ -166,6 +167,7 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
         name: p.name,
         chestNumber: String(p.chestNumber),
         teamName: team?.name ?? "Independent",
+        teamId: p.teamId,
         category: p.category,
         existingResultId: existingResult?.id,
         existingRank: existingResult?.position ?? idx + 1,
@@ -183,20 +185,34 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
       const homeTeam = dbTeams.find((t) => t.id === f.home_team_id);
       const awayTeam = dbTeams.find((t) => t.id === f.away_team_id);
       const venue = dbVenues.find((v) => v.id === f.venue_id);
-      const existingResult = dbResults.find((r) => r.fixture_id === f.id);
+      
+      const homeResult = dbResults.find(
+        (r) => r.fixture_id === f.id && Boolean(f.home_team_id) && r.team_id === f.home_team_id,
+      );
+      const awayResult = dbResults.find(
+        (r) => r.fixture_id === f.id && Boolean(f.away_team_id) && r.team_id === f.away_team_id,
+      );
+      const fallbackResult = dbResults.find((r) => r.fixture_id === f.id);
 
       return {
         id: f.id,
+        homeTeamId: f.home_team_id ?? undefined,
+        awayTeamId: f.away_team_id ?? undefined,
         homeTeamName: homeTeam?.name ?? "Team Home",
         awayTeamName: awayTeam?.name ?? "Team Away",
         homeTeamCode: homeTeam?.code ?? "HOM",
         awayTeamCode: awayTeam?.code ?? "AWY",
         venueName: venue?.name,
+        round: (f.metadata?.round as string | undefined) ?? "Match",
         status: f.status,
         scoreHome: f.score_home !== null ? Number(f.score_home) : null,
         scoreAway: f.score_away !== null ? Number(f.score_away) : null,
-        existingResultId: existingResult?.id,
-        existingStatus: existingResult?.status as ResultStatus,
+        homeResultId: homeResult?.id,
+        awayResultId: awayResult?.id,
+        homeRank: homeResult?.rank,
+        awayRank: awayResult?.rank,
+        existingResultId: fallbackResult?.id,
+        existingStatus: (homeResult?.status || awayResult?.status || fallbackResult?.status || "draft") as ResultStatus,
       };
     });
   } else if (staticEvent && staticEvent.type === "team") {
@@ -211,16 +227,18 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
 
       return {
         id: f.id,
+        homeTeamId: f.teamAId ?? undefined,
+        awayTeamId: f.teamBId ?? undefined,
         homeTeamName: teamA?.name ?? "Team A",
         awayTeamName: teamB?.name ?? "Team B",
         homeTeamCode: teamA?.code ?? "TMA",
         awayTeamCode: teamB?.code ?? "TMB",
         venueName: venue?.name,
-        round: f.round,
+        round: f.round !== undefined ? String(f.round) : "Match",
         status: f.status,
         scoreHome: f.teamAScore !== undefined ? f.teamAScore : null,
         scoreAway: f.teamBScore !== undefined ? f.teamBScore : null,
-        existingStatus: "draft",
+        existingStatus: "draft" as ResultStatus,
       };
 
     });

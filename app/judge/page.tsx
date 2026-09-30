@@ -11,9 +11,11 @@ import {
   getAuthenticatedProfile,
   getAssignmentsByJudge,
   getAssignedEventsForJudge,
+  getOrCreateQrIdentity,
   type EventRow,
   type JudgeAssignmentRow,
 } from "@/lib/repositories";
+import ShowQrButton from "@/components/qr/ShowQrButton";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +96,11 @@ export default async function JudgeControlPage() {
     },
   ];
 
+  // Resolve on-demand QR identity for the active judge
+  const judgeId = authProfile?.userId || "j001";
+  const judgeName = authProfile?.fullName || "Judge One";
+  const qrIdentity = await getOrCreateQrIdentity("profile", judgeId);
+
   return (
     <main className="pegasus-page pegasus-animate-fade">
       {/* Internal Operational Bar - strictly private, not in public navbar */}
@@ -104,49 +111,66 @@ export default async function JudgeControlPage() {
           alignItems: "center",
           marginBottom: "20px",
           flexWrap: "wrap",
-          gap: "10px",
+          gap: "12px",
           padding: "10px 16px",
           background: "rgba(255, 255, 255, 0.03)",
           borderRadius: "8px",
           border: "1px solid var(--border)",
         }}
       >
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 750,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: authProfile ? "var(--status-live)" : "var(--status-pending)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <span
             style={{
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              background: "currentColor",
-              display: "inline-block",
+              fontSize: "11px",
+              fontWeight: 750,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: authProfile ? "var(--status-live)" : "var(--status-pending)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
             }}
-          />
-          {authProfile
-            ? "AUTHENTICATED OFFICIAL DESK"
-            : "NON-PRODUCTION TRANSITIONAL MODE"}
-        </span>
-        <span
-          style={{
-            fontSize: "11px",
-            color: "var(--muted)",
-            fontFamily: "monospace",
+          >
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "currentColor",
+                display: "inline-block",
+              }}
+            />
+            {authProfile
+              ? "AUTHENTICATED OFFICIAL DESK"
+              : "NON-PRODUCTION TRANSITIONAL MODE"}
+          </span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "var(--muted)",
+              fontFamily: "monospace",
+            }}
+          >
+            {authProfile
+              ? `REFEREE: ${authProfile.fullName.toUpperCase()} • ROLE: ${authProfile.role.toUpperCase()}`
+              : `STATION: FIELD-REFEREE-DESK • ${hasActiveFestival ? festivalName.toUpperCase() : "STANDALONE"}`}
+          </span>
+        </div>
+
+        {/* On-demand Judge QR Action */}
+        <ShowQrButton
+          data={{
+            name: judgeName,
+            role: "judge",
+            roleLabel: "Official Event Judge / Referee",
+            identifier: `ID: ${judgeId.startsWith("j") ? judgeId.toUpperCase() : `J-${judgeId.slice(0, 6).toUpperCase()}`}`,
+            qrUrl: `/qr/${qrIdentity.qr_token}`,
+            isPrivileged: true,
           }}
-        >
-          {authProfile
-            ? `REFEREE: ${authProfile.fullName.toUpperCase()} • ROLE: ${authProfile.role.toUpperCase()}`
-            : `STATION: FIELD-REFEREE-DESK • ${hasActiveFestival ? festivalName.toUpperCase() : "STANDALONE"}`}
-        </span>
+          label="Show Official QR"
+          variant="secondary"
+          style={{ fontSize: "12px", minHeight: "32px", padding: "4px 12px" }}
+        />
       </div>
 
       <section className="pegasus-page__header">
@@ -204,13 +228,13 @@ export default async function JudgeControlPage() {
         ))}
       </section>
 
-      {/* Assigned Events Section */}
+      {/* Assigned Matches Section */}
       {assignedEventRows.length > 0 ? (
         <section style={{ display: "grid", gap: "16px", marginBottom: "40px" }}>
           <div style={{ marginBottom: "8px" }}>
-            <p className="pegasus-eyebrow">OFFICIAL ROSTER</p>
-            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
-              Your Official Event Assignments ({assignedEventRows.length})
+            <p className="pegasus-eyebrow">OFFICIAL MATCH ROSTER</p>
+            <h2 style={{ fontSize: "20px", fontWeight: 850, margin: 0 }}>
+              ASSIGNED MATCHES ({assignedEventRows.length})
             </h2>
           </div>
 
@@ -223,27 +247,50 @@ export default async function JudgeControlPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 flexWrap: "wrap",
-                gap: "16px",
-                padding: "20px",
+                gap: "20px",
+                padding: "20px 24px",
+                border: "1px solid var(--border)",
               }}
             >
               <div>
-                <span className="pegasus-eyebrow">
-                  {event.competition_type || "Event"}
-                  {event.point_class && ` • Class ${event.point_class}`}
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider">
+                    {event.competition_type || "ATHLETICS"}
+                  </span>
+                  <span style={{ color: "var(--muted)" }}>•</span>
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase bg-[#1A3663] text-white rounded-xs">
+                    ASSIGNED // READY
+                  </span>
+                </div>
+
                 <h3
                   style={{
-                    margin: "4px 0 2px",
-                    fontSize: "18px",
+                    margin: "2px 0 6px",
+                    fontSize: "20px",
                     fontWeight: 800,
+                    color: "var(--foreground)",
                   }}
                 >
                   {event.name}
                 </h3>
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                  Code: {event.code}
-                </span>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                    flexWrap: "wrap",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  <span>TEAMS: All Qualified Houses</span>
+                  <span>•</span>
+                  <span>VENUE: Main Track // Lane 1-8</span>
+                  <span>•</span>
+                  <span>TIME: Session 01</span>
+                </div>
               </div>
 
               <Link
@@ -253,15 +300,24 @@ export default async function JudgeControlPage() {
                   minHeight: "44px",
                   display: "inline-flex",
                   alignItems: "center",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
                 }}
               >
-                Open Event Desk <span>↗</span>
+                OPEN MATCH <span>→</span>
               </Link>
             </article>
           ))}
         </section>
       ) : staticAssignedEvents.length > 0 ? (
         <section style={{ display: "grid", gap: "16px", marginBottom: "40px" }}>
+          <div style={{ marginBottom: "8px" }}>
+            <p className="pegasus-eyebrow">OFFICIAL MATCH ROSTER</p>
+            <h2 style={{ fontSize: "20px", fontWeight: 850, margin: 0 }}>
+              ASSIGNED MATCHES ({staticAssignedEvents.length})
+            </h2>
+          </div>
+
           {staticAssignedEvents.map((event) => (
             <article
               key={event.id}
@@ -271,24 +327,50 @@ export default async function JudgeControlPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 flexWrap: "wrap",
-                gap: "16px",
-                padding: "20px",
+                gap: "20px",
+                padding: "20px 24px",
+                border: "1px solid var(--border)",
               }}
             >
               <div>
-                <span className="pegasus-eyebrow">{event.sport}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider">
+                    {event.sport.toUpperCase()}
+                  </span>
+                  <span style={{ color: "var(--muted)" }}>•</span>
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase bg-[#1A3663] text-white rounded-xs">
+                    ASSIGNED // READY FOR SCORING
+                  </span>
+                </div>
+
                 <h3
                   style={{
-                    margin: "4px 0 2px",
-                    fontSize: "18px",
+                    margin: "2px 0 6px",
+                    fontSize: "20px",
                     fontWeight: 800,
+                    color: "var(--foreground)",
                   }}
                 >
                   {event.name}
                 </h3>
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                  {event.category} • {event.format}
-                </span>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                    flexWrap: "wrap",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  <span>TEAMS/PARTICIPANTS: {event.category}</span>
+                  <span>•</span>
+                  <span>VENUE: Main Stadium</span>
+                  <span>•</span>
+                  <span>TIME: Scheduled Session</span>
+                </div>
               </div>
 
               <Link
@@ -298,9 +380,11 @@ export default async function JudgeControlPage() {
                   minHeight: "44px",
                   display: "inline-flex",
                   alignItems: "center",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
                 }}
               >
-                Open Event Desk <span>↗</span>
+                OPEN MATCH <span>→</span>
               </Link>
             </article>
           ))}

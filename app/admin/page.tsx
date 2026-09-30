@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { getAdminDashboardData } from "@/lib/admin";
+import { getAuthenticatedProfile, getOrCreateQrIdentity } from "@/lib/repositories";
+import ShowQrButton from "@/components/qr/ShowQrButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCommandCenterPage() {
   const data = await getAdminDashboardData();
+  const profile = await getAuthenticatedProfile();
+  const adminId = profile?.userId || "a001";
+  const adminName = profile?.fullName || "Super Admin";
+  const qrIdentity = await getOrCreateQrIdentity("profile", adminId);
 
   const totalAttentionCount = data.attentionItems.reduce(
     (sum, item) => sum + item.count,
@@ -61,49 +67,140 @@ export default async function AdminCommandCenterPage() {
             </p>
           </div>
 
-          {/* Active Station Status Pill */}
-          <div
-            className="pegasus-card"
-            style={{
-              padding: "12px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              background: "var(--surface)",
-              minWidth: "160px",
-            }}
-          >
-            <span
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: data.festivalStatus.isActive
-                  ? "var(--status-live)"
-                  : "var(--muted)",
-                display: "inline-block",
-                boxShadow: data.festivalStatus.isActive
-                  ? "0 0 8px var(--status-live)"
-                  : "none",
+          {/* Actions & Active Station Status */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <ShowQrButton
+              data={{
+                name: adminName,
+                role: "admin",
+                roleLabel: "Festival Administrator",
+                identifier: `ID: ${adminId.startsWith("a") ? adminId.toUpperCase() : `A-${adminId.slice(0, 6).toUpperCase()}`}`,
+                qrUrl: `/qr/${qrIdentity.qr_token}`,
+                isPrivileged: true,
               }}
+              label="Show Admin QR"
+              variant="primary"
             />
-            <div>
+
+            <div
+              className="pegasus-card"
+              style={{
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                background: "var(--surface)",
+                minWidth: "160px",
+              }}
+            >
               <span
                 style={{
-                  fontSize: "10px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--muted)",
-                  display: "block",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: data.festivalStatus.isActive
+                    ? "var(--status-live)"
+                    : "var(--muted)",
+                  display: "inline-block",
+                  boxShadow: data.festivalStatus.isActive
+                    ? "0 0 8px var(--status-live)"
+                    : "none",
                 }}
-              >
-                STATION STATUS
-              </span>
-              <strong style={{ fontSize: "13px", color: "var(--foreground)" }}>
-                {data.festivalStatus.label}
-              </strong>
+              />
+              <div>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    color: "var(--muted)",
+                    display: "block",
+                  }}
+                >
+                  STATION STATUS
+                </span>
+                <strong style={{ fontSize: "13px", color: "var(--foreground)" }}>
+                  {data.festivalStatus.label}
+                </strong>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4-Pillar Operational Cockpit */}
+      <section>
+        <div style={{ marginBottom: "12px" }}>
+          <p className="pegasus-eyebrow" style={{ margin: 0 }}>OPERATIONAL TRIAGE</p>
+          <h2 style={{ fontSize: "18px", fontWeight: 850, margin: "2px 0 0" }}>
+            4-PILLAR FESTIVAL STATUS
+          </h2>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
+          {/* Pillar 1: WHAT IS HAPPENING */}
+          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #5B9BD5" }}>
+            <span className="font-mono text-[11px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+              01 // WHAT IS HAPPENING
+            </span>
+            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+              {data.events.liveEvents > 0 ? `${data.events.liveEvents} Heats In Progress` : "Standby Session Active"}
+            </strong>
+            <p className="text-xs text-muted-foreground mt-1">
+              Arena status: Electronic timing armed. Track 01, Field Mat, Turf active.
+            </p>
+            <Link href="/admin/live" className="text-xs font-mono font-bold text-[#5B9BD5] inline-flex items-center gap-1 mt-3">
+              Monitor Live Arena <span>↗</span>
+            </Link>
+          </div>
+
+          {/* Pillar 2: WHAT NEEDS ACTION */}
+          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #E53737" }}>
+            <span className="font-mono text-[11px] font-bold text-[#E53737] uppercase tracking-wider block">
+              02 // WHAT NEEDS ACTION
+            </span>
+            <strong className="text-xl font-black text-[#E53737] block mt-1">
+              {totalAttentionCount > 0 ? `${totalAttentionCount} Items Requiring Decision` : "0 Pending Actions"}
+            </strong>
+            <p className="text-xs text-muted-foreground mt-1">
+              Verification queue: {data.results.submittedResults} submitted scorecards, {totalAttentionCount} critical attention queues.
+            </p>
+            <Link href="/admin/verification" className="text-xs font-mono font-bold text-[#E53737] inline-flex items-center gap-1 mt-3">
+              Review Verification Queue <span>↗</span>
+            </Link>
+          </div>
+
+          {/* Pillar 3: WHAT IS WAITING */}
+          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #F2B84B" }}>
+            <span className="font-mono text-[11px] font-bold text-[#b07d1d] uppercase tracking-wider block">
+              03 // WHAT IS WAITING
+            </span>
+            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+              {data.events.scheduledEvents} Events Scheduled
+            </strong>
+            <p className="text-xs text-muted-foreground mt-1">
+              Next scheduled: Tug of War 600kg weigh-in, afternoon track heats, and football knockouts.
+            </p>
+            <Link href="/admin/schedule" className="text-xs font-mono font-bold text-[#b07d1d] inline-flex items-center gap-1 mt-3">
+              Inspect Timetable <span>↗</span>
+            </Link>
+          </div>
+
+          {/* Pillar 4: WHAT HAS BEEN PUBLISHED */}
+          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #1A3663" }}>
+            <span className="font-mono text-[11px] font-bold text-[#1A3663] uppercase tracking-wider block">
+              04 // WHAT HAS BEEN PUBLISHED
+            </span>
+            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+              {data.results.publishedResults} Official Results Live
+            </strong>
+            <p className="text-xs text-muted-foreground mt-1">
+              Authoritative points synced to public House Shield radar and athlete achievement desks.
+            </p>
+            <Link href="/admin/publish" className="text-xs font-mono font-bold text-[#1A3663] inline-flex items-center gap-1 mt-3">
+              View Published Results <span>↗</span>
+            </Link>
           </div>
         </div>
       </section>

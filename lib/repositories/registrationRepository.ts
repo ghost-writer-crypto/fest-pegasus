@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { RegistrationStatus } from "@/lib/types";
+import { validateRosterQuota } from "@/lib/competition/quotaEngine";
+import {
+  isTugOfWarEvent,
+  extractWeightFromMetadata,
+  validateTugOfWarWeight,
+} from "@/lib/competition/tugOfWarWeight";
 
 /**
  * Shape of a row in public.registrations matching migrations 001 and 010.
@@ -345,7 +351,107 @@ export async function createRegistrationRecord(
     }
   }
 
-  // 4. Insert registration
+  // 4. Validate Roster Quota against Canonical Rules
+  const { data: eventRow } = await supabase
+    .from("events")
+    .select("id, code, name")
+    .eq("id", input.eventId)
+    .maybeSingle();
+
+  let divisionCode: string | undefined = undefined;
+  const divId = participant.division_id || input.divisionId;
+  if (divId) {
+    const { data: divRow } = await supabase
+      .from("divisions")
+      .select("code")
+      .eq("id", divId)
+      .maybeSingle();
+    divisionCode = divRow?.code;
+  }
+
+  let dbMaxQuota: number | null = null;
+  const { data: eqRow } = await supabase
+    .from("event_quotas")
+    .select("maximum_count, substitutes_count")
+    .eq("event_id", input.eventId)
+    .maybeSingle();
+  if (eqRow && eqRow.maximum_count != null) {
+    dbMaxQuota = eqRow.maximum_count + (eqRow.substitutes_count ?? 0);
+  }
+
+  // Count existing active registrations for this house in this event
+  const { data: activeTeamRegs } = await supabase
+    .from("registrations")
+    .select("id, status, participants!inner(team_id)")
+    .eq("event_id", input.eventId)
+    .eq("participants.team_id", participant.team_id)
+    .in("status", ["approved", "submitted", "draft"]);
+
+  const currentCount = activeTeamRegs?.length ?? 0;
+
+  const quotaResult = validateRosterQuota({
+    eventName: eventRow?.name || eventRow?.code || "Event",
+    eventId: eventRow?.code || input.eventId,
+    divisionId: divisionCode || divId || null,
+    currentRosterCount: currentCount,
+    incomingCount: 1,
+    customMaxQuota: dbMaxQuota,
+  });
+
+  if (!quotaResult.allowed) {
+    return {
+      success: false,
+      error: quotaResult.error,
+    };
+  }
+
+  // 4b. Validate Tug-of-War 600kg Weight Ceiling (Main/Active team only)
+  const isTow = isTugOfWarEvent(eventRow?.code || input.eventId);
+  const isSubstitute = Boolean(input.metadata?.isSubstitute);
+
+  if (isTow && !isSubstitute) {
+    const athleteWeight = extractWeightFromMetadata(input.metadata);
+    if (athleteWeight === null) {
+      return {
+        success: false,
+        error:
+          "Tug-of-War main team entries require an official athlete weigh-in record (metadata.weightKg > 0).",
+      };
+    }
+
+    // Fetch existing active registrations for this house in Tug of War with their metadata
+    const { data: existingTowRegs } = await supabase
+      .from("registrations")
+      .select("id, status, metadata, participants!inner(team_id)")
+      .eq("event_id", input.eventId)
+      .eq("participants.team_id", participant.team_id)
+      .in("status", ["approved", "submitted", "draft"]);
+
+    const mainParticipantsList = (existingTowRegs ?? [])
+      .filter((r: any) => !r.metadata?.isSubstitute)
+      .map((r: any) => ({
+        participantId: r.id,
+        weightKg: extractWeightFromMetadata(r.metadata),
+        isSubstitute: false,
+      }));
+
+    // Add incoming athlete
+    mainParticipantsList.push({
+      participantId: input.participantId,
+      weightKg: athleteWeight,
+      isSubstitute: false,
+    });
+
+    const weightValidation = validateTugOfWarWeight(mainParticipantsList);
+    if (!weightValidation.valid) {
+      return {
+        success: false,
+        error: weightValidation.error,
+      };
+    }
+  }
+
+  // 5. Insert registration
   const insertPayload = {
     festival_id: input.festivalId,
     participant_id: input.participantId,
@@ -392,6 +498,115 @@ export async function updateRegistrationStatusRecord(
   }
 
   const supabase = await createClient();
+
+  // If activating to approved or submitted from an inactive status (withdrawn or rejected),
+  // verify prospective roster quota and weight before activation.
+  if (status === "approved" || status === "submitted") {
+    const { data: currentReg } = await supabase
+      .from("registrations")
+      .select("id, status, event_id, participant_id, metadata, participants!inner(team_id, division_id)")
+      .eq("id", registrationId)
+      .maybeSingle();
+
+    if (
+      currentReg &&
+      (currentReg.status === "withdrawn" || currentReg.status === "rejected")
+    ) {
+      const participantObj = currentReg.participants as unknown as {
+        team_id?: string;
+        division_id?: string;
+      } | null;
+      const partTeamId = participantObj?.team_id;
+      const partDivId = participantObj?.division_id;
+
+      const { data: eventRow } = await supabase
+        .from("events")
+        .select("id, code, name")
+        .eq("id", currentReg.event_id)
+        .maybeSingle();
+
+      let divisionCode: string | undefined = undefined;
+      if (partDivId) {
+        const { data: divRow } = await supabase
+          .from("divisions")
+          .select("code")
+          .eq("id", partDivId)
+          .maybeSingle();
+        divisionCode = divRow?.code;
+      }
+
+      let dbMaxQuota: number | null = null;
+      const { data: eqRow } = await supabase
+        .from("event_quotas")
+        .select("maximum_count, substitutes_count")
+        .eq("event_id", currentReg.event_id)
+        .maybeSingle();
+      if (eqRow && eqRow.maximum_count != null) {
+        dbMaxQuota = eqRow.maximum_count + (eqRow.substitutes_count ?? 0);
+      }
+
+      const { data: activeTeamRegs } = await supabase
+        .from("registrations")
+        .select("id, status, metadata, participants!inner(team_id)")
+        .eq("event_id", currentReg.event_id)
+        .eq("participants.team_id", partTeamId)
+        .in("status", ["approved", "submitted", "draft"]);
+
+      const currentCount = activeTeamRegs?.length ?? 0;
+
+      const quotaResult = validateRosterQuota({
+        eventName: eventRow?.name || eventRow?.code || "Event",
+        eventId: eventRow?.code || currentReg.event_id,
+        divisionId: divisionCode || partDivId || null,
+        currentRosterCount: currentCount,
+        incomingCount: 1,
+        customMaxQuota: dbMaxQuota,
+      });
+
+      if (!quotaResult.allowed) {
+        return {
+          success: false,
+          error: `Roster limit exceeded: Cannot activate registration. ${quotaResult.error}`,
+        };
+      }
+
+      // Check Tug-of-War prospective weight if active main team member
+      const isTow = isTugOfWarEvent(eventRow?.code || currentReg.event_id);
+      const isSub = Boolean((currentReg.metadata as Record<string, unknown> | null)?.isSubstitute);
+
+      if (isTow && !isSub) {
+        const athleteWeight = extractWeightFromMetadata(currentReg.metadata);
+        if (athleteWeight === null) {
+          return {
+            success: false,
+            error: "Cannot activate Tug-of-War registration: Participant lacks a valid weigh-in record.",
+          };
+        }
+
+        const mainParticipantsList = (activeTeamRegs ?? [])
+          .filter((r: any) => r.id !== registrationId && !r.metadata?.isSubstitute)
+          .map((r: any) => ({
+            participantId: r.id,
+            weightKg: extractWeightFromMetadata(r.metadata),
+            isSubstitute: false,
+          }));
+
+        mainParticipantsList.push({
+          participantId: currentReg.participant_id,
+          weightKg: athleteWeight,
+          isSubstitute: false,
+        });
+
+        const weightValidation = validateTugOfWarWeight(mainParticipantsList);
+        if (!weightValidation.valid) {
+          return {
+            success: false,
+            error: `Weight limit exceeded: Cannot activate registration. ${weightValidation.error}`,
+          };
+        }
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from("registrations")

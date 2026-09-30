@@ -11,6 +11,7 @@ export type AdminUserIdentity = {
   role: string;
   isActive: boolean;
   email?: string | null;
+  qrToken?: string | null;
 } | null;
 
 interface AdminShellClientProps {

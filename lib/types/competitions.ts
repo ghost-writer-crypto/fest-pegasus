@@ -33,9 +33,9 @@ export type Competition = {
   format: CompetitionFormat;
   status: CompetitionStatus;
   roundName?: string | null;
-  venueId?: string;
-  scheduledAt?: string;
-  completedAt?: string;
+  venueId?: string | null;
+  scheduledAt?: string | null;
+  completedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -43,23 +43,23 @@ export type Competition = {
 export type Fixture = {
   id: string;
   competitionId?: string;
+  eventId?: string;
   homeTeamId?: string | null;
   awayTeamId?: string | null;
+  teamAId?: string | null;
+  teamBId?: string | null;
   scheduledAt?: string | null;
   venueId?: string | null;
   status: FixtureStatus;
   scoreHome?: number | null;
   scoreAway?: number | null;
+  teamAScore?: number | null;
+  teamBScore?: number | null;
+  round?: string | number;
+  nextFixtureId?: string | null;
   metadata?: Record<string, unknown>;
   createdAt?: string;
   updatedAt?: string;
-  eventId?: string;
-  teamAId?: string;
-  teamBId?: string;
-  teamAScore?: number;
-  teamBScore?: number;
-  round?: string;
-  nextFixtureId?: string;
 };
 
 export type CompetitionChangeEntry = {
@@ -133,3 +133,4 @@ export type GenerateKnockoutFixturesInput = {
   teamIds: string[];
   roundName?: string;
 };
+

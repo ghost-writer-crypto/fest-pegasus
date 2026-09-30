@@ -70,24 +70,61 @@ export async function getPublishedResultsByFestival(
 
   const supabase = await createClient();
 
+  // Relational query embedding participant's team_id to guarantee canonical house resolution
   const { data, error } = await supabase
     .from("results")
-    .select(RESULT_COLUMNS)
+    .select(`
+      id, festival_id, event_id, competition_id, fixture_id, participant_id, team_id, rank, points, performance, disposition, status, is_official, published_at, created_at, updated_at,
+      participants:participant_id (
+        id,
+        team_id
+      )
+    `)
     .eq("festival_id", festivalId)
     .eq("status", "published")
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error(
-      `[resultRepository.getPublishedResultsByFestival] Failed to retrieve published results for festival ${festivalId}:`,
-      error,
+    console.warn(
+      `[resultRepository.getPublishedResultsByFestival] Embedded relational query warning, trying direct select:`,
+      error.message,
     );
-    throw new Error(
-      `Failed to retrieve published results for festival ${festivalId}: ${error.message} (${error.code})`,
-    );
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("results")
+      .select(RESULT_COLUMNS)
+      .eq("festival_id", festivalId)
+      .eq("status", "published")
+      .order("created_at", { ascending: true });
+
+    if (fallbackError) {
+      console.error(
+        `[resultRepository.getPublishedResultsByFestival] Failed to retrieve published results for festival ${festivalId}:`,
+        fallbackError,
+      );
+      throw new Error(
+        `Failed to retrieve published results for festival ${festivalId}: ${fallbackError.message} (${fallbackError.code})`,
+      );
+    }
+
+    return (fallbackData as ResultRow[]) ?? [];
   }
 
-  return (data as ResultRow[]) ?? [];
+  return (
+    ((data as unknown as Array<
+      ResultRow & {
+        participants?: { id: string; team_id: string | null } | null;
+      }
+    >) ?? []).map((row) => {
+      const resolvedTeamId =
+        row.team_id || row.participants?.team_id || null;
+
+      const { participants: _p, ...cleanRow } = row;
+      return {
+        ...cleanRow,
+        team_id: resolvedTeamId,
+      } as ResultRow;
+    })
+  );
 }
 
 /**
@@ -321,7 +358,9 @@ export async function saveDraftResultsBatch(
           (e) =>
             (e.id && e.id === record.id) ||
             (e.participant_id && e.participant_id === record.participant_id) ||
-            (e.fixture_id && e.fixture_id === record.fixture_id),
+            (e.fixture_id && e.team_id
+              ? e.fixture_id === record.fixture_id && e.team_id === record.team_id
+              : e.fixture_id && e.fixture_id === record.fixture_id),
         );
         if (matchingEntry) {
           return {
@@ -344,13 +383,38 @@ export async function saveDraftResultsBatch(
 
   const validActorUuid = isUuid(actorId) ? actorId : null;
 
+  // Auto-resolve team_id for individual entries if omitted
+  const participantIdsNeedingTeam = entries
+    .filter((e) => e.participant_id && !e.team_id)
+    .map((e) => e.participant_id!);
+
+  let participantTeamMap = new Map<string, string | null>();
+  if (participantIdsNeedingTeam.length > 0) {
+    const { data: partTeams } = await supabase
+      .from("participants")
+      .select("id, team_id")
+      .in("id", participantIdsNeedingTeam);
+    if (partTeams) {
+      participantTeamMap = new Map(partTeams.map((p) => [p.id, p.team_id]));
+    }
+  }
+
   // 2. Prepare draft rows
   const rowsToUpsert = entries.map((e) => {
     const existing = existingRecords?.find(
       (r) =>
+        (e.id && r.id === e.id) ||
         (e.participant_id && r.participant_id === e.participant_id) ||
-        (e.fixture_id && r.fixture_id === e.fixture_id),
+        (e.fixture_id && e.team_id
+          ? r.fixture_id === e.fixture_id && r.team_id === e.team_id
+          : e.fixture_id && r.fixture_id === e.fixture_id),
     );
+
+    const resolvedTeamId =
+      e.team_id ||
+      (e.participant_id ? participantTeamMap.get(e.participant_id) : null) ||
+      existing?.team_id ||
+      null;
 
     return {
       id: e.id || existing?.id || undefined,
@@ -359,7 +423,7 @@ export async function saveDraftResultsBatch(
       competition_id: e.competition_id ?? null,
       fixture_id: e.fixture_id ?? null,
       participant_id: e.participant_id ?? null,
-      team_id: e.team_id ?? null,
+      team_id: resolvedTeamId,
       rank: e.rank ?? null,
       points: e.points ?? 0,
       performance: e.performance ?? {},
@@ -477,7 +541,9 @@ export async function submitResultsBatch(
           (e) =>
             (e.id && e.id === record.id) ||
             (e.participant_id && e.participant_id === record.participant_id) ||
-            (e.fixture_id && e.fixture_id === record.fixture_id),
+            (e.fixture_id && e.team_id
+              ? e.fixture_id === record.fixture_id && e.team_id === record.team_id
+              : e.fixture_id && e.fixture_id === record.fixture_id),
         );
         if (matchingEntry) {
           return {
@@ -500,13 +566,38 @@ export async function submitResultsBatch(
 
   const validActorUuid = isUuid(actorId) ? actorId : null;
 
+  // Auto-resolve team_id for individual entries if omitted
+  const participantIdsNeedingTeam = entries
+    .filter((e) => e.participant_id && !e.team_id)
+    .map((e) => e.participant_id!);
+
+  let participantTeamMap = new Map<string, string | null>();
+  if (participantIdsNeedingTeam.length > 0) {
+    const { data: partTeams } = await supabase
+      .from("participants")
+      .select("id, team_id")
+      .in("id", participantIdsNeedingTeam);
+    if (partTeams) {
+      participantTeamMap = new Map(partTeams.map((p) => [p.id, p.team_id]));
+    }
+  }
+
   // 2. Prepare submitted rows
   const rowsToUpsert = entries.map((e) => {
     const existing = existingRecords?.find(
       (r) =>
+        (e.id && r.id === e.id) ||
         (e.participant_id && r.participant_id === e.participant_id) ||
-        (e.fixture_id && r.fixture_id === e.fixture_id),
+        (e.fixture_id && e.team_id
+          ? r.fixture_id === e.fixture_id && r.team_id === e.team_id
+          : e.fixture_id && r.fixture_id === e.fixture_id),
     );
+
+    const resolvedTeamId =
+      e.team_id ||
+      (e.participant_id ? participantTeamMap.get(e.participant_id) : null) ||
+      existing?.team_id ||
+      null;
 
     return {
       id: e.id || existing?.id || undefined,
@@ -515,7 +606,7 @@ export async function submitResultsBatch(
       competition_id: e.competition_id ?? null,
       fixture_id: e.fixture_id ?? null,
       participant_id: e.participant_id ?? null,
-      team_id: e.team_id ?? null,
+      team_id: resolvedTeamId,
       rank: e.rank ?? null,
       points: e.points ?? 0,
       performance: e.performance ?? {},

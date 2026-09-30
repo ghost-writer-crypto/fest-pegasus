@@ -98,4 +98,3 @@ export function getSafeEventPoints(
 
   return getPoints(codexEvent.classification, position);
 }
-

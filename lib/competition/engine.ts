@@ -1,5 +1,5 @@
-import { getPoints } from "./scoring";
-import { CODEX_EVENTS } from "./eventClassification";
+import { getPoints } from "./scoring.ts";
+import { CODEX_EVENTS } from "./eventClassification.ts";
 
 export function getEventPoints(
   eventId: string,
