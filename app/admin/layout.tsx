@@ -18,22 +18,14 @@ export default async function AdminLayout({
   // 1. Resolve server-side authenticated identity and verified profile
   const profile = await getAuthenticatedProfile();
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const hasSupabaseConfig = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  );
-
   // 2. Strict server-side security authorization gate
-  // In production or when Supabase is configured: fail closed unconditionally
-  if (isProduction || hasSupabaseConfig) {
-    if (!profile || profile.role !== "admin" || !profile.isActive) {
-      redirect("/?error=unauthorized_admin");
-    }
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    redirect("/login?redirect=/admin&error=unauthorized_admin");
   }
 
-  const effectiveAdminId = profile?.userId || "a001";
+  const effectiveAdminId = profile.userId;
   const qrIdentity = await getOrCreateQrIdentity("profile", effectiveAdminId);
+
 
   const adminUser = profile
     ? {

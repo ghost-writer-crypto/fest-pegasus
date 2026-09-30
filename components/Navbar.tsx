@@ -49,6 +49,13 @@ const portals = [
     href: "/admin",
     tag: "CONTROL",
   },
+  {
+    role: "Login",
+    title: "Operator Login & Switcher",
+    desc: "Official access key sign-in & fast role switcher",
+    href: "/login",
+    tag: "AUTH",
+  },
 ];
 
 export default function Navbar() {
