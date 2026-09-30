@@ -69,6 +69,13 @@ import type {
   CreateSubstitutionInput,
   ReviewSubstitutionInput,
 } from "@/lib/types";
+import {
+  parseFestivalWorkbook,
+  loadValidationContext,
+  validateFestivalImportData,
+  executeFestivalImport,
+} from "@/lib/import";
+import type { ImportPreviewDataset, ImportExecutionPayload, ImportResult } from "@/lib/types/import";
 
 export type AdminActionResult = {
   success: boolean;
@@ -389,7 +396,14 @@ export async function checkParticipantDependenciesAction(
   if (!profile || profile.role !== "admin" || !profile.isActive) {
     return {
       success: false,
-      dependencies: { registrationCount: 0, resultCount: 0, substitutionCount: 0, totalCount: 0 },
+      dependencies: {
+        registrationCount: 0,
+        resultCount: 0,
+        substitutionCount: 0,
+        totalCount: 0,
+        totalDependencies: 0,
+        isSafeToDelete: false,
+      },
     };
   }
 
@@ -1196,6 +1210,116 @@ export async function rotateQrAction(
   return { success: true, newToken: res.newIdentity?.qr_token };
 }
 
+/**
+ * Server action to parse and validate an uploaded festival data Excel workbook (.xlsx).
+ * Strictly read-only, non-destructive pre-flight check.
+ */
+export async function validateFestivalImportAction(
+  formData: FormData,
+  festivalId: string = "fest-2026",
+): Promise<{
+  success: boolean;
+  data?: ImportPreviewDataset;
+  error?: string;
+}> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to import festival data.",
+    };
+  }
 
+  try {
+    const file = formData.get("file") as File | null;
+    if (!file) {
+      return {
+        success: false,
+        error: "No file provided. Please upload an .xlsx workbook.",
+      };
+    }
 
+    if (!file.name.endsWith(".xlsx")) {
+      return {
+        success: false,
+        error: "Invalid file format. Only .xlsx files are supported.",
+      };
+    }
 
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 1. Parse Excel workbook
+    const parseResult = parseFestivalWorkbook(buffer);
+    if (!parseResult.success || !parseResult.data) {
+      return {
+        success: false,
+        error: parseResult.error || "Failed to parse Excel workbook.",
+      };
+    }
+
+    // 2. Load DB validation context (teams, divisions, sports, existing records)
+    const context = await loadValidationContext(festivalId);
+
+    // 3. Perform comprehensive domain & cross-reference validation
+    const previewDataset = await validateFestivalImportData(parseResult.data, context);
+
+    return {
+      success: true,
+      data: previewDataset,
+    };
+  } catch (err: unknown) {
+    console.error("[validateFestivalImportAction] Error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "An unexpected error occurred while parsing the file.",
+    };
+  }
+}
+
+/**
+ * Server action to execute the transactional import batch.
+ * Strictly CREATE-ONLY. Revalidates all relevant cache paths on completion.
+ */
+export async function executeFestivalImportAction(
+  payload: ImportExecutionPayload,
+): Promise<{
+  success: boolean;
+  result?: ImportResult;
+  error?: string;
+}> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to execute data import.",
+    };
+  }
+
+  try {
+    const result = await executeFestivalImport(payload);
+
+    if (result.success) {
+      revalidatePath("/admin/participants");
+      revalidatePath("/admin/events");
+      revalidatePath("/admin/sports");
+      revalidatePath("/admin");
+      revalidatePath("/participants");
+      revalidatePath("/events");
+      revalidatePath("/results");
+      revalidatePath("/admin/import");
+    }
+
+    return {
+      success: result.success,
+      result,
+      error: result.error,
+    };
+  } catch (err: unknown) {
+    console.error("[executeFestivalImportAction] Error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to execute festival data import.",
+    };
+  }
+}

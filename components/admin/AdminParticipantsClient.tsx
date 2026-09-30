@@ -224,6 +224,8 @@ export default function AdminParticipantsClient({
           resultCount: 0,
           substitutionCount: 0,
           totalCount: 0,
+          totalDependencies: 0,
+          isSafeToDelete: true,
         });
       }
       setIsCheckingDeps(false);

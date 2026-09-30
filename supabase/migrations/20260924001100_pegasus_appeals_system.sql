@@ -44,7 +44,7 @@ create table if not exists public.appeals (
   -- Submitter Provenance
   submitted_by uuid references auth.users(id) on delete set null,
   submitter_name text not null,
-  submitter_role public.identity_role not null,
+  submitter_role public.profile_role not null,
 
   -- Appeal Substance
   reason_category public.appeal_reason_category not null default 'other',

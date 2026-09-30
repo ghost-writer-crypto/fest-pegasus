@@ -11,6 +11,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Overview", href: "/admin", status: "available" },
+  { label: "Data Import", href: "/admin/import", status: "available" },
   { label: "Participants", href: "/admin/participants", status: "available" },
   { label: "Substitutions", href: "/admin/substitutions", status: "available" },
   { label: "Teams", href: "/admin/teams", status: "available" },

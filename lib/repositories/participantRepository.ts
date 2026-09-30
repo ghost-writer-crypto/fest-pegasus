@@ -903,6 +903,8 @@ export type ParticipantDependencies = {
   originalSubstitutionCount?: number;
   replacementSubstitutionCount?: number;
   totalCount: number;
+  totalDependencies: number;
+  isSafeToDelete: boolean;
 };
 
 /**
@@ -919,6 +921,8 @@ export async function getParticipantDependencies(
       originalSubstitutionCount: 0,
       replacementSubstitutionCount: 0,
       totalCount: 0,
+      totalDependencies: 0,
+      isSafeToDelete: true,
     };
   }
 
@@ -970,6 +974,8 @@ export async function getParticipantDependencies(
         originalSubstitutionCount: origCount,
         replacementSubstitutionCount: replCount,
         totalCount,
+        totalDependencies: totalCount,
+        isSafeToDelete: totalCount === 0,
       };
     } catch (err) {
       console.warn("[participantRepository.getParticipantDependencies] Supabase query error, falling back:", err);
@@ -992,13 +998,16 @@ export async function getParticipantDependencies(
   }
 
   const subCount = origCount + replCount;
+  const tot = regCount + resCount + subCount;
   return {
     registrationCount: regCount,
     resultCount: resCount,
     substitutionCount: subCount,
     originalSubstitutionCount: origCount,
     replacementSubstitutionCount: replCount,
-    totalCount: regCount + resCount + subCount,
+    totalCount: tot,
+    totalDependencies: tot,
+    isSafeToDelete: tot === 0,
   };
 }
 
