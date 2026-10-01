@@ -20,7 +20,7 @@ export interface HeroSlide {
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: "slide-campus",
-    tag: "01 / CAMPUS ARENA",
+    tag: "CAMPUS ARENA",
     title: "ZENITHROW Campus Complex",
     description: "Official Championship Sports Festival 2026",
     ctaLabel: "EXPLORE SCHEDULE",
@@ -31,7 +31,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: "slide-turf",
-    tag: "02 / ARENA KNOCKOUTS",
+    tag: "ARENA KNOCKOUTS",
     title: "Precision on the Turf Under Lights",
     description: "High-stakes arena fixtures across sports",
     ctaLabel: "LIVE FIXTURES",
@@ -42,7 +42,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: "slide-track",
-    tag: "03 / TRACK & FIELD",
+    tag: "TRACK & FIELD",
     title: "Championship Track Arena",
     description: "Athletics, Sprints, Relays and Field Events",
     ctaLabel: "EVENT SCHEDULE",
@@ -53,7 +53,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: "slide-trophy",
-    tag: "04 / CHAMPIONSHIP SHIELD",
+    tag: "CHAMPIONSHIP SHIELD",
     title: "House Championship Trophy",
     description: "Garuda, Toofan, Tiburon, Trojan compete for the overall shield",
     ctaLabel: "VIEW LEADERBOARD",

@@ -90,7 +90,6 @@ export default function LatestResultsSection({
         {/* Section Header */}
         <div className={styles.sectionHeader}>
           <div className={styles.headerTextGroup}>
-            <p className={styles.sectionKicker}>07 / VERIFIED SCORES</p>
             <h2 id="results-heading" className={styles.sectionTitle}>
               LATEST RESULTS
             </h2>

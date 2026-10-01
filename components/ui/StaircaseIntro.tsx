@@ -63,14 +63,14 @@ export default function StaircaseIntro() {
       <div className={styles.introCenter} aria-hidden="true">
         <div className={styles.emblemBadge}>
           <span className={styles.emblemDot} />
-          <span className={styles.emblemText}>CHAMPIONSHIP OS 2026</span>
+          <span className={styles.emblemText}>CHAMPIONSHIP 2026</span>
         </div>
         <div className={styles.brandTitleWrap}>
           <span className={styles.brandTitle}>ZENITHROW</span>
         </div>
         <div className={styles.subRule}>
           <span className={styles.subText}>PRECISION ATHLETICS</span>
-          <span className={styles.subSep}>//</span>
+          <span className={styles.subSep}>•</span>
           <span className={styles.subText}>KERALA CAMPUS MEET</span>
         </div>
       </div>

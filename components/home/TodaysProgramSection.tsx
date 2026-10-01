@@ -84,7 +84,6 @@ export default function TodaysProgramSection({
         {/* Section Header */}
         <div className={styles.sectionHeader}>
           <div className={styles.headerTextGroup}>
-            <p className={styles.sectionKicker}>05 / PROGRAM</p>
             <h2 id="schedule-heading" className={styles.sectionTitle}>
               TODAY
             </h2>
@@ -130,7 +129,7 @@ export default function TodaysProgramSection({
               <div className="hidden lg:grid grid-cols-12 gap-4 pb-3 border-b border-[#1A3663]/15 text-[11px] font-mono font-bold tracking-widest text-[#5B9BD5] uppercase px-2">
                 <span className="col-span-4">EVENT</span>
                 <span className="col-span-2">SPORT</span>
-                <span className="col-span-2">DIVISION</span>
+                <span className="col-span-2">CATEGORY</span>
                 <span className="col-span-2">VENUE</span>
                 <span className="col-span-1">TIME</span>
                 <span className="col-span-1 text-right">STATUS</span>
@@ -145,10 +144,10 @@ export default function TodaysProgramSection({
                     role="row"
                     aria-label={`${item.timeSlot}: ${item.eventName} (${item.sportName}, ${item.category}) at ${item.venueName}, Status ${item.status}`}
                   >
-                    {/* EVENT with numbered kicker */}
+                    {/* EVENT with index */}
                     <div className="lg:col-span-4 flex items-center gap-3">
                       <span className="font-mono text-xs font-bold text-[#5B9BD5] tracking-widest shrink-0">
-                        {kickerNum} //
+                        {kickerNum}
                       </span>
                       <span className="font-bold text-[#1A3663] text-sm sm:text-base">
                         {item.eventName}
@@ -161,9 +160,9 @@ export default function TodaysProgramSection({
                       <span className="font-semibold uppercase">{item.sportName}</span>
                     </div>
 
-                    {/* DIVISION */}
+                    {/* CATEGORY */}
                     <div className="lg:col-span-2 text-xs font-mono text-[#64748B]">
-                      <span className="lg:hidden text-[#94A3B8] mr-2">DIV:</span>
+                      <span className="lg:hidden text-[#94A3B8] mr-2">CAT:</span>
                       <span>{item.category}</span>
                     </div>
 

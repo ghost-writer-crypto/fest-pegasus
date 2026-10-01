@@ -83,7 +83,6 @@ export default function HouseStandingsSection({
           {/* Section Header */}
           <div className={styles.sectionHeader}>
             <div className={styles.headerTextGroup}>
-              <p className={styles.sectionKicker}>06 / CHAMPIONSHIP RADAR</p>
               <h2 id="standings-heading" className={styles.sectionTitle}>
                 HOUSE STANDINGS
               </h2>

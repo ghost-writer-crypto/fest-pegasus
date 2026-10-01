@@ -30,9 +30,7 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
     venue: "Main Track // Lane 1-8",
     ctaLabel: "View Official Results",
     ctaHref: "/results",
-    kicker: "01 // SPRINT TRACK",
-    summary: "Electronic chip timing verified. Official gold mark set at 11.42s.",
-    badge: "ELECTRONIC CHIP TIMING",
+    kicker: "",
   },
   {
     id: "comp-long-jump-majestir",
@@ -44,9 +42,7 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
     venue: "Long Jump Pit // Runway A",
     ctaLabel: "View Pit Distances",
     ctaHref: "/results",
-    kicker: "02 // FIELD HORIZONTAL",
-    summary: "Official measurement recorded. Winning jump measured at 5.82m.",
-    badge: "OPTICAL BOARD MEASUREMENT",
+    kicker: "",
   },
   {
     id: "comp-high-jump-majestir",
@@ -58,9 +54,7 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
     venue: "High Jump Mat // South Curve",
     ctaLabel: "Inspect Jump Clearance",
     ctaHref: "/results",
-    kicker: "03 // FIELD VERTICAL",
-    summary: "Clearance at 1.68m certified by Chief Field Adjudicator.",
-    badge: "CERTIFIED HEIGHT BAR",
+    kicker: "",
   },
   {
     id: "comp-football-knockouts",
@@ -72,9 +66,7 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
     venue: "Central Stadium Turf",
     ctaLabel: "View Tournament Fixtures",
     ctaHref: "/fixtures",
-    kicker: "04 // TEAM KNOCKOUT",
-    summary: "4-House bracket elimination match under stadium lights.",
-    badge: "FIFA REGULATION TURF",
+    kicker: "",
   },
   {
     id: "comp-tug-of-war-600kg",
@@ -86,9 +78,7 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
     venue: "Central Arena Pit",
     ctaLabel: "View Squad Rosters",
     ctaHref: "/teams",
-    kicker: "05 // STRENGTH SHOWDOWN",
-    summary: "Strict calibrated loadcell weigh-in enforcement. 8 athletes per anchor line.",
-    badge: "CALIBRATED LOAD CELL",
+    kicker: "",
   },
 ];
 

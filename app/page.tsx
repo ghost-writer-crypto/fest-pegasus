@@ -109,26 +109,25 @@ export default function HomePage() {
 
   return (
     <main className={styles.homeRoot}>
-      {/* 01. CINEMATIC STAIRCASE ENTRANCE PRELOADER */}
+      {/* STAIRCASE ENTRANCE PRELOADER */}
       <StaircaseIntro />
 
-      {/* 02. FEATURED HERO CAROUSEL */}
+      {/* HERO CAROUSEL */}
       <HeroCarousel />
 
-
-      {/* 04. THE SPORTS & COMPETITIONS (SKIPER16 STICKY DECK) */}
+      {/* UPCOMING EVENTS */}
       <Skiper16 />
 
-      {/* SPORTS INDEX LIST */}
+      {/* SPORTS INDEX */}
       <SportsIndexSection sports={sports} events={events} />
 
-      {/* 05. TODAY'S SCHEDULE (CHRONOLOGICAL CADENCE) */}
+      {/* TODAY'S SCHEDULE */}
       <TodaysProgramSection items={verifiedScoreboard} />
 
-      {/* 06. HOUSE STANDINGS (CHAMPIONSHIP RADAR TELEMETRY) */}
+      {/* HOUSE STANDINGS */}
       <HouseStandingsSection leaderboard={leaderboard} />
 
-      {/* 07. LATEST RESULTS (EMPIRICAL SETTLEMENT) */}
+      {/* LATEST RESULTS */}
       <LatestResultsSection items={latestResults} />
 
       {/* 07. PUBLIC FOOTER */}
@@ -142,7 +141,7 @@ export default function HomePage() {
                   <span>ZENITHROW</span>
                 </div>
                 <span className={styles.footerTagline}>
-                  STUDENTS&apos; SPORTS FESTIVAL 2026 // OFFICIAL TOURNAMENT OPERATING SYSTEM
+                  STUDENTS&apos; SPORTS FESTIVAL 2026
                 </span>
               </div>
 

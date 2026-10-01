@@ -76,7 +76,6 @@ export default function SportsIndexSection({
         {/* Section Header: Synchronized entrance */}
         <div className={styles.sectionHeader}>
           <div className={styles.headerTextGroup}>
-            <p className={styles.sectionKicker}>04 / THE DISCIPLINES</p>
             <h2 id="sports-heading" className={styles.sectionTitle}>
               THE SPORTS
             </h2>
