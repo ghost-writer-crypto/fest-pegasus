@@ -1,7 +1,6 @@
 import Link from "next/link";
 import StaircaseIntro from "@/components/ui/StaircaseIntro";
 import HeroCarousel from "@/components/home/HeroCarousel";
-import LiveStatusStrip from "@/components/home/LiveStatusStrip";
 import { Skiper16 } from "@/components/ui/skiper-ui/skiper16";
 import SportsIndexSection from "@/components/home/SportsIndexSection";
 import TodaysProgramSection from "@/components/home/TodaysProgramSection";
@@ -29,54 +28,6 @@ export default function HomePage() {
     if (perf.score !== undefined) return `${perf.score} pts`;
     return "Official Finish";
   };
-
-  // Operational Live Status Strip Data
-  const activeComp = competitions.find(
-    (c) => (c.status as string) === "in_progress" || (c.status as string) === "live"
-  );
-  const liveEvent = activeComp
-    ? {
-        name: events.find((e) => e.id === activeComp.eventId)?.name || "Live Session",
-        venue: venues.find((v) => v.id === activeComp.venueId)?.name || "Main Campus",
-        status: "LIVE",
-        time: activeComp.scheduledAt
-          ? new Date(activeComp.scheduledAt).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })
-          : "IN PROGRESS",
-      }
-    : null;
-
-  const upcomingEvent = {
-    name: "Tug-of-War 600kg Arena Finals",
-    venue: "Central Arena Pit",
-    time: "06:00 PM",
-    sport: "Tug of War",
-  };
-
-  const topPublishedResult = results[0];
-  const topAthlete = participants.find((p) => p.id === topPublishedResult?.participantId);
-  const topAthleteTeam = teams.find((t) => t.id === topAthlete?.teamId);
-  const topEvent = events.find((e) => e.id === topPublishedResult?.eventId);
-  const latestResult = topPublishedResult
-    ? {
-        eventName: topEvent?.name || "100m Sprint",
-        performance: formatPerformance(topPublishedResult.performance),
-        houseOrAthlete: topAthleteTeam ? topAthleteTeam.name : topAthlete?.name || "Official Athlete",
-        position: topPublishedResult.position ?? 1,
-      }
-    : null;
-
-  const leader = leaderboard[0]
-    ? {
-        name: leaderboard[0].name,
-        points: leaderboard[0].points,
-        rank: 1,
-        leadMargin: leaderboard[1] ? leaderboard[0].points - leaderboard[1].points : 0,
-      }
-    : null;
 
   // Verified competition scoreboard from track & field
   const verifiedScoreboard = competitions.map((comp) => {
@@ -164,13 +115,6 @@ export default function HomePage() {
       {/* 02. FEATURED HERO CAROUSEL */}
       <HeroCarousel />
 
-      {/* 03. LIVE / STATUS STRIP */}
-      <LiveStatusStrip
-        liveEvent={liveEvent}
-        upcomingEvent={upcomingEvent}
-        latestResult={latestResult}
-        leader={leader}
-      />
 
       {/* 04. THE SPORTS & COMPETITIONS (SKIPER16 STICKY DECK) */}
       <Skiper16 />

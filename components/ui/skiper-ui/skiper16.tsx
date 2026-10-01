@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 
 export interface CompetitionCardData {
   id: string;
@@ -95,8 +95,8 @@ export const DEFAULT_COMPETITIONS: CompetitionCardData[] = [
 interface StickyCardProps {
   card: CompetitionCardData;
   index: number;
-  total: number;
-  progress: any;
+  total?: number;
+  progress: MotionValue<number>;
   range: [number, number];
   targetScale: number;
 }
@@ -104,17 +104,12 @@ interface StickyCardProps {
 const StickyCompetitionCard: React.FC<StickyCardProps> = ({
   card,
   index,
-  total,
   progress,
   range,
   targetScale,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scale = useTransform(progress, range, [1, targetScale]);
-
-  const isFinished = card.status === "FINISHED";
-  const isWeighIn = card.status === "WEIGH-IN";
-  const isScheduled = card.status === "SCHEDULED";
 
   return (
     <div
@@ -128,73 +123,32 @@ const StickyCompetitionCard: React.FC<StickyCardProps> = ({
         style={{
           scale,
         }}
-        className="w-full max-w-4xl rounded-sm border border-[var(--border)] bg-[var(--surface-1)] text-[var(--text-primary)] p-6 sm:p-8 relative overflow-hidden transition-shadow zenith-edge"
+        className="w-full max-w-4xl rounded-[var(--radius-card,20px)] border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[18px] text-[var(--text-primary)] p-6 sm:p-8 relative overflow-hidden transition-shadow zenith-edge shadow-[var(--glass-shadow)]"
       >
         {/* Subtle Top Architectural Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--secondary)] via-[var(--primary)] to-[#F2B84B]" />
 
-        {/* Card Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs font-bold tracking-widest text-[var(--secondary)] uppercase">
-              {card.kicker}
-            </span>
-            <span className="opacity-30">•</span>
-            <span className="font-mono text-xs text-[var(--text-secondary)] uppercase">
-              {card.sport}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {isFinished && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border)] rounded-xs">
-                OFFICIAL FINAL
-              </span>
-            )}
-            {isWeighIn && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase bg-[#F2B84B]/15 text-[#F2B84B] border border-[#F2B84B]/30 rounded-xs">
-                WEIGH-IN PENDING
-              </span>
-            )}
-            {isScheduled && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase bg-[var(--secondary)]/15 text-[var(--secondary)] border border-[var(--secondary)]/30 rounded-xs">
-                UPCOMING
-              </span>
-            )}
-            {card.badge && (
-              <span className="hidden md:inline-block font-mono text-[10px] uppercase text-[var(--text-muted)] tracking-wider">
-                {card.badge}
-              </span>
-            )}
-          </div>
-        </div>
-
         {/* Card Body Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-[var(--border)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-2">
           <div className="md:col-span-2">
-            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)] mb-2">
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)] mb-4">
               {card.name}
             </h3>
-            {card.summary && (
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                {card.summary}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-4 text-xs font-mono text-[var(--text-muted)]">
+            <div className="flex flex-wrap gap-6 text-xs font-mono text-[var(--text-muted)]">
               <div>
-                <span className="text-[var(--text-muted)] block text-[10px] uppercase">Division</span>
-                <span className="text-[var(--text-primary)] font-bold">{card.division}</span>
+                <span className="text-[var(--text-muted)] block text-[10px] uppercase tracking-wider mb-0.5">Category</span>
+                <span className="text-[var(--text-primary)] font-bold text-sm">{card.division}</span>
               </div>
-              <div className="border-l border-[var(--border)] pl-4">
-                <span className="text-[var(--text-muted)] block text-[10px] uppercase">Venue</span>
-                <span className="text-[var(--text-primary)] font-bold">{card.venue}</span>
+              <div className="border-l border-[var(--glass-border)] pl-6">
+                <span className="text-[var(--text-muted)] block text-[10px] uppercase tracking-wider mb-0.5">Venue</span>
+                <span className="text-[var(--text-primary)] font-bold text-sm">{card.venue}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col justify-between items-start md:items-end bg-[var(--surface-raised)] p-4 rounded-xs border border-[var(--border)]">
+          <div className="flex flex-col justify-between items-start md:items-end bg-[var(--surface-raised)] p-5 rounded-[var(--radius-md,14px)] border border-[var(--glass-border)]">
             <div>
-              <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase block">Scheduled Time</span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-wider block mb-1">Scheduled Time</span>
               <span className="text-xl sm:text-2xl font-black font-mono text-[#F2B84B]">
                 {card.scheduledTime}
               </span>
@@ -202,18 +156,12 @@ const StickyCompetitionCard: React.FC<StickyCardProps> = ({
 
             <Link
               href={card.ctaHref}
-              className="mt-4 md:mt-0 inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary)] hover:opacity-90 text-white text-xs font-bold uppercase tracking-wider transition-opacity rounded-xs shadow-md"
+              className="mt-4 md:mt-0 inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:opacity-90 text-white text-xs font-bold uppercase tracking-wider transition-opacity rounded-[var(--radius-pill,9999px)] shadow-md"
             >
               <span>{card.ctaLabel}</span>
               <span aria-hidden="true">↗</span>
             </Link>
           </div>
-        </div>
-
-        {/* Card Footer: Metadata Indicators */}
-        <div className="flex items-center justify-between pt-4 text-[11px] font-mono text-[var(--text-muted)]">
-          <span>DISCIPLINE {index + 1} OF {total}</span>
-          <span className="text-[var(--secondary)]">ZENITHROW OPERATING SYSTEM</span>
         </div>
       </motion.div>
     </div>
@@ -237,15 +185,12 @@ export const Skiper16: React.FC<Skiper16Props> = ({
     <section
       ref={containerRef}
       className="relative w-full py-16 border-b border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)]"
-      aria-label="Competition card deck"
+      aria-label="Upcoming events"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-8 text-center md:text-left">
         <div>
-          <p className="font-mono text-xs font-bold tracking-widest text-[var(--secondary)] uppercase mb-1">
-            04 // THE DISCIPLINES
-          </p>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)] uppercase">
-            COMPETITIONS IN MOTION
+            Upcoming Events
           </h2>
         </div>
       </div>
