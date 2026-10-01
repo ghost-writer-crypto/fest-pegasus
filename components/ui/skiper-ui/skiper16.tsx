@@ -239,7 +239,7 @@ export const Skiper16: React.FC<Skiper16Props> = ({
       className="relative w-full py-16 border-b border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)]"
       aria-label="Competition card deck"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-8 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-8 text-center md:text-left">
         <div>
           <p className="font-mono text-xs font-bold tracking-widest text-[var(--secondary)] uppercase mb-1">
             04 // THE DISCIPLINES
@@ -248,9 +248,6 @@ export const Skiper16: React.FC<Skiper16Props> = ({
             COMPETITIONS IN MOTION
           </h2>
         </div>
-        <p className="text-xs font-mono text-[var(--text-secondary)] max-w-sm">
-          Sticky operational deck powered by Skiper16. Scroll to track each event stage and venue status.
-        </p>
       </div>
 
       <div className="relative w-full">
