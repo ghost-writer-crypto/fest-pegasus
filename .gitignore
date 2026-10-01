@@ -42,3 +42,6 @@ next-env.d.ts
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
 .agent/ .agents/ .claude/ .codex/ .gemini/ .impeccable/ skills-lock.json
+
+.vercel
+.env*

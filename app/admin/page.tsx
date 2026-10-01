@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAdminDashboardData } from "@/lib/admin";
 import { getAuthenticatedProfile, getOrCreateQrIdentity } from "@/lib/repositories";
 import ShowQrButton from "@/components/qr/ShowQrButton";
+import AdminHeroMediaClient from "@/components/admin/AdminHeroMediaClient";
 
 export const dynamic = "force-dynamic";
 
@@ -847,7 +848,10 @@ export default async function AdminCommandCenterPage() {
         )}
       </section>
 
-      {/* 6. Quick Access Navigation Grid */}
+      {/* 6. Homepage Hero Carousel Media Staging */}
+      <AdminHeroMediaClient />
+
+      {/* 7. Quick Access Navigation Grid */}
       <section>
         <div style={{ marginBottom: "12px" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>

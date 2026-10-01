@@ -71,25 +71,44 @@
   --status-disqualified: #E53935;
   --status-disqualified-bg: #FEE2E2;
 
-  /* Controlled Precision Corner System */
-  --radius-micro: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-hero: 20px;
+  /* Coherent Curvature & Sculpted Radius Tokens */
+  --radius-micro: 8px;
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-medium: 20px;
+  --radius-card: 20px;
+  --radius-panel: 24px;
+  --radius-hero: 28px;
+  --radius-modal: 24px;
   --radius-pill: 9999px;
   --radius-full: 9999px;
 
   --container: 1280px;
 
+  /* Liquid Glass System — Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.76);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.52);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-border-subtle: rgba(15, 23, 42, 0.04);
+  --glass-border-highlight: rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(18px) saturate(160%);
+  --glass-blur-heavy: blur(28px) saturate(180%);
+  --glass-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-shadow-hover: 0 12px 36px -4px rgba(15, 23, 42, 0.09), 0 2px 8px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+  --glass-shadow-lg: 0 16px 44px -6px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+
   /* Machined Inner Highlight & Restrained Shadows */
   --zenith-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --zenith-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
-  --zenith-shadow-lg: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+  --zenith-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --zenith-shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.09);
 
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-  --shadow-elevation: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-elevation: 0 12px 28px -4px rgba(15, 23, 42, 0.09);
 
   /* Motion Tokens */
   --motion-instant: 90ms;
@@ -167,14 +186,28 @@
   --status-disqualified: #E53935;
   --status-disqualified-bg: rgba(229, 57, 53, 0.15);
 
+  /* Liquid Glass System — Dark Metal Mode */
+  --glass-bg: rgba(15, 18, 24, 0.68);
+  --glass-bg-subtle: rgba(10, 12, 16, 0.5);
+  --glass-bg-elevated: rgba(22, 27, 36, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-subtle: rgba(255, 255, 255, 0.05);
+  --glass-border-highlight: rgba(255, 255, 255, 0.16);
+  --glass-blur: blur(18px) saturate(160%);
+  --glass-blur-heavy: blur(28px) saturate(190%);
+  --glass-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --glass-shadow-hover: 0 16px 44px -4px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --glass-shadow-lg: 0 20px 48px -6px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+
   /* Machined Inner Highlight & Restrained Shadows */
   --zenith-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --zenith-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --zenith-shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.7);
+  --zenith-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --zenith-shadow-lg: 0 16px 40px -4px rgba(0, 0, 0, 0.7);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.5);
-  --shadow-elevation: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --shadow-elevation: 0 16px 36px -4px rgba(0, 0, 0, 0.65);
 
   color-scheme: dark;
 }
@@ -279,37 +312,56 @@ button {
 }
 
 .zenith-surface-1 {
-  background-color: var(--surface-1);
-  border: 1px solid var(--border);
-  box-shadow: var(--zenith-highlight), var(--zenith-shadow);
-  border-radius: var(--radius-md);
-  transition: border-color var(--motion-fast) var(--ease-out-editorial), box-shadow var(--motion-fast) var(--ease-out-editorial);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-card);
+  transition:
+    border-color var(--motion-fast) var(--ease-out-editorial),
+    box-shadow var(--motion-fast) var(--ease-out-editorial),
+    transform var(--motion-fast) var(--ease-out-editorial),
+    background var(--motion-fast) var(--ease-out-editorial);
+}
+
+.zenith-surface-1:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .zenith-surface-2 {
-  background-color: var(--surface-2);
-  border: 1px solid var(--border);
-  box-shadow: var(--zenith-highlight);
-  border-radius: var(--radius-md);
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight);
+  border-radius: var(--radius-card);
 }
 
 .zenith-surface-3 {
-  background-color: var(--surface-3);
-  border: 1px solid var(--border-hover);
-  border-radius: var(--radius-sm);
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-md);
 }
 
 .zenith-surface-4 {
-  background-color: var(--surface-4);
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
   border: 1px solid var(--border-strong);
-  box-shadow: var(--zenith-highlight), var(--zenith-shadow-lg);
-  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-lg);
+  border-radius: var(--radius-panel);
 }
 
 /* 1px Precision Edge Classes */
 .zenith-edge {
-  border: 1px solid var(--border);
-  box-shadow: var(--zenith-highlight);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .zenith-edge-subtle {
@@ -490,10 +542,12 @@ button {
 .zenith-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-1);
-  box-shadow: var(--zenith-highlight);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
 }
 
 .zenith-table {
@@ -510,15 +564,15 @@ button {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  background: var(--surface-2);
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
+  background: var(--glass-bg-elevated);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-border);
   text-align: left;
 }
 
 .zenith-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-border-subtle, var(--border-subtle));
   color: var(--text-body);
   transition: background var(--motion-fast) ease;
 }
@@ -528,7 +582,7 @@ button {
 }
 
 .zenith-table tr:hover td {
-  background: var(--surface-subtle);
+  background: var(--glass-bg-elevated);
 }
 
 /* =========================================
@@ -539,12 +593,15 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-1);
-  box-shadow: var(--zenith-highlight);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: background var(--motion-fast) var(--ease-out-editorial), border-color var(--motion-fast) var(--ease-out-editorial);
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg-elevated);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  transition:
+    background var(--motion-fast) var(--ease-out-editorial),
+    border-color var(--motion-fast) var(--ease-out-editorial),
+    box-shadow var(--motion-fast) var(--ease-out-editorial);
 }
 
 .pegasus-nav__inner {
@@ -987,10 +1044,12 @@ button {
 
   padding: 0 20px;
 
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
 
-  background: var(--surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--foreground);
 
   font-size: 12px;
@@ -1796,11 +1855,14 @@ button {
 ========================================= */
 
 .pegasus-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   padding: 24px;
-  box-shadow: var(--zenith-highlight), var(--zenith-shadow);
+  box-shadow: var(--glass-shadow);
+  position: relative;
   transition:
     transform var(--motion-fast) var(--ease-out-editorial),
     background var(--motion-fast) var(--ease-out-editorial),
@@ -1815,26 +1877,28 @@ button {
 }
 
 .pegasus-card--interactive:hover {
-  transform: translateY(-1px);
-  background: var(--surface-1);
+  transform: translateY(-2px);
+  background: var(--glass-bg-elevated);
   border-color: var(--border-hover);
-  box-shadow: var(--zenith-highlight), var(--shadow-card);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .pegasus-card--interactive:active {
-  transform: scale(0.995);
+  transform: scale(0.992);
   transition-duration: var(--motion-instant);
 }
 
 .pegasus-card--elevated {
-  background: var(--surface-2);
-  border-color: var(--border);
-  box-shadow: var(--zenith-highlight), var(--zenith-shadow-lg);
+  background: var(--glass-bg-elevated);
+  border-color: var(--glass-border-highlight);
+  box-shadow: var(--glass-shadow-hover);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
 }
 
 .pegasus-card--compact {
   padding: 14px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 
 /* =========================================
@@ -1931,9 +1995,11 @@ button {
   width: 100%;
   min-height: 48px;
   padding: 0 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--foreground);
   font-size: 14px;
   box-sizing: border-box;
@@ -4088,10 +4154,12 @@ select:focus-visible {
 .pegasus-table-container {
   width: 100%;
   overflow-x: auto;
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--border);
-  background: var(--surface-1);
-  box-shadow: var(--zenith-highlight);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -4104,25 +4172,25 @@ select:focus-visible {
 }
 
 .pegasus-table thead {
-  background: var(--surface-raised);
-  border-bottom: 1px solid var(--border-strong);
+  background: var(--glass-bg-elevated);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .pegasus-table th {
-  padding: 12px 16px;
+  padding: 14px 18px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
   white-space: nowrap;
 }
 
 .pegasus-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--glass-border-subtle, var(--border));
   vertical-align: middle;
   font-size: 13px;
   line-height: 1.4;
@@ -4134,7 +4202,7 @@ select:focus-visible {
 }
 
 .pegasus-table tbody tr:hover {
-  background: var(--surface-raised);
+  background: var(--glass-bg-elevated);
 }
 
 .pegasus-table tbody tr:last-child td {

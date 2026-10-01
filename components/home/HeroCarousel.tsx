@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, useSyncExternalStore } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { Skiper3 } from "@/components/ui/skiper-ui/skiper3";
 import styles from "./HeroCarousel.module.css";
 
 export interface HeroSlide {
@@ -21,12 +19,10 @@ export interface HeroSlide {
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    id: "slide-motion",
-    tag: "01 / THE FEST",
-    title: "THE COMPETITION\nIS ALREADY MOVING.",
-    subtitle: "AUTHENTIC TIMING // VERIFIED RESULTS // CHAMPIONSHIP RADAR",
-    description:
-      "ZENITHROW powers real-time fixtures, electronic chip timing, certified results, and multi-house standings across collegiate athletics.",
+    id: "slide-campus",
+    tag: "01 / CAMPUS ARENA",
+    title: "ZENITHROW Campus Complex",
+    description: "Official Championship Sports Festival 2026",
     ctaLabel: "EXPLORE SCHEDULE",
     ctaHref: "/schedules",
     image: "/images/hero/campus-aerial.jpg",
@@ -36,10 +32,8 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: "slide-turf",
     tag: "02 / ARENA KNOCKOUTS",
-    title: "PRECISION ON THE TURF.",
-    subtitle: "KNOCKOUT ROUNDS UNDER THE LIGHTS",
-    description:
-      "High-stakes competition across Football, Volleyball, Basketball, Cricket, and the certified Tug of War 600kg arena.",
+    title: "Precision on the Turf Under Lights",
+    description: "High-stakes arena fixtures across sports",
     ctaLabel: "LIVE FIXTURES",
     ctaHref: "/fixtures",
     image: "/images/hero/football-arena.jpg",
@@ -47,17 +41,26 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     displayOrder: 2,
   },
   {
+    id: "slide-track",
+    tag: "03 / TRACK & FIELD",
+    title: "Championship Track Arena",
+    description: "Athletics, Sprints, Relays and Field Events",
+    ctaLabel: "EVENT SCHEDULE",
+    ctaHref: "/sports",
+    image: "/images/hero/track-stadium.jpg",
+    badge: "OLYMPIC GRADE TIMING",
+    displayOrder: 3,
+  },
+  {
     id: "slide-trophy",
-    tag: "03 / CHAMPIONSHIP SHIELD",
-    title: "FOUR HOUSES. ONE SHIELD.",
-    subtitle: "AGGREGATED MULTI-DISCIPLINE POINTS",
-    description:
-      "Every sprint cleared and goal scored accumulates toward the overall House Championship Trophy. Track certified standings in real time.",
+    tag: "04 / CHAMPIONSHIP SHIELD",
+    title: "House Championship Trophy",
+    description: "Garuda, Toofan, Tiburon, Trojan compete for the overall shield",
     ctaLabel: "VIEW LEADERBOARD",
     ctaHref: "/leaderboard",
     image: "/images/hero/championship-trophy.jpg",
     badge: "LIVE POINTS AGGREGATION",
-    displayOrder: 3,
+    displayOrder: 4,
   },
 ];
 
@@ -94,7 +97,6 @@ export default function HeroCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [transitionKey, setTransitionKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -112,7 +114,6 @@ export default function HeroCarousel({
       const target = (index + totalSlides) % totalSlides;
       if (target === currentIndex) return;
 
-      // Determine scene movement direction
       let resolvedDir = explicitDirection;
       if (!resolvedDir) {
         if (target === 0 && currentIndex === totalSlides - 1) {
@@ -124,7 +125,6 @@ export default function HeroCarousel({
         }
       }
 
-      // Clear any pending transition timer to prevent queues on rapid navigation
       if (transitionTimerRef.current) {
         clearTimeout(transitionTimerRef.current);
       }
@@ -132,9 +132,7 @@ export default function HeroCarousel({
       setPreviousIndex(currentIndex);
       setDirection(resolvedDir);
       setCurrentIndex(target);
-      setTransitionKey((k) => k + 1);
 
-      // Clean up previous scene reference once shutter/camera sweep completes
       transitionTimerRef.current = setTimeout(() => {
         setPreviousIndex(null);
       }, SCENE_TRANSITION_MS);
@@ -167,7 +165,6 @@ export default function HeroCarousel({
     return () => clearTimeout(timer);
   }, [currentIndex, shouldAnimate, goToSlide]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (transitionTimerRef.current) {
@@ -176,7 +173,6 @@ export default function HeroCarousel({
     };
   }, []);
 
-  // Keyboard navigation within carousel
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
@@ -190,7 +186,6 @@ export default function HeroCarousel({
     }
   };
 
-  // Mobile Touch Gestures
   const handleTouchStart = (e: React.TouchEvent) => {
     isTouchDevice.current = true;
     touchStartX.current = e.touches[0].clientX;
@@ -215,29 +210,6 @@ export default function HeroCarousel({
     touchEndX.current = null;
   };
 
-  // Subtle layered depth on desktop
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isTouchDevice.current || isReducedMotion || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const y = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-
-    // Keep movement restrained within physical bounds
-    const depthX = (x * 12).toFixed(2);
-    const depthY = (y * 8).toFixed(2);
-
-    containerRef.current.style.setProperty("--depth-x", `${depthX}px`);
-    containerRef.current.style.setProperty("--depth-y", `${depthY}px`);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    if (containerRef.current) {
-      containerRef.current.style.setProperty("--depth-x", "0px");
-      containerRef.current.style.setProperty("--depth-y", "0px");
-    }
-  };
-
   const current = slides[currentIndex] || slides[0];
 
   return (
@@ -250,8 +222,7 @@ export default function HeroCarousel({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocused(true)}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -262,9 +233,10 @@ export default function HeroCarousel({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Screen Reader Announcement */}
+      {/* Screen Reader Semantic Announcement */}
+      <h1 className={styles.srOnly}>ZENITHROW — Sports Festival 2026</h1>
       <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
-        Scene {currentIndex + 1} of {totalSlides}: {current.title} — {current.description}
+        Scene {currentIndex + 1} of {totalSlides}: {current.title}
       </div>
 
       {/* Layer 0 & 1: Continuous Camera Viewport with Directional Shutter Reveal */}
@@ -296,7 +268,7 @@ export default function HeroCarousel({
               className={`${styles.sceneLayer} ${sceneClass}`}
               aria-hidden={!isCurrent}
             >
-              <div className={styles.imageFocalPlane} style={{ position: "absolute", overflow: "hidden" }}>
+              <div className={styles.imageFocalPlane}>
                 <Image
                   src={slide.image}
                   alt={slide.title}
@@ -310,188 +282,20 @@ export default function HeroCarousel({
           );
         })}
 
-        {/* Persistent Architectural Vignette Gradient (Deep PEGASUS Navy) */}
+        {/* Cinematic Vignette Gradient Overlay */}
         <div className={styles.overlayGradient} aria-hidden="true" />
-
-        {/* Architectural Stage Hairline Guide with Directional Sweep */}
-        <div
-          className={`${styles.stageArchitecturalLine} ${
-            previousIndex !== null
-              ? direction === "next"
-                ? styles.stageLineSweepNext
-                : styles.stageLineSweepPrev
-              : ""
-          }`}
-          aria-hidden="true"
-        />
       </div>
 
-      {/* Layer 2: Coordinated Persistent Typography & Metadata Stage */}
+      {/* Layer 2: Floating Liquid-Glass Cockpit Deck */}
       <div className={styles.contentStage}>
-        <div className={styles.stageGrid}>
-          {/* Spatial Anchor: Kicker Row with Transforming Badge */}
-          <div className={styles.kickerRow}>
-            <div className={styles.kickerBadgeMask}>
-              {previousIndex !== null && slides[previousIndex] && (
-                <span
-                  className={`${styles.kickerBadge} ${styles.kickerBadgeExiting} ${
-                    direction === "next" ? styles.kickerExitNext : styles.kickerExitPrev
-                  }`}
-                  aria-hidden="true"
-                >
-                  {slides[previousIndex].tag}
-                </span>
-              )}
-              <span
-                key={`tag-${currentIndex}`}
-                className={`${styles.kickerBadge} ${
-                  previousIndex !== null
-                    ? direction === "next"
-                      ? styles.kickerEnterNext
-                      : styles.kickerEnterPrev
-                    : ""
-                }`}
-              >
-                {current.tag}
-              </span>
-            </div>
-
-            {/* Architectural Connecting Rule between Kicker and Status */}
-            <div
-              key={`rule-${transitionKey}`}
-              className={styles.kickerArchitecturalRule}
-              aria-hidden="true"
-            />
-
-            {current.badge && (
-              <div className={styles.statusChip}>
-                <span className={styles.statusDot} aria-hidden="true" />
-                <span className={styles.statusTextMask}>
-                  {previousIndex !== null && slides[previousIndex]?.badge && (
-                    <span
-                      className={`${styles.statusText} ${styles.statusTextExiting} ${
-                        direction === "next" ? styles.textExitNext : styles.textExitPrev
-                      }`}
-                      aria-hidden="true"
-                    >
-                      {slides[previousIndex].badge}
-                    </span>
-                  )}
-                  <span
-                    key={`badge-${currentIndex}`}
-                    className={`${styles.statusText} ${
-                      previousIndex !== null
-                        ? direction === "next"
-                          ? styles.textEnterNext
-                          : styles.textEnterPrev
-                        : ""
-                    }`}
-                  >
-                    {current.badge}
-                  </span>
-                </span>
-              </div>
-            )}
-            <div className="ml-auto hidden md:flex items-center">
-              <Skiper3 />
-            </div>
+        <div className={styles.cockpitDeck}>
+          {/* Active Scene Identity Indicator */}
+          <div className={styles.sceneBadge}>
+            <span className={styles.livePulse} aria-hidden="true" />
+            <span className={styles.sceneTagText}>{current.tag}</span>
           </div>
 
-          {/* Typography as Motion Object: Architectural Mask Window with Kinetic Tracking */}
-          <div className={styles.titleMaskWindow}>
-            {previousIndex !== null && slides[previousIndex] && (
-              <span
-                className={`${styles.heroTitle} ${styles.titleExiting} ${
-                  direction === "next" ? styles.titleExitNext : styles.titleExitPrev
-                }`}
-                aria-hidden="true"
-              >
-                {slides[previousIndex].title}
-              </span>
-            )}
-            <h1
-              key={`title-${currentIndex}`}
-              className={`${styles.heroTitle} ${
-                previousIndex !== null
-                  ? direction === "next"
-                    ? styles.titleEnterNext
-                    : styles.titleEnterPrev
-                  : ""
-              }`}
-            >
-              {current.title}
-            </h1>
-          </div>
-
-          {/* Supporting Lead Description Mask Window */}
-          <div className={styles.descMaskWindow}>
-            {previousIndex !== null && slides[previousIndex] && (
-              <span
-                className={`${styles.heroDescription} ${styles.descExiting} ${
-                  direction === "next" ? styles.descExitNext : styles.descExitPrev
-                }`}
-                aria-hidden="true"
-              >
-                {slides[previousIndex].description}
-              </span>
-            )}
-            <p
-              key={`desc-${currentIndex}`}
-              className={`${styles.heroDescription} ${
-                previousIndex !== null
-                  ? direction === "next"
-                    ? styles.descEnterNext
-                    : styles.descEnterPrev
-                  : ""
-              }`}
-            >
-              {current.description}
-            </p>
-          </div>
-
-          {/* Persistent Action Hardware: Button Frame Remains In-Place While Label Updates */}
-          <div className={styles.actionRow}>
-            <Link href={current.ctaHref} className={styles.primaryCta}>
-              <span className={styles.ctaLabelWindow}>
-                {previousIndex !== null && slides[previousIndex] && (
-                  <span
-                    className={`${styles.ctaLabel} ${styles.ctaLabelExiting} ${
-                      direction === "next" ? styles.ctaExitNext : styles.ctaExitPrev
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {slides[previousIndex].ctaLabel}
-                  </span>
-                )}
-                <span
-                  key={`cta-${currentIndex}`}
-                  className={`${styles.ctaLabel} ${
-                    previousIndex !== null
-                      ? direction === "next"
-                        ? styles.ctaEnterNext
-                        : styles.ctaEnterPrev
-                      : ""
-                  }`}
-                >
-                  {current.ctaLabel}
-                </span>
-              </span>
-              <span className={styles.ctaArrow} aria-hidden="true">
-                ↗
-              </span>
-            </Link>
-
-            <Link href="/results" className={styles.secondaryCta}>
-              <span>LIVE RESULTS</span>
-              <span className={styles.ctaArrow} aria-hidden="true">
-                →
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Layer 3: Persistent Architectural Progress Timeline & Stage Hardware */}
-        <div className={styles.timelineBar}>
+          {/* Timeline Track Segments */}
           <div
             className={styles.timelineSegments}
             role="tablist"
@@ -537,7 +341,7 @@ export default function HeroCarousel({
             })}
           </div>
 
-          {/* Persistent Manual Stage Controls: Prev, Play/Pause, Next */}
+          {/* Manual Stage Controls */}
           <div className={styles.manualControls}>
             <button
               type="button"
@@ -547,8 +351,8 @@ export default function HeroCarousel({
               title="Previous scene"
             >
               <svg
-                width="16"
-                height="16"
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -570,8 +374,8 @@ export default function HeroCarousel({
             >
               {isPlaying ? (
                 <svg
-                  width="14"
-                  height="14"
+                  width="12"
+                  height="12"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   aria-hidden="true"
@@ -581,8 +385,8 @@ export default function HeroCarousel({
                 </svg>
               ) : (
                 <svg
-                  width="14"
-                  height="14"
+                  width="12"
+                  height="12"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   aria-hidden="true"
@@ -600,8 +404,8 @@ export default function HeroCarousel({
               title="Next scene"
             >
               <svg
-                width="16"
-                height="16"
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
