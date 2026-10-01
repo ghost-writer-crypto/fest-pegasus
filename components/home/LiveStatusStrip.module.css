@@ -1,7 +1,9 @@
 .statusStrip {
-  background-color: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
   color: var(--text-primary);
   position: relative;
   z-index: 20;
@@ -61,8 +63,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   background-color: rgba(229, 57, 53, 0.15);
   border: 1px solid rgba(229, 57, 53, 0.4);
   font-family: var(--font-mono);
@@ -94,8 +96,8 @@
 .liveTagStandby {
   display: inline-flex;
   align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   background-color: var(--surface-hover);
   border: 1px solid var(--border);
   font-family: var(--font-mono);
@@ -108,8 +110,8 @@
 .badgeNeutral {
   display: inline-flex;
   align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   background-color: var(--surface-hover);
   border: 1px solid var(--border);
   font-family: var(--font-mono);
@@ -122,8 +124,8 @@
 .badgeOfficial {
   display: inline-flex;
   align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   background-color: var(--surface-hover);
   border: 1px solid var(--border);
   font-family: var(--font-mono);
@@ -136,8 +138,8 @@
 .badgeGold {
   display: inline-flex;
   align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   background-color: rgba(229, 57, 53, 0.12);
   border: 1px solid rgba(229, 57, 53, 0.3);
   font-family: var(--font-mono);

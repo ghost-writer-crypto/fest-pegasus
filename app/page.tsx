@@ -1,4 +1,5 @@
 import Link from "next/link";
+import StaircaseIntro from "@/components/ui/StaircaseIntro";
 import HeroCarousel from "@/components/home/HeroCarousel";
 import LiveStatusStrip from "@/components/home/LiveStatusStrip";
 import { Skiper16 } from "@/components/ui/skiper-ui/skiper16";
@@ -157,6 +158,9 @@ export default function HomePage() {
 
   return (
     <main className={styles.homeRoot}>
+      {/* 01. CINEMATIC STAIRCASE ENTRANCE PRELOADER */}
+      <StaircaseIntro />
+
       {/* 02. FEATURED HERO CAROUSEL */}
       <HeroCarousel />
 
