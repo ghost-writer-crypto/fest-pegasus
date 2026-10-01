@@ -22,39 +22,39 @@ export interface HeroSlide {
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: "slide-motion",
-    tag: "PEGASUS / SPORTS FEST OPERATING SYSTEM",
-    title: "THE FEST.\nIN MOTION.",
+    tag: "01 / THE FEST",
+    title: "THE COMPETITION\nIS ALREADY MOVING.",
     subtitle: "AUTHENTIC TIMING // VERIFIED RESULTS // CHAMPIONSHIP RADAR",
     description:
-      "PEGASUS powers competitions, live results, teams, fixtures and standings across certified collegiate athletics.",
-    ctaLabel: "VIEW SCHEDULE",
+      "ZENITHROW powers real-time fixtures, electronic chip timing, certified results, and multi-house standings across collegiate athletics.",
+    ctaLabel: "EXPLORE SCHEDULE",
     ctaHref: "/schedules",
-    image: "/images/hero/track-stadium.jpg",
+    image: "/images/hero/campus-aerial.jpg",
     badge: "ELECTRONIC CHIP TIMING",
     displayOrder: 1,
   },
   {
     id: "slide-turf",
-    tag: "PEGASUS / ARENA KNOCKOUTS",
+    tag: "02 / ARENA KNOCKOUTS",
     title: "PRECISION ON THE TURF.",
     subtitle: "KNOCKOUT ROUNDS UNDER THE LIGHTS",
     description:
-      "High-stakes competition across Football, Volleyball, Basketball, Cricket, and the Tug of War 600kg arena.",
-    ctaLabel: "VIEW SCHEDULE",
-    ctaHref: "/schedules",
+      "High-stakes competition across Football, Volleyball, Basketball, Cricket, and the certified Tug of War 600kg arena.",
+    ctaLabel: "LIVE FIXTURES",
+    ctaHref: "/fixtures",
     image: "/images/hero/football-arena.jpg",
     badge: "OFFICIAL MATCH DRAWS",
     displayOrder: 2,
   },
   {
     id: "slide-trophy",
-    tag: "PEGASUS / CHAMPIONSHIP SHIELD",
+    tag: "03 / CHAMPIONSHIP SHIELD",
     title: "FOUR HOUSES. ONE SHIELD.",
     subtitle: "AGGREGATED MULTI-DISCIPLINE POINTS",
     description:
       "Every sprint cleared and goal scored accumulates toward the overall House Championship Trophy. Track certified standings in real time.",
-    ctaLabel: "VIEW SCHEDULE",
-    ctaHref: "/schedules",
+    ctaLabel: "VIEW LEADERBOARD",
+    ctaHref: "/leaderboard",
     image: "/images/hero/championship-trophy.jpg",
     badge: "LIVE POINTS AGGREGATION",
     displayOrder: 3,
@@ -296,7 +296,7 @@ export default function HeroCarousel({
               className={`${styles.sceneLayer} ${sceneClass}`}
               aria-hidden={!isCurrent}
             >
-              <div className={styles.imageFocalPlane} style={{ position: "absolute" }}>
+              <div className={styles.imageFocalPlane} style={{ position: "absolute", overflow: "hidden" }}>
                 <Image
                   src={slide.image}
                   alt={slide.title}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 export interface NavItem {
   label: string;
@@ -23,7 +24,7 @@ const navItems: NavItem[] = [
 const portals = [
   {
     role: "Participant",
-    title: "My PEGASUS",
+    title: "My ZENITHROW",
     desc: "Athlete identity, chest number, personal results & poster",
     href: "/my-result",
     tag: "ATHLETE",
@@ -51,8 +52,8 @@ const portals = [
   },
   {
     role: "Login",
-    title: "Operator Login & Switcher",
-    desc: "Official access key sign-in & fast role switcher",
+    title: "Operator Login",
+    desc: "Official access key sign-in & station credentials",
     href: "/login",
     tag: "AUTH",
   },
@@ -124,10 +125,10 @@ export default function Navbar() {
             setIsMobileOpen(false);
             setIsPortalOpen(false);
           }}
-          aria-label="PEGASUS Sports Festival Home"
+          aria-label="ZENITHROW Sports Festival Home"
         >
-          <span className="pegasus-brand__mark" aria-hidden="true">P</span>
-          <span className="pegasus-brand__name">PEGASUS</span>
+          <span className="pegasus-brand__mark" aria-hidden="true">Z</span>
+          <span className="pegasus-brand__name">ZENITHROW</span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -155,10 +156,10 @@ export default function Navbar() {
                       width: "6px",
                       height: "6px",
                       borderRadius: "50%",
-                      backgroundColor: "#E53737",
+                      backgroundColor: "var(--primary)",
                       marginLeft: "6px",
                       verticalAlign: "middle",
-                      boxShadow: "0 0 8px rgba(229, 55, 55, 0.8)",
+                      boxShadow: "0 0 8px rgba(229, 57, 53, 0.8)",
                       animation: "pegasus-pulse 1.8s infinite",
                     }}
                     aria-label="Live event in progress"
@@ -169,8 +170,11 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Utility: Portals Menu & My PEGASUS CTA */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Right Utility: Theme Toggle, Portals Menu & My ZENITHROW CTA */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Light / Dark Mode Toggle */}
+          <ThemeToggle />
+
           {/* Role-based Portals Switcher */}
           <div ref={portalRef} style={{ position: "relative" }}>
             <button
@@ -185,8 +189,9 @@ export default function Navbar() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                background: isPortalOpen ? "var(--surface-sunken)" : "transparent",
+                background: isPortalOpen ? "var(--surface-raised)" : "transparent",
                 borderColor: isPortalOpen ? "var(--border-strong)" : "var(--border)",
+                color: "var(--text-primary)",
               }}
               onClick={() => setIsPortalOpen((prev) => !prev)}
               aria-expanded={isPortalOpen}
@@ -207,15 +212,15 @@ export default function Navbar() {
                   top: "calc(100% + 8px)",
                   right: 0,
                   width: "290px",
-                  background: "#FFFFFF",
-                  border: "1px solid #1A3663",
-                  borderRadius: "4px",
-                  boxShadow: "0 12px 32px rgba(26, 54, 99, 0.12)",
-                  padding: "12px",
+                  background: "var(--surface-1)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  boxShadow: "var(--zenith-highlight), var(--zenith-shadow-lg)",
+                  padding: "10px",
                   zIndex: 1000,
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "4px",
                 }}
                 role="menu"
                 aria-label="Operational role entry points"
@@ -223,7 +228,7 @@ export default function Navbar() {
                 <div
                   style={{
                     padding: "4px 8px 8px",
-                    borderBottom: "1px solid #E8EDF3",
+                    borderBottom: "1px solid var(--border)",
                     marginBottom: "4px",
                   }}
                 >
@@ -233,7 +238,7 @@ export default function Navbar() {
                       fontSize: "10px",
                       fontWeight: 800,
                       letterSpacing: "0.14em",
-                      color: "#64748B",
+                      color: "var(--text-secondary)",
                       textTransform: "uppercase",
                     }}
                   >
@@ -248,7 +253,7 @@ export default function Navbar() {
                     onClick={() => setIsPortalOpen(false)}
                     style={{
                       padding: "8px 10px",
-                      borderRadius: "2px",
+                      borderRadius: "var(--radius-micro, 6px)",
                       textDecoration: "none",
                       display: "flex",
                       flexDirection: "column",
@@ -260,7 +265,7 @@ export default function Navbar() {
                     role="menuitem"
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "13px", fontWeight: 750, color: "#1A3663" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 750, color: "var(--text-primary)" }}>
                         {p.title}
                       </span>
                       <span
@@ -269,15 +274,16 @@ export default function Navbar() {
                           fontFamily: "ui-monospace, monospace",
                           fontWeight: 800,
                           padding: "2px 5px",
-                          background: "#E8EDF3",
-                          color: "#1A3663",
-                          borderRadius: "2px",
+                          background: "var(--surface-raised)",
+                          color: "var(--text-primary)",
+                          borderRadius: "var(--radius-micro, 6px)",
+                          border: "1px solid var(--border)",
                         }}
                       >
                         {p.tag}
                       </span>
                     </div>
-                    <span style={{ fontSize: "11px", color: "#64748B", lineHeight: 1.3 }}>
+                    <span style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.3 }}>
                       {p.desc}
                     </span>
                   </Link>
@@ -286,9 +292,9 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Primary Action: My PEGASUS */}
+          {/* Primary Action: My ZENITHROW */}
           <Link href="/my-result" className="pegasus-nav__result">
-            <span>My PEGASUS</span>
+            <span>My ZENITHROW</span>
             <span className="pegasus-nav__arrow" aria-hidden="true">↗</span>
           </Link>
 
@@ -319,6 +325,7 @@ export default function Navbar() {
         </div>
       </div>
 
+
       {/* Mobile Drawer Overlay */}
       {isMobileOpen && (
         <div
@@ -337,8 +344,8 @@ export default function Navbar() {
       >
         <div className="pegasus-nav__drawer-header">
           <div className="pegasus-brand">
-            <span className="pegasus-brand__mark">P</span>
-            <span className="pegasus-brand__name">PEGASUS</span>
+            <span className="pegasus-brand__mark">Z</span>
+            <span className="pegasus-brand__name">ZENITHROW</span>
           </div>
           <button
             type="button"
@@ -360,7 +367,7 @@ export default function Navbar() {
               fontSize: "10px",
               fontWeight: 800,
               letterSpacing: "0.14em",
-              color: "#64748B",
+              color: "var(--text-secondary)",
               textTransform: "uppercase",
               padding: "0 12px 4px",
               margin: 0,
@@ -391,7 +398,7 @@ export default function Navbar() {
                       style={{
                         fontSize: "9px",
                         fontWeight: 800,
-                        backgroundColor: "#E53737",
+                        backgroundColor: "var(--primary)",
                         color: "#FFFFFF",
                         padding: "1px 5px",
                         borderRadius: "2px",
@@ -408,27 +415,27 @@ export default function Navbar() {
           })}
 
           {/* Quick Athlete Entry */}
-          <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #E8EDF3" }}>
+          <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
             <Link
               href="/my-result"
-              className="pegasus-nav__result"
-              style={{ width: "100%", justifyContent: "center", minHeight: "44px" }}
+              className="pegasus-button pegasus-button--primary"
+              style={{ width: "100%", justifyContent: "center", minHeight: "44px", textDecoration: "none" }}
               onClick={() => setIsMobileOpen(false)}
             >
-              <span>My PEGASUS</span>
+              <span>My ZENITHROW</span>
               <span className="pegasus-nav__arrow" aria-hidden="true">↗</span>
             </Link>
           </div>
 
           {/* Role Portals Group in Mobile Drawer */}
-          <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #E8EDF3" }}>
+          <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
             <p
               style={{
                 fontFamily: "ui-monospace, monospace",
                 fontSize: "10px",
                 fontWeight: 800,
                 letterSpacing: "0.14em",
-                color: "#64748B",
+                color: "var(--text-secondary)",
                 textTransform: "uppercase",
                 padding: "0 12px 8px",
                 margin: 0,
@@ -442,14 +449,14 @@ export default function Navbar() {
                 onClick={() => setIsMobileOpen(false)}
                 style={{
                   padding: "8px",
-                  border: "1px solid #E8EDF3",
+                  border: "1px solid var(--border)",
                   borderRadius: "3px",
                   fontSize: "12px",
                   fontWeight: 700,
-                  color: "#1A3663",
+                  color: "var(--text-primary)",
                   textDecoration: "none",
                   textAlign: "center",
-                  background: "#F8FAFC",
+                  background: "var(--surface-raised)",
                 }}
               >
                 Team Manager
@@ -459,14 +466,14 @@ export default function Navbar() {
                 onClick={() => setIsMobileOpen(false)}
                 style={{
                   padding: "8px",
-                  border: "1px solid #E8EDF3",
+                  border: "1px solid var(--border)",
                   borderRadius: "3px",
                   fontSize: "12px",
                   fontWeight: 700,
-                  color: "#1A3663",
+                  color: "var(--text-primary)",
                   textDecoration: "none",
                   textAlign: "center",
-                  background: "#F8FAFC",
+                  background: "var(--surface-raised)",
                 }}
               >
                 Judge Desk
@@ -477,14 +484,14 @@ export default function Navbar() {
                 style={{
                   gridColumn: "span 2",
                   padding: "8px",
-                  border: "1px solid #1A3663",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: "3px",
                   fontSize: "12px",
                   fontWeight: 750,
-                  color: "#1A3663",
+                  color: "var(--text-primary)",
                   textDecoration: "none",
                   textAlign: "center",
-                  background: "#FFFFFF",
+                  background: "var(--surface)",
                 }}
               >
                 Admin Command Center
@@ -496,3 +503,4 @@ export default function Navbar() {
     </header>
   );
 }
+

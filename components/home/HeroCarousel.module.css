@@ -13,7 +13,7 @@
   position: relative;
   width: 100%;
   min-height: clamp(540px, 78vh, 760px);
-  background-color: #1A3663;
+  background-color: var(--bg-0, #070707);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@
 }
 
 .carousel:focus-visible {
-  outline: 2px solid #5B9BD5;
+  outline: 2px solid var(--secondary, #2563EB);
   outline-offset: -2px;
 }
 
@@ -47,12 +47,14 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  overflow: hidden;
 }
 
 .sceneLayer {
   position: absolute;
   inset: 0;
   will-change: clip-path, transform;
+  overflow: hidden;
 }
 
 .sceneResting {
@@ -160,7 +162,7 @@
 
 .heroImage {
   object-fit: cover;
-  object-position: center;
+  object-position: center 32%;
 }
 
 /* Layer 1: Readability Vignette Gradient */
@@ -290,7 +292,7 @@
   font-weight: 750;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #5B9BD5;
+  color: var(--secondary, #2563EB);
   will-change: transform, opacity;
 }
 
@@ -364,7 +366,7 @@
 .kickerArchitecturalRule {
   width: 24px;
   height: 1px;
-  background-color: rgba(91, 155, 213, 0.5);
+  background-color: rgba(37, 99, 235, 0.45);
   transform-origin: left;
   animation: ruleExtend 340ms var(--ease-broadcast-camera) 40ms both;
 }
@@ -383,9 +385,9 @@
   align-items: center;
   gap: 6px;
   padding: 3px 9px;
-  background-color: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-micro, 6px);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -686,9 +688,10 @@
   align-items: center;
   gap: 8px;
   padding: 13px 24px;
-  background-color: #E53737;
+  background-color: var(--primary, #E53935);
   color: #FFFFFF;
-  border-radius: 3px;
+  border-radius: var(--radius-small, 8px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -698,13 +701,13 @@
     background-color 160ms var(--ease-broadcast-camera),
     transform 160ms var(--ease-broadcast-camera),
     box-shadow 160ms var(--ease-broadcast-camera);
-  box-shadow: 0 2px 10px rgba(229, 55, 55, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .primaryCta:hover {
-  background-color: #C52929;
+  background-color: var(--primary-hover, #D32F2F);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(229, 55, 55, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .primaryCta:active {
@@ -803,15 +806,16 @@
   align-items: center;
   gap: 8px;
   padding: 12px 22px;
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.08);
   color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-small, 8px);
   font-size: 13px;
   font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition:
     background-color 160ms var(--ease-broadcast-camera),
     border-color 160ms var(--ease-broadcast-camera),
@@ -819,8 +823,8 @@
 }
 
 .secondaryCta:hover {
-  background-color: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
   transform: translateY(-1px);
 }
 
@@ -831,7 +835,7 @@
 }
 
 .secondaryCta:focus-visible {
-  outline: 2px solid #FFFFFF;
+  outline: 2px solid var(--secondary, #2563EB);
   outline-offset: 2px;
 }
 
@@ -916,8 +920,8 @@
 .timelineFill {
   height: 100%;
   width: 100%;
-  background-color: #E53737;
-  border-radius: 2px;
+  background-color: var(--primary, #E53935);
+  border-radius: var(--radius-micro, 6px);
   transform: scaleX(0);
   transform-origin: left;
   will-change: transform;
@@ -958,12 +962,13 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-micro, 6px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.06);
   color: #FFFFFF;
   cursor: pointer;
   padding: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition:
     background-color 160ms var(--ease-broadcast-camera),
     border-color 160ms var(--ease-broadcast-camera),
@@ -971,8 +976,8 @@
 }
 
 .controlBtn:hover {
-  background-color: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.36);
   transform: translateY(-1px);
 }
 
@@ -983,7 +988,7 @@
 }
 
 .controlBtn:focus-visible {
-  outline: 2px solid #5B9BD5;
+  outline: 2px solid var(--secondary, #2563EB);
   outline-offset: 2px;
 }
 
@@ -1007,6 +1012,9 @@
   }
 
   .imageFocalPlane {
+    inset: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
     transform: none !important;
   }
 
@@ -1030,6 +1038,10 @@
 @media (max-width: 600px) {
   .carousel {
     min-height: 500px;
+  }
+
+  .heroImage {
+    object-position: 55% 26%;
   }
 
   .actionRow {

@@ -27,6 +27,7 @@ import {
   isTugOfWarEvent,
   extractWeightFromMetadata,
   calculateTugOfWarWeight,
+  validateTugOfWarWeight,
   roundWeight,
 } from "@/lib/competition/tugOfWarWeight";
 import { calculateAppealWindow } from "@/lib/appeals/appealEngine";
@@ -328,11 +329,27 @@ export default function TeamManagerClient({
   // Map division names
   const divMap = new Map(divisions.map((d) => [d.id, d.name]));
 
+  // Tug-of-War 600kg Weight Instrument Telemetry
+  const towEvent = events.find((ev) => isTugOfWarEvent(ev.code || ev.id));
+  const towRegistrations = towEvent
+    ? registrations.filter((r) => r.event_id === towEvent.id && r.status === "approved")
+    : [];
+
+  const towValidation = towEvent
+    ? validateTugOfWarWeight(
+        towRegistrations.map((r) => ({
+          participantId: r.participant_id,
+          weightKg: extractWeightFromMetadata(r.metadata) ?? undefined,
+          isSubstitute: Boolean(r.metadata?.isSubstitute),
+        }))
+      )
+    : null;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Header Banner */}
       <div
-        className="pegasus-card"
+        className="zenith-surface-1 zenith-edge"
         style={{
           padding: "20px 24px",
           display: "flex",
@@ -340,75 +357,163 @@ export default function TeamManagerClient({
           alignItems: "center",
           flexWrap: "wrap",
           gap: "16px",
-          borderLeft: `5px solid ${currentTeam.color || "var(--accent)"}`,
+          borderRadius: "var(--radius-medium)",
+          border: "1px solid var(--border)",
+          borderLeft: `4px solid ${currentTeam.color || "var(--primary)"}`,
         }}
       >
         <div>
-          <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "var(--accent)", letterSpacing: "0.08em" }}>
+          <span className="zenith-kicker" style={{ display: "block", marginBottom: "4px" }}>
             HOUSE COMMAND TERMINAL
           </span>
-          <h2 style={{ fontSize: "22px", fontWeight: 850, margin: "2px 0 4px" }}>
+          <h2 style={{ fontSize: "24px", fontWeight: 850, margin: "0 0 6px", textTransform: "uppercase", color: "var(--text-primary)" }}>
             {currentTeam.name} ({currentTeam.code})
           </h2>
-          <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
-            Manager: <strong>{managerName || "House Captain"}</strong> • Roster Size:{" "}
-            <strong>{participants.length} Athletes</strong> • Active Entries:{" "}
-            <strong>{registrations.length} Entries</strong>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
+            Manager: <strong style={{ color: "var(--text-primary)" }}>{managerName || "House Captain"}</strong> • Roster:{" "}
+            <strong style={{ color: "var(--text-primary)" }}>{participants.length} Athletes</strong> • Active Entries:{" "}
+            <strong style={{ color: "var(--text-primary)" }}>{registrations.length} Entries</strong>
           </p>
         </div>
 
         <div style={{ display: "flex", gap: "10px" }}>
           <button
             onClick={openAddAthleteModal}
-            className="pegasus-button pegasus-button--secondary"
-            style={{ fontSize: "13px", padding: "8px 14px" }}
+            className="zenith-btn zenith-btn-secondary"
+            style={{ fontSize: "12px", padding: "8px 14px" }}
           >
             + Add Athlete
           </button>
           <button
             onClick={() => openAddRegistrationModal()}
-            className="pegasus-button pegasus-button--primary"
-            style={{ fontSize: "13px", padding: "8px 16px" }}
+            className="zenith-btn zenith-btn-primary"
+            style={{ fontSize: "12px", padding: "8px 16px" }}
           >
             + Register for Event
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "8px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
+      {/* TUG-OF-WAR 600KG INSTRUMENT PANEL */}
+      {towEvent && towValidation && (
+        <div
+          className="zenith-surface-1 zenith-edge"
+          style={{
+            padding: "20px 24px",
+            borderRadius: "var(--radius-medium)",
+            border: "1px solid var(--border)",
+            borderLeft: !towValidation.valid && towValidation.excessWeightKg > 0 ? "4px solid var(--primary)" : "4px solid var(--secondary)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+            <div>
+              <span className="zenith-kicker">08 // REGULATION INSTRUMENT</span>
+              <h3 style={{ margin: "2px 0 0", fontSize: "16px", fontWeight: 850, textTransform: "uppercase", color: "var(--text-primary)" }}>
+                Tug-of-War 600kg Weight Status
+              </h3>
+            </div>
+            <div>
+              {!towValidation.valid && towValidation.excessWeightKg > 0 ? (
+                <span className="zenith-signal zenith-signal-live">
+                  <span className="zenith-signal-dot" />
+                  WEIGHT EXCEEDED (+{towValidation.excessWeightKg.toFixed(1)} KG)
+                </span>
+              ) : towValidation.unweighedParticipantIds.length > 0 ? (
+                <span className="zenith-signal zenith-signal-upcoming">
+                  WEIGH-IN PENDING ({towValidation.unweighedParticipantIds.length} ATHLETES)
+                </span>
+              ) : (
+                <span className="zenith-signal zenith-signal-verified">
+                  <span className="zenith-signal-dot" />
+                  REGULATION COMPLIANT
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            <div style={{ padding: "14px 18px", background: "var(--surface-raised)", borderRadius: "var(--radius-small)", border: "1px solid var(--border)" }}>
+              <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 800, textTransform: "uppercase", color: "var(--text-muted)", display: "block" }}>
+                ACTIVE
+              </span>
+              <strong style={{ fontSize: "20px", fontFamily: "var(--font-mono)", fontWeight: 900, color: "var(--text-primary)", display: "block", marginTop: "2px" }}>
+                {towValidation.activeCount} ATHLETES
+              </strong>
+            </div>
+
+            <div style={{ padding: "14px 18px", background: "var(--surface-raised)", borderRadius: "var(--radius-small)", border: "1px solid var(--border)" }}>
+              <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 800, textTransform: "uppercase", color: "var(--text-muted)", display: "block" }}>
+                WEIGHT
+              </span>
+              <strong style={{ fontSize: "20px", fontFamily: "var(--font-mono)", fontWeight: 900, color: towValidation.excessWeightKg > 0 ? "var(--primary)" : "var(--text-primary)", display: "block", marginTop: "2px" }}>
+                {towValidation.totalWeightKg.toFixed(1)} KG
+              </strong>
+            </div>
+
+            <div style={{ padding: "14px 18px", background: "var(--surface-raised)", borderRadius: "var(--radius-small)", border: "1px solid var(--border)" }}>
+              <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 800, textTransform: "uppercase", color: "var(--text-muted)", display: "block" }}>
+                LIMIT
+              </span>
+              <strong style={{ fontSize: "20px", fontFamily: "var(--font-mono)", fontWeight: 900, color: "var(--text-primary)", display: "block", marginTop: "2px" }}>
+                600 KG
+              </strong>
+            </div>
+
+            <div style={{ padding: "14px 18px", background: "var(--surface-raised)", borderRadius: "var(--radius-small)", border: "1px solid var(--border)" }}>
+              <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 800, textTransform: "uppercase", color: "var(--text-muted)", display: "block" }}>
+                REMAINING
+              </span>
+              <strong style={{ fontSize: "20px", fontFamily: "var(--font-mono)", fontWeight: 900, color: towValidation.remainingWeightKg < 10 ? "var(--primary)" : "var(--secondary)", display: "block", marginTop: "2px" }}>
+                {towValidation.remainingWeightKg.toFixed(1)} KG
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Controls */}
+      <div className="zenith-subnav-strip">
         <button
           onClick={() => setActiveTab("roster")}
-          className={`pegasus-button ${activeTab === "roster" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
-          style={{ fontSize: "13px", padding: "6px 16px" }}
+          className={`zenith-btn ${activeTab === "roster" ? "zenith-btn-primary" : "zenith-btn-subtle"}`}
+          style={{ fontSize: "12px", padding: "8px 16px" }}
         >
           Athletes Roster ({participants.length})
         </button>
         <button
           onClick={() => setActiveTab("registrations")}
-          className={`pegasus-button ${activeTab === "registrations" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
-          style={{ fontSize: "13px", padding: "6px 16px" }}
+          className={`zenith-btn ${activeTab === "registrations" ? "zenith-btn-primary" : "zenith-btn-subtle"}`}
+          style={{ fontSize: "12px", padding: "8px 16px" }}
         >
           Event Registrations ({registrations.length})
         </button>
         <button
           onClick={() => setActiveTab("substitutions")}
-          className={`pegasus-button ${activeTab === "substitutions" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
-          style={{ fontSize: "13px", padding: "6px 16px" }}
+          className={`zenith-btn ${activeTab === "substitutions" ? "zenith-btn-primary" : "zenith-btn-subtle"}`}
+          style={{ fontSize: "12px", padding: "8px 16px" }}
         >
           Substitutions ({substitutions.length})
         </button>
         <button
           onClick={() => setActiveTab("appeals")}
-          className={`pegasus-button ${activeTab === "appeals" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
-          style={{ fontSize: "13px", padding: "6px 16px" }}
+          className={`zenith-btn ${activeTab === "appeals" ? "zenith-btn-primary" : "zenith-btn-subtle"}`}
+          style={{ fontSize: "12px", padding: "8px 16px" }}
         >
           Appeals & Protests ({appeals.length})
         </button>
         <button
           onClick={() => setActiveTab("results")}
-          className={`pegasus-button ${activeTab === "results" ? "pegasus-button--primary" : "pegasus-button--secondary"}`}
-          style={{ fontSize: "13px", padding: "6px 16px" }}
+          className={`zenith-btn ${activeTab === "results" ? "zenith-btn-primary" : "zenith-btn-subtle"}`}
+          style={{ fontSize: "12px", padding: "8px 16px" }}
         >
           House Results ({publishedResults.length})
         </button>
@@ -429,51 +534,59 @@ export default function TeamManagerClient({
               </tr>
             </thead>
             <tbody>
-              {participants.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <strong>{p.name}</strong>
-                  </td>
-                  <td>
-                    {p.chest_number ? (
-                      <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--accent)" }}>
-                        #{p.chest_number}
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--muted)", fontSize: "12px" }}>Unassigned</span>
-                    )}
-                  </td>
-                  <td>
-                    <span style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--muted)" }}>
-                      {p.public_id}
-                    </span>
-                  </td>
-                  <td>{p.division_id ? divMap.get(p.division_id) || "—" : "—"}</td>
-                  <td>
-                    <span className={`pegasus-status pegasus-status--${p.status === "confirmed" ? "confirmed" : "pending"}`}>
-                      {p.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        onClick={() => openEditAthleteModal(p)}
-                        className="pegasus-button pegasus-button--secondary"
-                        style={{ fontSize: "11px", padding: "2px 8px", minHeight: "26px" }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => openAddRegistrationModal(p.id)}
-                        className="pegasus-button pegasus-button--subtle"
-                        style={{ fontSize: "11px", padding: "2px 8px", minHeight: "26px" }}
-                      >
-                        + Entry
-                      </button>
-                    </div>
+              {participants.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "32px 16px", color: "var(--text-muted)" }}>
+                    No athletes enrolled in house roster. Click &ldquo;+ Add Athlete&rdquo; to register squad members.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                participants.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <strong>{p.name}</strong>
+                    </td>
+                    <td>
+                      {p.chest_number ? (
+                        <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--accent)" }}>
+                          #{p.chest_number}
+                        </span>
+                      ) : (
+                        <span style={{ color: "var(--muted)", fontSize: "12px" }}>Unassigned</span>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--muted)" }}>
+                        {p.public_id}
+                      </span>
+                    </td>
+                    <td>{p.division_id ? divMap.get(p.division_id) || "—" : "—"}</td>
+                    <td>
+                      <span className={`pegasus-status pegasus-status--${p.status === "confirmed" ? "confirmed" : "pending"}`}>
+                        {p.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button
+                          onClick={() => openEditAthleteModal(p)}
+                          className="pegasus-button pegasus-button--secondary"
+                          style={{ fontSize: "11px", padding: "2px 8px", minHeight: "26px" }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => openAddRegistrationModal(p.id)}
+                          className="pegasus-button pegasus-button--subtle"
+                          style={{ fontSize: "11px", padding: "2px 8px", minHeight: "26px" }}
+                        >
+                          + Entry
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -494,11 +607,18 @@ export default function TeamManagerClient({
               </tr>
             </thead>
             <tbody>
-              {registrations.map((r) => (
-                <tr key={r.id}>
-                  <td>
-                    <strong>{r.eventName || r.eventCode}</strong>
+              {registrations.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "32px 16px", color: "var(--text-muted)" }}>
+                    No event registrations found for your house squad. Click &ldquo;+ Register For Event&rdquo; to enroll athletes.
                   </td>
+                </tr>
+              ) : (
+                registrations.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      <strong>{r.eventName || r.eventCode}</strong>
+                    </td>
                   <td>{r.participantName}</td>
                   <td>
                     {r.participantChestNumber ? `#${r.participantChestNumber}` : "—"}
@@ -523,8 +643,9 @@ export default function TeamManagerClient({
                     )}
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
           </table>
         </div>
       )}
