@@ -39,19 +39,20 @@ export default async function AdminCommandCenterPage() {
           }}
         >
           <div>
-            <p className="pegasus-eyebrow" style={{ margin: "0 0 6px" }}>
-              CONTROL ROOM • OPERATIONAL TELEMETRY
+            <p className="zenith-kicker" style={{ margin: "0 0 6px" }}>
+              00 // OPERATIONAL TELEMETRY
             </p>
             <h1
               style={{
                 margin: 0,
                 fontSize: "clamp(26px, 4vw, 36px)",
-                fontWeight: 850,
+                fontWeight: 900,
                 letterSpacing: "-0.03em",
-                color: "var(--foreground)",
+                textTransform: "uppercase",
+                color: "var(--text-primary)",
               }}
             >
-              Command Center
+              ZENITHROW COMMAND
             </h1>
             <p
               style={{

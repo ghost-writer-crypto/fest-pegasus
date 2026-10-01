@@ -154,7 +154,7 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
       competition: ev?.name || "Championship Event",
       position: pos,
       house: team?.name || "Official House",
-      festival: "Pegasus Sports Festival 2026",
+      festival: "ZENITHROW Sports Festival 2026",
       date: r.published_at
         ? new Date(r.published_at).toLocaleDateString("en-US", {
             month: "long",
@@ -169,14 +169,14 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
   });
 
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--my-result pegasus-animate-fade">
+    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px 80px" }}>
       {/* Page Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">MY PEGASUS // ATHLETE COMMAND OS</p>
-        <h1 className="pegasus-page-title">Participant Dashboard</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>07 / ATHLETE COCKPIT</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Participant Dashboard</h1>
         <p className="pegasus-page__description">
           Official athlete telemetry, personal competition marks, house point
-          contributions, and official podium achievement posters.
+          contributions, and certified podium achievement records.
         </p>
       </section>
 
@@ -187,22 +187,22 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
 
       {/* Lookup State: Searched and Participant Found */}
       {trimmedQuery && participant && (
-        <section style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+        <section style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
           {/* 01. MY PROFILE & MY HOUSE */}
           <div
-            className="pegasus-card"
+            className="zenith-surface-1 zenith-edge"
             style={{
-              padding: "28px",
+              padding: "24px 28px",
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "24px",
+              gap: "28px",
+              borderRadius: "var(--radius-medium)",
               border: "1px solid var(--border)",
-              background: "var(--surface)",
             }}
           >
             {/* Athlete Profile Column */}
             <div>
-              <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider block mb-2">
+              <span className="zenith-kicker" style={{ display: "block", marginBottom: "8px" }}>
                 01 // MY PROFILE
               </span>
               <div
@@ -215,24 +215,43 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
                 }}
               >
                 {participant.chest_number && (
-                  <span className="pegasus-chest-badge font-mono">
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "12px",
+                      fontWeight: 850,
+                      padding: "3px 8px",
+                      borderRadius: "var(--radius-micro)",
+                      background: "var(--primary)",
+                      color: "#FFFFFF",
+                    }}
+                  >
                     CHEST #{participant.chest_number}
                   </span>
                 )}
-                <span className="pegasus-participant-card__id font-mono">
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: "var(--text-secondary)",
+                  }}
+                >
                   {participant.public_id}
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase bg-[#1A3663] text-white rounded-xs">
+                <span className="zenith-signal zenith-signal-verified">
+                  <span className="zenith-signal-dot" />
                   CONFIRMED ATHLETE
                 </span>
               </div>
 
               <h2
                 style={{
-                  fontSize: "24px",
-                  fontWeight: 800,
+                  fontSize: "26px",
+                  fontWeight: 900,
                   margin: "0 0 6px",
-                  color: "var(--foreground)",
+                  textTransform: "uppercase",
+                  color: "var(--text-primary)",
                 }}
               >
                 {participant.name}
@@ -244,43 +263,62 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
                   alignItems: "center",
                   gap: "12px",
                   fontSize: "13px",
-                  color: "var(--muted)",
+                  color: "var(--text-secondary)",
                 }}
               >
-                <span className="font-semibold text-[#1A3663]">{team?.name ?? "Unassigned Team"}</span>
+                <span style={{ fontWeight: 700, color: "var(--text-primary)", textTransform: "uppercase" }}>
+                  {team?.name ?? "Unassigned House"}
+                </span>
                 <span>•</span>
                 <span>{divisionName}</span>
               </div>
             </div>
 
             {/* My House Column */}
-            <div className="border-t sm:border-t-0 sm:border-l border-white/10 sm:pl-6 pt-4 sm:pt-0 flex flex-col justify-between">
+            <div
+              style={{
+                borderLeft: "1px solid var(--border)",
+                paddingLeft: "24px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: "16px",
+              }}
+            >
               <div>
-                <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider block mb-2">
+                <span className="zenith-kicker" style={{ display: "block", marginBottom: "8px" }}>
                   02 // MY HOUSE
                 </span>
-                <h3 className="text-xl font-extrabold text-[#1A3663]">
+                <h3
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 850,
+                    margin: 0,
+                    textTransform: "uppercase",
+                    color: "var(--text-primary)",
+                  }}
+                >
                   {team?.name || "Official House"}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0" }}>
                   House Championship Shield Standing
                 </p>
               </div>
 
-              <div className="flex items-center gap-6 mt-4">
+              <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-muted-foreground block">
-                    Shield Rank
+                  <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--text-muted)", letterSpacing: "0.08em", display: "block" }}>
+                    SHIELD RANK
                   </span>
-                  <span className="text-2xl font-mono font-black text-[#F2B84B]">
+                  <span style={{ fontSize: "24px", fontFamily: "var(--font-mono)", fontWeight: 900, color: "var(--text-primary)" }}>
                     #{houseStanding?.rank || 1}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-muted-foreground block">
-                    House Points
+                  <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", textTransform: "uppercase", color: "var(--text-muted)", letterSpacing: "0.08em", display: "block" }}>
+                    HOUSE POINTS
                   </span>
-                  <span className="text-2xl font-mono font-black text-[#1A3663]">
+                  <span style={{ fontSize: "24px", fontFamily: "var(--font-mono)", fontWeight: 900, color: "var(--primary)" }}>
                     {houseStanding?.points || 20} PTS
                   </span>
                 </div>
@@ -292,42 +330,42 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: "12px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "16px",
             }}
           >
-            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
-              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+            <div className="zenith-surface-1 zenith-edge" style={{ padding: "18px 20px", borderRadius: "var(--radius-medium)", border: "1px solid var(--border)" }}>
+              <span className="zenith-kicker" style={{ display: "block", fontSize: "10px" }}>
                 MY ACCRUED POINTS
               </span>
-              <strong className="text-3xl font-black font-mono text-[#E53737] block mt-1">
+              <strong style={{ fontSize: "28px", fontWeight: 900, fontFamily: "var(--font-mono)", color: "var(--primary)", display: "block", marginTop: "4px" }}>
                 +{totalPoints} PTS
               </strong>
-              <span className="text-[11px] text-muted-foreground">
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                 Authoritative points earned
               </span>
             </div>
 
-            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
-              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+            <div className="zenith-surface-1 zenith-edge" style={{ padding: "18px 20px", borderRadius: "var(--radius-medium)", border: "1px solid var(--border)" }}>
+              <span className="zenith-kicker" style={{ display: "block", fontSize: "10px" }}>
                 VERIFIED OUTCOMES
               </span>
-              <strong className="text-3xl font-black font-mono text-[#1A3663] block mt-1">
+              <strong style={{ fontSize: "28px", fontWeight: 900, fontFamily: "var(--font-mono)", color: "var(--text-primary)", display: "block", marginTop: "4px" }}>
                 {publishedResults.length}
               </strong>
-              <span className="text-[11px] text-muted-foreground">
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                 Final published marks
               </span>
             </div>
 
-            <div className="pegasus-card" style={{ padding: "16px 20px" }}>
-              <span className="font-mono text-[10px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
+            <div className="zenith-surface-1 zenith-edge" style={{ padding: "18px 20px", borderRadius: "var(--radius-medium)", border: "1px solid var(--border)" }}>
+              <span className="zenith-kicker" style={{ display: "block", fontSize: "10px" }}>
                 PODIUM FINISHES
               </span>
-              <strong className="text-3xl font-black font-mono text-[#F2B84B] block mt-1">
+              <strong style={{ fontSize: "28px", fontWeight: 900, fontFamily: "var(--font-mono)", color: "#F59E0B", display: "block", marginTop: "4px" }}>
                 {achievements.filter((a) => typeof a.position === "number" && a.position <= 3).length}
               </strong>
-              <span className="text-[11px] text-muted-foreground">
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                 Medal positions
               </span>
             </div>
@@ -336,59 +374,84 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
           {/* 03. MY ACHIEVEMENTS (OFFICIAL POSTER GENERATION FLOW) */}
           <div>
             <div style={{ marginBottom: "16px" }}>
-              <p className="pegasus-eyebrow">PODIUM & HONORS</p>
-              <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "2px 0 0" }}>
+              <p className="zenith-kicker" style={{ marginBottom: "4px" }}>PODIUM & HONORS</p>
+              <h3 style={{ fontSize: "20px", fontWeight: 850, margin: 0, textTransform: "uppercase", color: "var(--text-primary)" }}>
                 My Achievements ({achievements.length})
               </h3>
             </div>
 
             {achievements.length === 0 ? (
               <div
-                className="pegasus-card"
-                style={{ padding: "32px", textAlign: "center", color: "var(--muted)" }}
+                className="zenith-surface-1 zenith-edge"
+                style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)", borderRadius: "var(--radius-medium)", border: "1px solid var(--border)" }}
               >
                 No podium marks recorded yet. Achievements unlock upon published official finish.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px" }}>
                 {achievements.map((ach) => (
                   <div
                     key={ach.id}
-                    className="pegasus-card"
+                    className="zenith-surface-1 zenith-edge"
                     style={{
                       padding: "20px",
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
                       gap: "16px",
-                      border: "1px solid rgba(242, 184, 75, 0.3)",
-                      background: "rgba(15, 34, 66, 0.03)",
+                      borderRadius: "var(--radius-medium)",
+                      border: "1px solid var(--border)",
+                      borderLeft: "3px solid #F59E0B",
                     }}
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "8px" }}>
+                        <span className="zenith-kicker">
                           {ach.competition}
                         </span>
-                        <span className="font-mono text-xs font-bold px-2 py-0.5 bg-[#F2B84B]/15 text-[#b07d1d] border border-[#F2B84B]/40 rounded-xs">
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "11px",
+                            fontWeight: 800,
+                            padding: "2px 8px",
+                            borderRadius: "var(--radius-micro)",
+                            background: "rgba(245, 158, 11, 0.12)",
+                            border: "1px solid rgba(245, 158, 11, 0.35)",
+                            color: "#F59E0B",
+                          }}
+                        >
                           {typeof ach.position === "number" ? `#${ach.position} PODIUM` : ach.position}
                         </span>
                       </div>
-                      <h4 className="text-lg font-bold text-[#1A3663] mb-1">
+                      <h4 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 4px", color: "var(--text-primary)" }}>
                         {ach.achievement}
                       </h4>
-                      <p className="text-xs font-mono text-[#64748B]">
+                      <p style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--text-secondary)", margin: 0 }}>
                         {ach.house} • {ach.festival} • {ach.date}
                       </p>
                       {ach.performance && (
-                        <div className="mt-3 inline-block px-3 py-1 bg-white border border-[#E8EDF3] rounded-xs font-mono text-sm font-bold text-[#1A3663]">
+                        <div
+                          style={{
+                            marginTop: "12px",
+                            display: "inline-block",
+                            padding: "4px 10px",
+                            background: "var(--surface-raised)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "var(--radius-micro)",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "13px",
+                            fontWeight: 750,
+                            color: "var(--text-primary)",
+                          }}
+                        >
                           Mark: {ach.performance}
                         </div>
                       )}
                     </div>
 
-                    <div className="pt-3 border-t border-[#E8EDF3] flex items-center justify-between">
-                      <span className="text-[11px] font-mono text-muted-foreground uppercase">
+                    <div style={{ paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)", textTransform: "uppercase" }}>
                         CERTIFICATE READY
                       </span>
                       <AchievementPosterModal achievement={ach} />

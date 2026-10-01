@@ -29,15 +29,15 @@ export default async function TeamManagerDashboardPage() {
     allAppeals,
     allPublishedResults,
   ] = await Promise.all([
-    getAuthenticatedProfile(),
-    getTeamsByFestival(festivalId),
-    getParticipantsByFestivalAdmin(festivalId),
-    getEventsByFestival(festivalId),
-    getDivisionsByFestival(festivalId),
-    getAdminRegistrationsByFestival(festivalId),
-    getSubstitutionsByFestival(festivalId),
-    getAppealsByFestival(festivalId),
-    getPublishedResultsByFestival(festivalId),
+    getAuthenticatedProfile().catch(() => null),
+    getTeamsByFestival(festivalId).catch(() => []),
+    getParticipantsByFestivalAdmin(festivalId).catch(() => []),
+    getEventsByFestival(festivalId).catch(() => []),
+    getDivisionsByFestival(festivalId).catch(() => []),
+    getAdminRegistrationsByFestival(festivalId).catch(() => []),
+    getSubstitutionsByFestival(festivalId).catch(() => []),
+    getAppealsByFestival(festivalId).catch(() => []),
+    getPublishedResultsByFestival(festivalId).catch(() => []),
   ]);
 
   // Determine current team: if manager has team_id use it, otherwise default to first team for inspection

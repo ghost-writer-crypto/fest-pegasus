@@ -41,12 +41,12 @@ export default async function ResultsPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--results pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">OFFICIAL STANDINGS & PODIUMS</p>
-        <h1 className="pegasus-page-title">Results</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>02 / RESULTS</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Official Results</h1>
         <p className="pegasus-page__description">
           Verified and officially published event outcomes, athlete rankings,
-          and championship points for the Pegasus Sports Festival.
+          and championship points for ZENITHROW Sports Festival 2026.
         </p>
       </section>
 

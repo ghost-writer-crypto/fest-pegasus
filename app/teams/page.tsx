@@ -4,18 +4,18 @@ import { participants } from "@/data/participants";
 
 export default function TeamsPage() {
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--teams pegasus-animate-fade">
+    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 24px 80px" }}>
       {/* Page Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">FESTIVAL HOUSES & ATHLETE ROSTERS</p>
-        <h1 className="pegasus-page-title">Teams</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "36px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>06 / HOUSES</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Official Houses</h1>
         <p className="pegasus-page__description">
           Official competition houses, team identities, registered athlete rosters,
-          and division allocations for the Pegasus Sports Festival.
+          and division allocations for ZENITHROW Sports Festival 2026.
         </p>
       </section>
 
-      <section className="pegasus-teams-grid">
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "24px" }}>
         {leaderboard.map((team) => {
           const teamParticipants = participants.filter(
             (participant) => participant.teamId === team.id,
@@ -28,33 +28,60 @@ export default function TeamsPage() {
               : "H");
 
           return (
-            <article key={team.id} className="pegasus-card pegasus-team-card">
-              <div className="pegasus-team-card__header">
+            <article
+              key={team.id}
+              className="zenith-surface-1 zenith-edge"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+                padding: "24px",
+                borderRadius: "var(--radius-medium)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                  <div className="pegasus-team-badge" aria-label={team.name}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "var(--radius-micro)",
+                      background: "var(--surface-raised)",
+                      border: "1px solid var(--border)",
+                      boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.12)",
+                      fontFamily: "var(--font-mono)",
+                      fontWeight: 900,
+                      fontSize: "15px",
+                      color: "var(--text-primary)",
+                    }}
+                    aria-label={team.name}
+                  >
                     {teamInitials}
                   </div>
                   <div>
-                    <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>
+                    <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 850, textTransform: "uppercase", color: "var(--text-primary)" }}>
                       {team.name}
                     </h2>
-                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                      {team.code ? `Code: ${team.code}` : "Identity Pending"}
+                    <span style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                      {team.code ? `CODE: ${team.code}` : "IDENTITY CONFIRMED"}
                     </span>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <span className="pegasus-status pegasus-status--upcoming">
-                    <span className="pegasus-status__dot" />
-                    Rank #{team.rank}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                  <span className="zenith-signal zenith-signal-upcoming">
+                    RANK #{team.rank}
                   </span>
                   <span
                     style={{
-                      fontSize: "14px",
-                      fontWeight: 800,
-                      color: "var(--accent)",
-                      fontFamily: "monospace",
+                      fontSize: "16px",
+                      fontWeight: 900,
+                      color: "var(--primary)",
+                      fontFamily: "var(--font-mono)",
                     }}
                   >
                     {team.points} PTS

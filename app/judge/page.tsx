@@ -173,13 +173,11 @@ export default async function JudgeControlPage() {
         />
       </div>
 
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">CONTROL ROOM • FIELD OPERATIONS</p>
-        <h1 className="pegasus-page-title">Judge Control Center</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "28px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>09 / FIELD REFEREE</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Judge Control Center</h1>
         <p className="pegasus-page__description">
-          Field operations console for referees, event judges, and official
-          scorers. Enter performance marks, verify lane outcomes, and submit
-          results for Chief Scorer verification.
+          Field operations console for referees, event judges, and official scorers. Rapid lane mark entry, result verification, and official submission.
         </p>
       </section>
 
@@ -188,28 +186,31 @@ export default async function JudgeControlPage() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: "12px",
-          marginBottom: "28px",
+          gap: "14px",
+          marginBottom: "32px",
         }}
       >
         {metrics.map((m) => (
           <div
             key={m.label}
-            className="pegasus-card"
+            className="zenith-surface-1 zenith-edge"
             style={{
               padding: "16px 20px",
               display: "flex",
               flexDirection: "column",
               gap: "6px",
+              borderRadius: "var(--radius-medium)",
+              border: "1px solid var(--border)",
             }}
           >
             <span
               style={{
                 fontSize: "11px",
-                fontWeight: 700,
-                color: "var(--muted)",
+                fontWeight: 800,
+                color: "var(--text-muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                letterSpacing: "0.08em",
+                fontFamily: "var(--font-mono)",
               }}
             >
               {m.label}
@@ -219,7 +220,8 @@ export default async function JudgeControlPage() {
                 fontSize: "28px",
                 fontWeight: 900,
                 lineHeight: 1,
-                color: m.value > 0 ? "var(--accent)" : "var(--foreground)",
+                fontFamily: "var(--font-mono)",
+                color: m.value > 0 ? "var(--primary)" : "var(--text-primary)",
               }}
             >
               {m.value}
@@ -232,8 +234,8 @@ export default async function JudgeControlPage() {
       {assignedEventRows.length > 0 ? (
         <section style={{ display: "grid", gap: "16px", marginBottom: "40px" }}>
           <div style={{ marginBottom: "8px" }}>
-            <p className="pegasus-eyebrow">OFFICIAL MATCH ROSTER</p>
-            <h2 style={{ fontSize: "20px", fontWeight: 850, margin: 0 }}>
+            <p className="zenith-kicker" style={{ marginBottom: "4px" }}>OFFICIAL MATCH ROSTER</p>
+            <h2 style={{ fontSize: "20px", fontWeight: 850, margin: 0, textTransform: "uppercase", color: "var(--text-primary)" }}>
               ASSIGNED MATCHES ({assignedEventRows.length})
             </h2>
           </div>
@@ -241,7 +243,7 @@ export default async function JudgeControlPage() {
           {assignedEventRows.map((event) => (
             <article
               key={event.id}
-              className="pegasus-card pegasus-card--interactive"
+              className="zenith-surface-1 zenith-edge"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -249,17 +251,19 @@ export default async function JudgeControlPage() {
                 flexWrap: "wrap",
                 gap: "20px",
                 padding: "20px 24px",
+                borderRadius: "var(--radius-medium)",
                 border: "1px solid var(--border)",
               }}
             >
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                  <span className="font-mono text-xs font-bold text-[#5B9BD5] uppercase tracking-wider">
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span className="zenith-kicker">
                     {event.competition_type || "ATHLETICS"}
                   </span>
-                  <span style={{ color: "var(--muted)" }}>•</span>
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase bg-[#1A3663] text-white rounded-xs">
-                    ASSIGNED // READY
+                  <span style={{ color: "var(--border)" }}>•</span>
+                  <span className="zenith-signal zenith-signal-upcoming">
+                    <span className="zenith-signal-dot" />
+                    ASSIGNED // READY FOR SCORING
                   </span>
                 </div>
 
@@ -267,8 +271,9 @@ export default async function JudgeControlPage() {
                   style={{
                     margin: "2px 0 6px",
                     fontSize: "20px",
-                    fontWeight: 800,
-                    color: "var(--foreground)",
+                    fontWeight: 850,
+                    textTransform: "uppercase",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {event.name}
@@ -281,27 +286,27 @@ export default async function JudgeControlPage() {
                     gap: "16px",
                     flexWrap: "wrap",
                     fontSize: "12px",
-                    color: "var(--muted)",
-                    fontFamily: "monospace",
+                    color: "var(--text-muted)",
+                    fontFamily: "var(--font-mono)",
                   }}
                 >
                   <span>TEAMS: All Qualified Houses</span>
                   <span>•</span>
                   <span>VENUE: Main Track // Lane 1-8</span>
                   <span>•</span>
-                  <span>TIME: Session 01</span>
+                  <span>SESSION: Primary Draw</span>
                 </div>
               </div>
 
               <Link
                 href={`/judge/events/${event.id}`}
-                className="pegasus-button pegasus-button--primary"
+                className="zenith-btn zenith-btn-primary"
                 style={{
                   minHeight: "44px",
                   display: "inline-flex",
                   alignItems: "center",
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
+                  fontSize: "13px",
+                  padding: "0 20px",
                 }}
               >
                 OPEN MATCH <span>→</span>

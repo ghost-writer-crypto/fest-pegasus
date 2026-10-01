@@ -16,8 +16,8 @@
 .sectionWrap {
   position: relative;
   width: 100%;
-  background-color: #FFFFFF;
-  border-bottom: 1px solid #E8EDF3;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
   padding: 80px 0 96px;
   scroll-margin-top: 80px;
 }
@@ -47,21 +47,21 @@
 }
 
 .sectionKicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #5B9BD5;
+  color: var(--primary);
   margin: 0;
 }
 
 .sectionTitle {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(2rem, 3.6vw, 2.8rem);
   font-weight: 850;
   letter-spacing: -0.035em;
-  color: #1A3663;
+  color: var(--text-primary);
   line-height: 1.05;
   margin: 0;
   text-transform: uppercase;
@@ -71,17 +71,17 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #1A3663;
+  color: var(--text-primary);
   text-decoration: none;
   padding: 8px 16px;
-  border-radius: 2px;
-  border: 1px solid #E8EDF3;
-  background-color: #FFFFFF;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
   transition:
     background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -91,9 +91,9 @@
 }
 
 .sectionLink:hover {
-  background-color: #1A3663;
-  border-color: #1A3663;
-  color: #FFFFFF;
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--background);
 }
 
 .sectionLink:active {
@@ -101,7 +101,7 @@
 }
 
 .sectionLink:focus-visible {
-  outline: 2px solid #1A3663;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -112,7 +112,7 @@
 .sectionDividerTrack {
   width: 100%;
   height: 1px;
-  background-color: #E8EDF3;
+  background-color: var(--border);
   margin-bottom: 0;
   overflow: hidden;
 }
@@ -120,7 +120,7 @@
 .sectionDividerLine {
   width: 100%;
   height: 100%;
-  background-color: #1A3663;
+  background-color: var(--primary);
   transform-origin: left center;
   will-change: transform;
 }
@@ -154,15 +154,15 @@
   align-items: center;
   gap: 32px;
   padding: 24px 8px;
-  border-bottom: 1px solid #E8EDF3;
-  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
   transition:
     background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scheduleRow:hover {
-  background-color: #F8FAFC;
+  background-color: var(--surface-hover);
   transform: translateX(2px);
 }
 
@@ -183,16 +183,16 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #5B9BD5;
+  background-color: var(--secondary);
   flex-shrink: 0;
 }
 
 .scheduleTime {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 22px;
   font-weight: 850;
   letter-spacing: -0.03em;
-  color: #1A3663;
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -220,11 +220,11 @@
 }
 
 .scheduleEventName {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-heading);
   font-size: 18px;
   font-weight: 850;
   letter-spacing: 0.01em;
-  color: #1A3663;
+  color: var(--text-primary);
   text-transform: uppercase;
 }
 
@@ -232,16 +232,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 650;
-  color: #64748B;
+  color: var(--text-secondary);
   text-transform: uppercase;
   flex-wrap: wrap;
 }
 
 .metaDot {
-  color: #C9D3DF;
+  color: var(--border);
   font-size: 10px;
 }
 
@@ -272,15 +272,16 @@
   align-items: center;
   justify-content: center;
   padding: 4px 10px;
-  background-color: #E8EDF3;
-  color: #1A3663;
-  border-radius: 2px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
+  border: 1px solid var(--border);
 }
 
 .pending .scheduleStatusCol {
@@ -308,9 +309,9 @@
   gap: 20px;
   margin-top: 32px;
   padding: 16px 20px;
-  background-color: #F8FAFC;
-  border: 1px solid #E8EDF3;
-  border-radius: 2px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   flex-wrap: wrap;
   will-change: transform, opacity;
 }
@@ -333,9 +334,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
-  color: #26364A;
+  color: var(--text-primary);
   line-height: 1.4;
   flex: 1;
   min-width: 240px;
@@ -343,10 +344,10 @@
 
 .scheduleNoticeBadge {
   padding: 3px 8px;
-  background-color: #1A3663;
+  background-color: var(--primary);
   color: #FFFFFF;
-  border-radius: 2px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -360,34 +361,34 @@
 .emptyCard {
   text-align: center;
   padding: 64px 24px;
-  background-color: #F8FAFC;
-  border: 1px dashed #C9D3DF;
-  border-radius: 2px;
+  background-color: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
   margin: 16px 0;
 }
 
 .emptyEyebrow {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.16em;
-  color: #64748B;
+  color: var(--text-muted);
   margin: 0 0 8px 0;
   text-transform: uppercase;
 }
 
 .emptyTitle {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-heading);
   font-size: 20px;
   font-weight: 800;
-  color: #1A3663;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .emptyDesc {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
-  color: #64748B;
+  color: var(--text-secondary);
   max-width: 520px;
   margin: 0 auto 24px auto;
   line-height: 1.5;
@@ -397,25 +398,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #1A3663;
+  color: var(--text-primary);
   text-decoration: none;
   padding: 8px 16px;
-  border-radius: 2px;
-  border: 1px solid #1A3663;
-  background-color: transparent;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
   transition:
     background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
     color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .emptyLink:hover {
-  background-color: #1A3663;
-  color: #FFFFFF;
+  background-color: var(--text-primary);
+  color: var(--background);
 }
 
 /* =========================================

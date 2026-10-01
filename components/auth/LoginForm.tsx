@@ -12,61 +12,49 @@ interface LoginFormProps {
 }
 
 const ROLES_LIST = [
-
   {
     key: "admin",
-    roleLabel: "Festival Director",
+    roleLabel: "ZENITHROW Demo Admin",
     roleBadge: "ADMIN",
-    roleColor: "#1A3663",
-    roleBg: "rgba(26, 54, 99, 0.08)",
-    badgeColor: "#d7ff3f",
-    badgeBg: "rgba(215, 255, 63, 0.15)",
+    roleColor: "var(--primary)",
+    roleBg: "rgba(229, 57, 53, 0.08)",
+    badgeColor: "var(--primary)",
+    badgeBg: "rgba(229, 57, 53, 0.12)",
     description: "Festival Command Center: Tournament control, participant roster, appeals adjudication & publication.",
     dest: "/admin",
   },
   {
     key: "judge",
-    roleLabel: "Chief Track Referee",
+    roleLabel: "ZENITHROW Demo Judge",
     roleBadge: "JUDGE",
-    roleColor: "#101010",
-    roleBg: "rgba(0, 0, 0, 0.04)",
-    badgeColor: "#38bdf8",
-    badgeBg: "rgba(56, 189, 248, 0.15)",
+    roleColor: "var(--secondary)",
+    roleBg: "rgba(37, 99, 235, 0.08)",
+    badgeColor: "var(--secondary)",
+    badgeBg: "rgba(37, 99, 235, 0.12)",
     description: "Field Referee Desk: Scorecard entry, finish times, heats verification & station QR.",
     dest: "/judge",
   },
   {
-    key: "team_manager_garuda",
-    roleLabel: "Garuda House Captain",
-    roleBadge: "GARUDA (GAR)",
-    roleColor: "#8B0000",
-    roleBg: "rgba(139, 0, 0, 0.05)",
-    badgeColor: "#F2B84B",
-    badgeBg: "rgba(242, 184, 75, 0.15)",
-    description: "House Command: Squad roster quota management, Tug-of-War weight checks & disputes.",
+    key: "team_manager",
+    roleLabel: "ZENITHROW Demo Team Manager",
+    roleBadge: "TEAM MANAGER",
+    roleColor: "#F59E0B",
+    roleBg: "rgba(245, 158, 11, 0.08)",
+    badgeColor: "#F59E0B",
+    badgeBg: "rgba(245, 158, 11, 0.12)",
+    description: "House Command: Squad roster quota management, substitutions & team-specific operations.",
     dest: "/team-manager",
   },
   {
-    key: "team_manager_toofan",
-    roleLabel: "Toofan House Captain",
-    roleBadge: "TOOFAN (TOF)",
-    roleColor: "#1E3A8A",
-    roleBg: "rgba(30, 58, 138, 0.05)",
-    badgeColor: "#5B9BD5",
-    badgeBg: "rgba(91, 155, 213, 0.15)",
-    description: "House Command: Squad roster, substitute nominations & official result tracking.",
-    dest: "/team-manager",
-  },
-  {
-    key: "desk_operator",
-    roleLabel: "Control Desk Operator",
-    roleBadge: "DESK OPS",
-    roleColor: "#065F46",
-    roleBg: "rgba(6, 95, 70, 0.05)",
-    badgeColor: "#34D399",
-    badgeBg: "rgba(52, 211, 153, 0.15)",
-    description: "Scoring & Check-in Desk: Rapid participant check-in, score ingestion & printout desk.",
-    dest: "/admin/verification",
+    key: "participant",
+    roleLabel: "ZENITHROW Demo Athlete",
+    roleBadge: "ATHLETE",
+    roleColor: "#10B981",
+    roleBg: "rgba(16, 185, 129, 0.08)",
+    badgeColor: "#10B981",
+    badgeBg: "rgba(16, 185, 129, 0.12)",
+    description: "Public Athlete Experience: Personal competition telemetry, chest number & verified results.",
+    dest: "/my-result",
   },
 ];
 
@@ -241,32 +229,31 @@ export default function LoginForm({
         {/* Right Column: Standard Credentials Login */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E8EDF3",
-            borderRadius: "4px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-sm)",
             padding: "24px",
-            boxShadow: "0 2px 12px rgba(26, 54, 99, 0.04)",
           }}
         >
-          <div style={{ marginBottom: "20px", borderBottom: "1px solid #E8EDF3", paddingBottom: "12px" }}>
+          <div style={{ marginBottom: "20px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
             <span
               style={{
-                fontFamily: "ui-monospace, monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: "10px",
                 fontWeight: 800,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                color: "#64748B",
+                color: "var(--text-muted)",
                 display: "block",
                 marginBottom: "4px",
               }}
             >
               OPERATOR CREDENTIAL SIGN-IN
             </span>
-            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "#1A3663" }}>
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>
               Sign In to Your Station
             </h2>
-            <p style={{ fontSize: "12px", color: "#64748B", margin: "4px 0 0" }}>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "4px 0 0", fontFamily: "var(--font-sans)" }}>
               Enter your assigned festival email and official access key.
             </p>
           </div>
@@ -278,11 +265,11 @@ export default function LoginForm({
               <div
                 style={{
                   padding: "10px 12px",
-                  background: "rgba(229, 55, 55, 0.08)",
-                  border: "1px solid rgba(229, 55, 55, 0.3)",
-                  borderRadius: "3px",
+                  background: "rgba(229, 57, 53, 0.12)",
+                  border: "1px solid rgba(229, 57, 53, 0.4)",
+                  borderRadius: "var(--radius-sm)",
                   fontSize: "12px",
-                  color: "#E53737",
+                  color: "var(--primary)",
                   fontWeight: 600,
                 }}
               >
@@ -299,8 +286,9 @@ export default function LoginForm({
                   fontWeight: 750,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
-                  color: "#26364A",
+                  color: "var(--text-primary)",
                   marginBottom: "6px",
+                  fontFamily: "var(--font-sans)",
                 }}
               >
                 Operator Email / Role
@@ -310,15 +298,15 @@ export default function LoginForm({
                 name="email"
                 type="text"
                 required
-                placeholder="e.g. admin@pegasus.internal or judge"
+                placeholder="e.g. admin@zenithrow.internal or judge"
                 style={{
                   width: "100%",
                   padding: "10px 12px",
-                  border: "1px solid #CBD5E1",
-                  borderRadius: "3px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)",
                   fontSize: "13px",
-                  color: "#1A3663",
-                  background: "#F8FAFC",
+                  color: "var(--text-primary)",
+                  background: "var(--background)",
                   outline: "none",
                 }}
               />
@@ -333,8 +321,9 @@ export default function LoginForm({
                   fontWeight: 750,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
-                  color: "#26364A",
+                  color: "var(--text-primary)",
                   marginBottom: "6px",
+                  fontFamily: "var(--font-sans)",
                 }}
               >
                 Access Key / Password
@@ -348,11 +337,11 @@ export default function LoginForm({
                 style={{
                   width: "100%",
                   padding: "10px 12px",
-                  border: "1px solid #CBD5E1",
-                  borderRadius: "3px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)",
                   fontSize: "13px",
-                  color: "#1A3663",
-                  background: "#F8FAFC",
+                  color: "var(--text-primary)",
+                  background: "var(--background)",
                   outline: "none",
                 }}
               />
@@ -366,25 +355,26 @@ export default function LoginForm({
                 width: "100%",
                 minHeight: "44px",
                 marginTop: "8px",
-                background: "#1A3663",
-                borderColor: "#1A3663",
+                background: "var(--primary)",
+                borderColor: "var(--primary)",
                 color: "#FFFFFF",
                 fontSize: "12px",
                 letterSpacing: "0.08em",
+                borderRadius: "var(--radius-sm)",
               }}
             >
               {isPending ? "Authenticating..." : "Authorize Station Access ↗"}
             </button>
 
-            <div style={{ borderTop: "1px solid #E8EDF3", paddingTop: "14px", marginTop: "4px" }}>
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: "14px", marginTop: "4px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "11px", color: "#64748B" }}>Need spectator access?</span>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Need spectator access?</span>
                 <Link
                   href="/"
                   style={{
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: "#1A3663",
+                    color: "var(--primary)",
                     textDecoration: "underline",
                   }}
                 >

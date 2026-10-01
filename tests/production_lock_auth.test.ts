@@ -39,6 +39,8 @@ test("PEGASUS: Production Lock & Access Control Security Matrix", async (t) => {
   const inactiveAdmin: SessionData = { ...adminSession, isActive: false };
   const unauthenticated = null;
 
+  const participantSession: SessionData = PRESET_OPERATORS.participant;
+
   await t.test("1. Unauthenticated -> /admin blocked", () => {
     const res = checkAdminAccess(unauthenticated);
     assert.equal(res.allowed, false);
@@ -68,6 +70,9 @@ test("PEGASUS: Production Lock & Access Control Security Matrix", async (t) => {
   });
 
   await t.test("6. Authenticated Team Manager -> /team-manager allowed", () => {
+    const res = checkTeamManagerAccess(PRESET_OPERATORS.team_manager);
+    assert.equal(res.allowed, true);
+
     const resGaruda = checkTeamManagerAccess(tmGarudaSession);
     assert.equal(resGaruda.allowed, true);
 
@@ -82,13 +87,13 @@ test("PEGASUS: Production Lock & Access Control Security Matrix", async (t) => {
   });
 
   await t.test("8. Team Manager -> /admin rejected", () => {
-    const res = checkAdminAccess(tmGarudaSession);
+    const res = checkAdminAccess(PRESET_OPERATORS.team_manager);
     assert.equal(res.allowed, false);
     assert.equal(res.redirectUrl, "/login?redirect=/admin&error=unauthorized_admin");
   });
 
   await t.test("9. Team Manager -> /judge rejected", () => {
-    const res = checkJudgeAccess(tmGarudaSession);
+    const res = checkJudgeAccess(PRESET_OPERATORS.team_manager);
     assert.equal(res.allowed, false);
     assert.equal(res.redirectUrl, "/login?redirect=/judge&error=unauthorized_judge");
   });
@@ -140,5 +145,11 @@ test("PEGASUS: Production Lock & Access Control Security Matrix", async (t) => {
     assert.equal(getSafeRedirectDestination("/admin/publish", "/admin"), "/admin/publish");
     assert.equal(getSafeRedirectDestination("/judge/events/evt-100", "/judge"), "/judge/events/evt-100");
     assert.equal(getSafeRedirectDestination("/team-manager", "/"), "/team-manager");
+  });
+
+  await t.test("14. Participant (Guest role) -> /admin, /judge, /team-manager rejected", () => {
+    assert.equal(checkAdminAccess(participantSession).allowed, false);
+    assert.equal(checkJudgeAccess(participantSession).allowed, false);
+    assert.equal(checkTeamManagerAccess(participantSession).allowed, false);
   });
 });

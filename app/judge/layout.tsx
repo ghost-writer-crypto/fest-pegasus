@@ -8,8 +8,8 @@ import ShowQrButton from "@/components/qr/ShowQrButton";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pegasus Judge — Field Operations Console",
-  description: "Field scoring and referee console for Pegasus Sports Festival",
+  title: "ZENITHROW Judge — Field Operations Console",
+  description: "Field scoring and referee console for ZENITHROW Sports Festival",
 };
 
 export default async function JudgeLayout({
@@ -30,8 +30,8 @@ export default async function JudgeLayout({
       <header className="pegasus-judge-topbar">
         <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
           <Link href="/judge" className="pegasus-brand">
-            <span className="pegasus-brand__mark">P</span>
-            <span className="pegasus-brand__name">PEGASUS</span>
+            <span className="pegasus-brand__mark">Z</span>
+            <span className="pegasus-brand__name">ZENITHROW</span>
           </Link>
           <span
             style={{

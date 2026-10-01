@@ -70,7 +70,7 @@ export default function AchievementPosterModal({ achievement }: AchievementPoste
       ctx.fillStyle = "#5B9BD5";
       ctx.font = "bold 24px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("PEGASUS / STUDENTS' SPORTS FESTIVAL 2026", 600, 115);
+      ctx.fillText("ZENITHROW / STUDENTS' SPORTS FESTIVAL 2026", 600, 115);
 
       ctx.fillStyle = "#F2B84B";
       ctx.font = "900 42px sans-serif";
@@ -173,7 +173,7 @@ export default function AchievementPosterModal({ achievement }: AchievementPoste
       ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
       ctx.font = "16px monospace";
       ctx.fillText(
-        "PEGASUS OPERATING SYSTEM // AUTHORITATIVE RESULTS LIFECYCLE CERTIFIED",
+        "ZENITHROW OPERATING SYSTEM // AUTHORITATIVE RESULTS LIFECYCLE CERTIFIED",
         600,
         1450
       );
@@ -181,7 +181,7 @@ export default function AchievementPosterModal({ achievement }: AchievementPoste
       // Trigger instant PNG download
       const link = document.createElement("a");
       const safeTitle = achievement.competition.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      link.download = `pegasus-poster-${safeTitle}-${achievement.position}.png`;
+      link.download = `zenithrow-poster-${safeTitle}-${achievement.position}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (err) {

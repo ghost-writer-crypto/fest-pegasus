@@ -14,8 +14,8 @@ export default function DisplayPage() {
       <header className="pegasus-display-header">
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div className="pegasus-brand" style={{ transform: "scale(1.15)", transformOrigin: "left center" }}>
-            <span className="pegasus-brand__mark">P</span>
-            <span className="pegasus-brand__name">PEGASUS</span>
+            <span className="pegasus-brand__mark">Z</span>
+            <span className="pegasus-brand__name">ZENITHROW</span>
           </div>
           <span
             className="pegasus-status pegasus-status--live"
@@ -43,7 +43,7 @@ export default function DisplayPage() {
       {/* Main Stadium Jumbotron Body */}
       <section className="pegasus-display-body">
         <p className="pegasus-eyebrow" style={{ fontSize: "14px", letterSpacing: "0.2em", color: "var(--accent)" }}>
-          PEGASUS SPORTS FESTIVAL 2026
+          ZENITHROW SPORTS FESTIVAL 2026
         </p>
         <h1 className="pegasus-display-title">
           STADIUM SCREEN SYSTEM

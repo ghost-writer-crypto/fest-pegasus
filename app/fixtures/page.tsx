@@ -46,12 +46,12 @@ export default async function FixturesPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--fixtures pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">TOURNAMENT BRACKETS & MATCHUPS</p>
-        <h1 className="pegasus-page-title">Fixtures</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>10 / FIXTURES</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Tournament Fixtures</h1>
         <p className="pegasus-page__description">
-          Official team tournament fixtures, knockout matchups, and game
-          schedules across the Pegasus Sports Festival.
+          Official team tournament fixtures, knockout matchups, and arena
+          schedules across ZENITHROW Sports Festival 2026.
         </p>
       </section>
 

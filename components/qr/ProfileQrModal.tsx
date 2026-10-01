@@ -125,7 +125,7 @@ export default function ProfileQrModal({
               color: "var(--muted)",
             }}
           >
-            PEGASUS IDENTITY
+            ZENITHROW IDENTITY
           </span>
         </div>
 
@@ -203,7 +203,7 @@ export default function ProfileQrModal({
             marginBottom: "6px",
           }}
         >
-          PEGASUS ID QR
+          ZENITHROW ID QR
         </span>
 
         {data.isPrivileged ? (

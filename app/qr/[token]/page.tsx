@@ -5,8 +5,8 @@ import { resolveQrToken } from "@/lib/repositories/qrRepository";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Identity Verification | Pegasus QR",
-  description: "Official PEGASUS identity verification and authentication portal",
+  title: "Identity Verification | ZENITHROW QR",
+  description: "Official ZENITHROW identity verification and authentication portal",
 };
 
 interface QrResolutionPageProps {
@@ -214,7 +214,7 @@ export default async function QrResolutionPage({
           </div>
 
           <p style={{ margin: 0, fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Official competitor identity verified via PEGASUS Security Token. Student profile and results are read-only.
+            Official competitor identity verified via ZENITHROW Security Token. Student profile and results are read-only.
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%", marginTop: "4px" }}>

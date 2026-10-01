@@ -1,8 +1,8 @@
 .statusStrip {
-  background-color: #0F2242;
-  border-top: 1px solid rgba(232, 237, 243, 0.12);
-  border-bottom: 1px solid #1A3663;
-  color: #FFFFFF;
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
   position: relative;
   z-index: 20;
 }
@@ -15,7 +15,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  divide-x: 1px solid rgba(255, 255, 255, 0.08);
+  divide-x: 1px solid var(--border);
 }
 
 .tile {
@@ -32,11 +32,11 @@
 }
 
 .tile:hover {
-  background-color: rgba(255, 255, 255, 0.035);
+  background-color: var(--surface-hover);
 }
 
 .tile:focus-visible {
-  outline: 2px solid #F2B84B;
+  outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 
@@ -49,12 +49,12 @@
 }
 
 .kicker {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5B9BD5;
+  color: var(--secondary);
 }
 
 .liveTagActive {
@@ -62,21 +62,21 @@
   align-items: center;
   gap: 5px;
   padding: 2px 7px;
-  border-radius: 2px;
-  background-color: rgba(229, 55, 55, 0.2);
-  border: 1px solid rgba(229, 55, 55, 0.5);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  background-color: rgba(229, 57, 53, 0.15);
+  border: 1px solid rgba(229, 57, 53, 0.4);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: #E53737;
+  color: var(--primary);
 }
 
 .pulseDot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background-color: #E53737;
+  background-color: var(--primary);
   animation: pulseBeacon 1.2s infinite ease-in-out;
 }
 
@@ -95,56 +95,56 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 7px;
-  border-radius: 2px;
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.08em;
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 
 .badgeNeutral {
   display: inline-flex;
   align-items: center;
   padding: 2px 7px;
-  border-radius: 2px;
-  background-color: rgba(91, 155, 213, 0.15);
-  border: 1px solid rgba(91, 155, 213, 0.3);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.08em;
-  color: #8bbcef;
+  color: var(--secondary);
 }
 
 .badgeOfficial {
   display: inline-flex;
   align-items: center;
   padding: 2px 7px;
-  border-radius: 2px;
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.08em;
-  color: #E8EDF3;
+  color: var(--text-secondary);
 }
 
 .badgeGold {
   display: inline-flex;
   align-items: center;
   padding: 2px 7px;
-  border-radius: 2px;
-  background-color: rgba(242, 184, 75, 0.15);
-  border: 1px solid rgba(242, 184, 75, 0.4);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  border-radius: var(--radius-sm);
+  background-color: rgba(229, 57, 53, 0.12);
+  border: 1px solid rgba(229, 57, 53, 0.3);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: #F2B84B;
+  color: var(--primary);
 }
 
 .tileBody {
@@ -152,10 +152,11 @@
 }
 
 .tileTitle {
+  font-family: var(--font-heading);
   font-size: 14px;
   font-weight: 750;
   letter-spacing: -0.01em;
-  color: #FFFFFF;
+  color: var(--text-primary);
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
@@ -163,16 +164,18 @@
 }
 
 .tileTitleMuted {
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 650;
   letter-spacing: 0.02em;
-  color: #94A3B8;
+  color: var(--text-muted);
   line-height: 1.25;
 }
 
 .tileMeta {
+  font-family: var(--font-sans);
   font-size: 12px;
-  color: #C9D3DF;
+  color: var(--text-secondary);
   margin-top: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -183,16 +186,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #5B9BD5;
+  color: var(--secondary);
 }
 
 .tile:hover .tileFooter {
-  color: #F2B84B;
+  color: var(--primary);
 }
 
 .arrow {

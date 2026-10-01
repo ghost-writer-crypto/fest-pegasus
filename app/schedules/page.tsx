@@ -36,12 +36,12 @@ export default async function SchedulesPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--schedules pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">TIMETABLE & PROGRAM</p>
-        <h1 className="pegasus-page-title">Schedules</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>03 / SCHEDULE</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Competition Schedule</h1>
         <p className="pegasus-page__description">
           Official competition timetable, venue assignments, and event timings
-          for the Pegasus Sports Festival.
+          for ZENITHROW Sports Festival 2026.
         </p>
       </section>
 

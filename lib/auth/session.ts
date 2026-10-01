@@ -14,36 +14,52 @@ export const SESSION_COOKIE_NAME = "pegasus_session";
 
 export const PRESET_OPERATORS: Record<string, SessionData> = {
   admin: {
-    userId: "a001-admin-uuid",
-    fullName: "Festival Director",
+    userId: "demo-admin-uuid",
+    fullName: "ZENITHROW Demo Admin",
     role: "admin",
     teamId: null,
     isActive: true,
-    email: "admin@pegasus.internal",
+    email: "admin@zenithrow.internal",
   },
   judge: {
-    userId: "j001-judge-uuid",
-    fullName: "Chief Track Referee",
+    userId: "demo-judge-uuid",
+    fullName: "ZENITHROW Demo Judge",
     role: "judge",
     teamId: null,
     isActive: true,
-    email: "referee.track@pegasus.internal",
+    email: "judge@zenithrow.internal",
   },
-  team_manager_garuda: {
-    userId: "tm001-garuda-uuid",
-    fullName: "Garuda House Captain",
+  team_manager: {
+    userId: "demo-tm-uuid",
+    fullName: "ZENITHROW Demo Team Manager",
     role: "team_manager",
     teamId: "GAR",
     isActive: true,
-    email: "captain.garuda@pegasus.internal",
+    email: "teammanager@zenithrow.internal",
+  },
+  participant: {
+    userId: "demo-athlete-uuid",
+    fullName: "ZENITHROW Demo Athlete",
+    role: "guest",
+    teamId: "GAR",
+    isActive: true,
+    email: "athlete@zenithrow.internal",
+  },
+  team_manager_garuda: {
+    userId: "tm001-garuda-uuid",
+    fullName: "ZENITHROW Demo Team Manager (Garuda)",
+    role: "team_manager",
+    teamId: "GAR",
+    isActive: true,
+    email: "captain.garuda@zenithrow.internal",
   },
   team_manager_toofan: {
     userId: "tm002-toofan-uuid",
-    fullName: "Toofan House Captain",
+    fullName: "ZENITHROW Demo Team Manager (Toofan)",
     role: "team_manager",
     teamId: "TOF",
     isActive: true,
-    email: "captain.toofan@pegasus.internal",
+    email: "captain.toofan@zenithrow.internal",
   },
   desk_operator: {
     userId: "d001-desk-uuid",
@@ -51,7 +67,7 @@ export const PRESET_OPERATORS: Record<string, SessionData> = {
     role: "desk_operator",
     teamId: null,
     isActive: true,
-    email: "desk@pegasus.internal",
+    email: "desk@zenithrow.internal",
   },
 };
 

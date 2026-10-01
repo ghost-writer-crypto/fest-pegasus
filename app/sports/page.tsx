@@ -4,55 +4,96 @@ import { events } from "@/data/events";
 
 export default function SportsPage() {
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--sports pegasus-animate-fade">
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">COMPETITION DISCIPLINES</p>
-        <h1 className="pegasus-page-title">Sports</h1>
+    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 24px 80px" }}>
+      <section className="pegasus-page__header" style={{ marginBottom: "36px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>05 / DISCIPLINES</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Sports Program</h1>
         <p className="pegasus-page__description">
-          Explore every sport and configured event scheduled across the Pegasus
-          Sports Festival.
+          Certified athletic disciplines, match tournaments, and medal events configured across ZENITHROW 2026.
         </p>
       </section>
 
-      <section className="pegasus-sports-grid-view">
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
         {sports.map((sport, index) => {
           const configuredEvents = events.filter(
             (event) => event.sport.toLowerCase() === sport.name.toLowerCase(),
           );
+          const indexNum = String(index + 1).padStart(2, "0");
 
           return (
             <Link
               key={sport.id}
               href={`/sports/${sport.slug || sport.id}`}
-              className="pegasus-card pegasus-card--interactive pegasus-sport-entry"
+              className="zenith-surface-1 zenith-edge"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: "24px",
+                borderRadius: "var(--radius-medium)",
+                textDecoration: "none",
+                color: "inherit",
+                border: "1px solid var(--border)",
+                minHeight: "220px",
+                transition: "all 160ms cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
             >
-              <div className="pegasus-sport-entry__top">
-                <span className="pegasus-eyebrow">
-                  {String(index + 1).padStart(2, "0")} / {sport.type}
-                </span>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                  <span className="zenith-kicker">
+                    {indexNum} // {sport.type?.toUpperCase() || "DISCIPLINE"}
+                  </span>
 
-                <span className="pegasus-status pegasus-status--upcoming">
-                  <span className="pegasus-status__dot" />
-                  {configuredEvents.length}{" "}
-                  {configuredEvents.length === 1 ? "Event" : "Events"}
-                </span>
+                  <span className="zenith-signal zenith-signal-upcoming">
+                    <span className="zenith-signal-dot" />
+                    {configuredEvents.length} {configuredEvents.length === 1 ? "EVENT" : "EVENTS"}
+                  </span>
+                </div>
+
+                <h2
+                  style={{
+                    margin: "0 0 10px 0",
+                    fontSize: "22px",
+                    fontWeight: 850,
+                    letterSpacing: "-0.02em",
+                    textTransform: "uppercase",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {sport.name}
+                </h2>
+                {sport.description && (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "13px",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {sport.description}
+                  </p>
+                )}
               </div>
 
-              <div className="pegasus-sport-entry__body">
-                <h2>{sport.name}</h2>
-                {sport.description && <p>{sport.description}</p>}
-              </div>
-
-              <div className="pegasus-sport-entry__footer">
-                <span className="pegasus-sport-entry__count">
-                  {configuredEvents.length}{" "}
-                  {configuredEvents.length === 1
-                    ? "event configured"
-                    : "events configured"}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: "20px",
+                  paddingTop: "14px",
+                  borderTop: "1px solid var(--border)",
+                  fontSize: "12px",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                <span style={{ color: "var(--text-muted)", textTransform: "uppercase" }}>
+                  {configuredEvents.length} certified {configuredEvents.length === 1 ? "draw" : "draws"}
                 </span>
 
-                <span className="pegasus-sport-entry__cta">
-                  Explore events <span>↗</span>
+                <span style={{ color: "var(--secondary)", fontWeight: 700, textTransform: "uppercase" }}>
+                  EXPLORE PANEL ↗
                 </span>
               </div>
             </Link>

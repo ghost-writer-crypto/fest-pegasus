@@ -60,25 +60,25 @@ export default function AdminSidebar({
         >
           <div>
             <span
+              className="zenith-kicker"
               style={{
                 fontSize: "10px",
-                fontWeight: 800,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--accent)",
                 display: "block",
+                marginBottom: "4px",
               }}
             >
-              FESTIVAL CONTROL ROOM
+              00 // CONTROL ROOM
             </span>
             <strong
               style={{
                 fontSize: "16px",
-                fontWeight: 850,
-                letterSpacing: "-0.02em",
+                fontWeight: 900,
+                letterSpacing: "0.02em",
+                textTransform: "uppercase",
+                color: "var(--text-primary)",
               }}
             >
-              PEGASUS ADMIN
+              ZENITHROW COMMAND
             </strong>
           </div>
 

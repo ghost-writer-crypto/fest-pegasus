@@ -8,7 +8,7 @@ import ShowQrButton from "@/components/qr/ShowQrButton";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pegasus Team Manager — House Operations Portal",
+  title: "ZENITHROW Team Manager — House Operations Portal",
   description: "Official portal for house captains and team managers",
 };
 
@@ -31,8 +31,8 @@ export default async function TeamManagerLayout({
       <header className="pegasus-tm-topbar">
         <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
           <Link href="/team-manager" className="pegasus-brand">
-            <span className="pegasus-brand__mark">P</span>
-            <span className="pegasus-brand__name">PEGASUS</span>
+            <span className="pegasus-brand__mark">Z</span>
+            <span className="pegasus-brand__name">ZENITHROW</span>
           </Link>
           <span
             style={{

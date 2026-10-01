@@ -190,8 +190,8 @@ export default function HomePage() {
             <div className={styles.footerTop}>
               <div className={styles.footerBrandGroup}>
                 <div className={styles.footerBrand}>
-                  <span className={styles.footerBrandMark}>P</span>
-                  <span>PEGASUS</span>
+                  <span className={styles.footerBrandMark}>Z</span>
+                  <span>ZENITHROW</span>
                 </div>
                 <span className={styles.footerTagline}>
                   STUDENTS&apos; SPORTS FESTIVAL 2026 // OFFICIAL TOURNAMENT OPERATING SYSTEM
@@ -202,11 +202,11 @@ export default function HomePage() {
                 <Link href="/" className={styles.footerNavLink}>
                   Home
                 </Link>
+                <Link href="/sports" className={styles.footerNavLink}>
+                  Sports
+                </Link>
                 <Link href="/schedules" className={styles.footerNavLink}>
                   Schedule
-                </Link>
-                <Link href="/results?live=true" className={styles.footerNavLink}>
-                  Live
                 </Link>
                 <Link href="/results" className={styles.footerNavLink}>
                   Results
@@ -222,7 +222,7 @@ export default function HomePage() {
 
             <div className={styles.footerBottom}>
               <span>
-                © 2026 Pegasus Sports Festival. All rights reserved.
+                © 2026 ZENITHROW Sports Festival. All rights reserved.
               </span>
               <span>
                 Official timing, rankings, and point tallies verified by Meet Adjudicators.

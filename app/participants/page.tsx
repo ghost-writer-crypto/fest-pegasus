@@ -31,12 +31,11 @@ export default async function ParticipantsPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--participants pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">PARTICIPANTS</p>
-        <h1 className="pegasus-page-title">Meet the competitors.</h1>
+      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
+        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>11 / DIRECTORY</p>
+        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Athlete Directory</h1>
         <p className="pegasus-page__description">
-          Search athletes across teams and divisions in the official Pegasus
-          Sports Festival directory.
+          Search confirmed competitors across houses and academic divisions in the official ZENITHROW 2026 registry.
         </p>
       </section>
 

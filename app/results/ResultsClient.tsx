@@ -22,16 +22,16 @@ function getRankBadge(rank: number | null, disposition: string) {
   if (disposition && disposition !== "normal") {
     return {
       label: disposition.toUpperCase(),
-      bg: "rgba(255, 255, 255, 0.08)",
-      color: "var(--muted)",
+      bg: "rgba(255, 255, 255, 0.06)",
+      color: "var(--text-muted)",
       isPodium: false,
     };
   }
   if (!rank) {
     return {
       label: "—",
-      bg: "rgba(255, 255, 255, 0.05)",
-      color: "var(--muted)",
+      bg: "rgba(255, 255, 255, 0.04)",
+      color: "var(--text-muted)",
       isPodium: false,
     };
   }
@@ -39,9 +39,9 @@ function getRankBadge(rank: number | null, disposition: string) {
     return {
       label: "#1",
       subLabel: "Gold",
-      bg: "rgba(215, 255, 63, 0.2)",
-      border: "1px solid rgba(215, 255, 63, 0.5)",
-      color: "var(--accent)",
+      bg: "rgba(245, 158, 11, 0.12)",
+      border: "1px solid rgba(245, 158, 11, 0.4)",
+      color: "#F59E0B",
       isPodium: true,
     };
   }
@@ -49,9 +49,9 @@ function getRankBadge(rank: number | null, disposition: string) {
     return {
       label: "#2",
       subLabel: "Silver",
-      bg: "rgba(192, 192, 192, 0.18)",
-      border: "1px solid rgba(192, 192, 192, 0.4)",
-      color: "#e0e0e0",
+      bg: "rgba(148, 163, 184, 0.12)",
+      border: "1px solid rgba(148, 163, 184, 0.4)",
+      color: "#94A3B8",
       isPodium: true,
     };
   }
@@ -59,17 +59,17 @@ function getRankBadge(rank: number | null, disposition: string) {
     return {
       label: "#3",
       subLabel: "Bronze",
-      bg: "rgba(205, 127, 50, 0.18)",
-      border: "1px solid rgba(205, 127, 50, 0.4)",
-      color: "#d99058",
+      bg: "rgba(217, 119, 6, 0.12)",
+      border: "1px solid rgba(217, 119, 6, 0.4)",
+      color: "#D97706",
       isPodium: true,
     };
   }
   return {
     label: `#${rank}`,
-    bg: "rgba(255, 255, 255, 0.05)",
+    bg: "rgba(255, 255, 255, 0.04)",
     border: "1px solid var(--border)",
-    color: "var(--foreground)",
+    color: "var(--text-primary)",
     isPodium: false,
   };
 }
@@ -410,9 +410,9 @@ export default function ResultsClient({
                     </h2>
                   </div>
 
-                  <span className="pegasus-status pegasus-status--live">
-                    <span className="pegasus-status__dot" />
-                    Official Published
+                  <span className="zenith-signal zenith-signal-verified">
+                    <span className="zenith-signal-dot" />
+                    OFFICIALLY PUBLISHED
                   </span>
                 </div>
 
@@ -452,7 +452,7 @@ export default function ResultsClient({
                     return (
                       <article
                         key={result.id}
-                        className="pegasus-card pegasus-card--interactive"
+                        className="zenith-surface-1 zenith-edge"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -460,6 +460,8 @@ export default function ResultsClient({
                           flexWrap: "wrap",
                           gap: "14px",
                           padding: "14px 18px",
+                          borderRadius: "var(--radius-medium)",
+                          border: "1px solid var(--border)",
                           background: badge.isPodium
                             ? "var(--surface-raised)"
                             : "var(--surface)",
@@ -480,11 +482,12 @@ export default function ResultsClient({
                               flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
+                              width: "38px",
+                              height: "38px",
+                              borderRadius: "var(--radius-micro)",
                               background: badge.bg,
                               border: badge.border ?? "1px solid var(--border)",
+                              boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.12)",
                               color: badge.color,
                               fontWeight: 900,
                               fontSize: "14px",

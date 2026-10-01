@@ -3,8 +3,8 @@ import Link from "next/link";
 import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Operator Login — PEGASUS Sports Fest",
-  description: "Official operational authentication portal for PEGASUS Sports Festival 2026",
+  title: "Operator Login — ZENITHROW Sports Festival 2026",
+  description: "Official operational authentication portal for ZENITHROW Sports Festival 2026",
 };
 
 interface LoginPageProps {
@@ -22,12 +22,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const isLoggedOut = Boolean(params.logged_out);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "var(--background)", display: "flex", flexDirection: "column" }}>
       {/* Top Header */}
       <header
         style={{
-          borderBottom: "1px solid #E8EDF3",
-          background: "#FFFFFF",
+          borderBottom: "1px solid var(--border)",
+          background: "var(--surface)",
           padding: "16px 24px",
         }}
       >
@@ -41,8 +41,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           }}
         >
           <Link href="/" className="pegasus-brand">
-            <span className="pegasus-brand__mark">P</span>
-            <span className="pegasus-brand__name">PEGASUS</span>
+            <span className="pegasus-brand__mark">Z</span>
+            <span className="pegasus-brand__name">ZENITHROW</span>
           </Link>
 
           <Link
@@ -69,12 +69,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div style={{ textAlign: "center", marginBottom: "32px", maxWidth: "600px" }}>
           <span
             style={{
-              fontFamily: "ui-monospace, monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: "11px",
               fontWeight: 800,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "#E53737",
+              color: "var(--primary)",
               display: "inline-block",
               marginBottom: "8px",
             }}
@@ -86,13 +86,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               fontSize: "clamp(28px, 4vw, 36px)",
               fontWeight: 900,
               letterSpacing: "-0.03em",
-              color: "#1A3663",
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-heading)",
               margin: 0,
             }}
           >
             Operational Command Center
           </h1>
-          <p style={{ fontSize: "14px", color: "#64748B", margin: "8px 0 0", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: "8px 0 0", lineHeight: 1.5, fontFamily: "var(--font-sans)" }}>
             Access authorized terminals for Tournament Control, Referee Field Desk, and House Command.
           </p>
         </div>
@@ -109,15 +110,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {/* Footer */}
       <footer
         style={{
-          borderTop: "1px solid #E8EDF3",
+          borderTop: "1px solid var(--border)",
+          background: "var(--surface)",
           padding: "16px 24px",
           textAlign: "center",
           fontSize: "11px",
-          color: "#8492A6",
-          fontFamily: "ui-monospace, monospace",
+          color: "var(--text-muted)",
+          fontFamily: "var(--font-mono)",
         }}
       >
-        PEGASUS 2026 // AUTHORIZED OPERATOR TERMINAL // ISO 27001 SECURED
+        ZENITHROW 2026 // AUTHORIZED OPERATOR TERMINAL // ISO 27001 SECURED
       </footer>
     </div>
   );
