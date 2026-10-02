@@ -170,6 +170,11 @@ export type Sport = {
   type: SportType;
   category?: string;
   description?: string;
+  venueId?: string;
+  venueName?: string;
+  pointClass?: PointClass;
+  featured?: boolean;
+  coverImage?: string;
 };
 
 export type Event = {

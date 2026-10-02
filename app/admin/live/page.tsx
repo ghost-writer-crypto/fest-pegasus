@@ -10,7 +10,7 @@ export default function AdminLivePage() {
         "Real-time scoreboard sync across all simultaneous competition venues",
         "Call room marshalling and athlete check-in status",
         "Active heat progress, false start resets, and live lap tracking",
-        "Direct intercom/broadcast alerts to referee field terminals",
+        "Direct intercom and broadcast alerts to referee field terminals",
       ]}
     />
   );

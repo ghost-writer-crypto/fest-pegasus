@@ -240,7 +240,7 @@ export default function AdminVenuesClient({
       <section style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
         <div>
           <p className="pegasus-eyebrow" style={{ margin: "0 0 6px" }}>
-            CAMPUS INFRASTRUCTURE • VENUES
+            ZENITHROW 2026 • VENUES & INFRASTRUCTURE
           </p>
           <h1
             style={{
@@ -343,7 +343,7 @@ export default function AdminVenuesClient({
         {[
           { label: "Total Venues", value: telemetry.totalCount },
           { label: "Active Facilities", value: telemetry.activeCount, color: "var(--success, #10b981)" },
-          { label: "Inactive / Closed", value: telemetry.inactiveCount, color: telemetry.inactiveCount > 0 ? "var(--warning, #f59e0b)" : "var(--muted)" },
+          { label: "Inactive • Closed", value: telemetry.inactiveCount, color: telemetry.inactiveCount > 0 ? "var(--warning, #f59e0b)" : "var(--muted)" },
           { label: "Total Capacity", value: telemetry.totalCapacity > 0 ? telemetry.totalCapacity.toLocaleString() : "—" },
         ].map((item) => (
           <div
@@ -504,8 +504,8 @@ export default function AdminVenuesClient({
                 <thead>
                   <tr>
                     <th>Venue Name</th>
-                    <th>Code / Slug</th>
-                    <th>Location / Campus</th>
+                    <th>Code • Slug</th>
+                    <th>Location • Campus</th>
                     <th>Capacity</th>
                     <th>Scheduled Slots</th>
                     <th>Status</th>
@@ -763,7 +763,7 @@ export default function AdminVenuesClient({
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                    Slug / Identifier
+                    Slug • Identifier
                   </label>
                   <input
                     type="text"
@@ -793,7 +793,7 @@ export default function AdminVenuesClient({
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                  Location / Zone
+                  Location • Zone
                 </label>
                 <input
                   type="text"
@@ -913,7 +913,7 @@ export default function AdminVenuesClient({
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                    Slug / Code
+                    Slug • Code
                   </label>
                   <input
                     type="text"
@@ -941,7 +941,7 @@ export default function AdminVenuesClient({
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                  Location / Zone
+                  Location • Zone
                 </label>
                 <input
                   type="text"

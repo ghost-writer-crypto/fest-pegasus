@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { verifyResultAction } from "@/app/admin/actions";
 import {
@@ -40,19 +40,108 @@ export default function AdminVerificationClient({
     "submitted",
   );
 
-  const eventMap = new Map(events.map((e) => [e.id, e]));
-  const participantMap = new Map(participants.map((p) => [p.id, p]));
-  const teamMap = new Map(teams.map((t) => [t.id, t]));
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [eventFilter, setEventFilter] = useState("all");
+  const [teamFilter, setTeamFilter] = useState("all");
 
-  const submittedResults = results.filter((r) => r.status === "submitted");
-  const verifiedResults = results.filter((r) => r.status === "verified");
+  const eventMap = useMemo(() => new Map(events.map((e) => [e.id, e])), [events]);
+  const participantMap = useMemo(() => new Map(participants.map((p) => [p.id, p])), [participants]);
+  const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
 
-  const displayedResults =
-    activeTab === "submitted"
-      ? submittedResults
-      : activeTab === "verified"
-        ? verifiedResults
-        : results;
+  const submittedResults = useMemo(
+    () => results.filter((r) => r.status === "submitted"),
+    [results],
+  );
+  const verifiedResults = useMemo(
+    () => results.filter((r) => r.status === "verified"),
+    [results],
+  );
+
+  // Telemetry metrics
+  const telemetry = useMemo(() => {
+    const totalCount = results.length;
+    const awaitingAudit = submittedResults.length;
+    const verifiedCount = verifiedResults.length;
+    const publishedCount = results.filter((r) => r.status === "published").length;
+    const correctedCount = results.filter((r) => r.status === "corrected").length;
+
+    return {
+      totalCount,
+      awaitingAudit,
+      verifiedCount,
+      publishedCount,
+      correctedCount,
+    };
+  }, [results, submittedResults, verifiedResults]);
+
+  // Tab-selected candidates
+  const tabResults = useMemo(() => {
+    if (activeTab === "submitted") return submittedResults;
+    if (activeTab === "verified") return verifiedResults;
+    return results;
+  }, [activeTab, submittedResults, verifiedResults, results]);
+
+  // Filtered results
+  const displayedResults = useMemo(() => {
+    return tabResults.filter((result) => {
+      // 1. Search Query
+      if (searchQuery.trim() !== "") {
+        const q = searchQuery.trim().toLowerCase();
+        const event = eventMap.get(result.event_id);
+        const participant = result.participant_id ? participantMap.get(result.participant_id) : undefined;
+        const team = result.team_id
+          ? teamMap.get(result.team_id)
+          : participant?.team_id
+            ? teamMap.get(participant.team_id)
+            : undefined;
+
+        const eventName = (event?.name || "").toLowerCase();
+        const eventCode = (event?.code || "").toLowerCase();
+        const partName = (participant?.name || "").toLowerCase();
+        const chestNo = (participant?.chest_number || "").toLowerCase();
+        const teamName = (team?.name || "").toLowerCase();
+        const teamCode = (team?.code || "").toLowerCase();
+        const resId = result.id.toLowerCase();
+
+        if (
+          !eventName.includes(q) &&
+          !eventCode.includes(q) &&
+          !partName.includes(q) &&
+          !chestNo.includes(q) &&
+          !teamName.includes(q) &&
+          !teamCode.includes(q) &&
+          !resId.includes(q)
+        ) {
+          return false;
+        }
+      }
+
+      // 2. Event filter
+      if (eventFilter !== "all" && result.event_id !== eventFilter) {
+        return false;
+      }
+
+      // 3. Team filter
+      if (teamFilter !== "all") {
+        const participant = result.participant_id ? participantMap.get(result.participant_id) : undefined;
+        const effectiveTeamId = result.team_id || participant?.team_id;
+        if (effectiveTeamId !== teamFilter) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [tabResults, searchQuery, eventFilter, teamFilter, eventMap, participantMap, teamMap]);
+
+  const isFiltering = searchQuery.trim() !== "" || eventFilter !== "all" || teamFilter !== "all";
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setEventFilter("all");
+    setTeamFilter("all");
+  };
 
   const handleVerify = (result: ResultRow) => {
     setSelectedResult(result);
@@ -88,7 +177,7 @@ export default function AdminVerificationClient({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="pegasus-animate-fade" style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
       {/* Feedback Banner */}
       {feedback && (
         <div
@@ -98,34 +187,36 @@ export default function AdminVerificationClient({
             borderRadius: "6px",
             border: `1px solid ${
               feedback.type === "success"
-                ? "rgba(215, 255, 63, 0.4)"
-                : "rgba(255, 80, 80, 0.4)"
+                ? "rgba(16, 185, 129, 0.35)"
+                : "rgba(239, 68, 68, 0.35)"
             }`,
             background:
               feedback.type === "success"
-                ? "rgba(215, 255, 63, 0.08)"
-                : "rgba(255, 80, 80, 0.08)",
+                ? "rgba(16, 185, 129, 0.1)"
+                : "rgba(239, 68, 68, 0.1)",
             color:
               feedback.type === "success"
-                ? "var(--accent)"
-                : "var(--status-dns)",
-            fontSize: "13px",
-            fontWeight: 650,
+                ? "var(--success, #10b981)"
+                : "var(--destructive, #ef4444)",
+            fontSize: "14px",
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <span>{feedback.message}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>{feedback.type === "success" ? "✓" : "⚠"}</span>
+            <strong>{feedback.message}</strong>
+          </div>
           <button
             type="button"
             onClick={() => setFeedback(null)}
             style={{
-              background: "transparent",
+              background: "none",
               border: "none",
               color: "inherit",
               cursor: "pointer",
-              fontWeight: "bold",
+              fontSize: "16px",
             }}
           >
             ✕
@@ -133,7 +224,65 @@ export default function AdminVerificationClient({
         </div>
       )}
 
-      {/* Quick Navigation / Publishing Link */}
+      {/* Telemetry Metrics Bar */}
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+          gap: "10px",
+        }}
+      >
+        {[
+          { label: "Total Outcomes", value: telemetry.totalCount },
+          {
+            label: "Awaiting Audit",
+            value: telemetry.awaitingAudit,
+            color: telemetry.awaitingAudit > 0 ? "var(--accent)" : "var(--muted)",
+          },
+          { label: "Verified Queue", value: telemetry.verifiedCount, color: "var(--success, #10b981)" },
+          { label: "Released • Public", value: telemetry.publishedCount, color: "#2563eb" },
+          {
+            label: "Corrected Marks",
+            value: telemetry.correctedCount,
+            color: telemetry.correctedCount > 0 ? "var(--warning, #f59e0b)" : "var(--muted)",
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="pegasus-card"
+            style={{
+              padding: "14px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "var(--muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {item.label}
+            </span>
+            <strong
+              style={{
+                fontSize: "22px",
+                fontWeight: 850,
+                lineHeight: 1.1,
+                color: item.color,
+              }}
+            >
+              {item.value}
+            </strong>
+          </div>
+        ))}
+      </section>
+
+      {/* Navigation Tabs and Destination Link */}
       <div
         style={{
           display: "flex",
@@ -143,16 +292,16 @@ export default function AdminVerificationClient({
           gap: "12px",
         }}
       >
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button
             type="button"
             className={`pegasus-button ${
               activeTab === "submitted"
                 ? "pegasus-button--primary"
-                : "pegasus-button--subtle"
+                : "pegasus-button--secondary"
             }`}
             onClick={() => setActiveTab("submitted")}
-            style={{ fontSize: "12px", minHeight: "36px" }}
+            style={{ fontSize: "12px", minHeight: "38px" }}
           >
             Awaiting Verification ({submittedResults.length})
           </button>
@@ -161,10 +310,10 @@ export default function AdminVerificationClient({
             className={`pegasus-button ${
               activeTab === "verified"
                 ? "pegasus-button--primary"
-                : "pegasus-button--subtle"
+                : "pegasus-button--secondary"
             }`}
             onClick={() => setActiveTab("verified")}
-            style={{ fontSize: "12px", minHeight: "36px" }}
+            style={{ fontSize: "12px", minHeight: "38px" }}
           >
             Verified Queue ({verifiedResults.length})
           </button>
@@ -173,23 +322,87 @@ export default function AdminVerificationClient({
             className={`pegasus-button ${
               activeTab === "all"
                 ? "pegasus-button--primary"
-                : "pegasus-button--subtle"
+                : "pegasus-button--secondary"
             }`}
             onClick={() => setActiveTab("all")}
-            style={{ fontSize: "12px", minHeight: "36px" }}
+            style={{ fontSize: "12px", minHeight: "38px" }}
           >
-            All Stages ({results.length})
+            All Lifecycle ({results.length})
           </button>
         </div>
 
         <Link
           href="/admin/publish"
           className="pegasus-button pegasus-button--secondary"
-          style={{ fontSize: "12px", minHeight: "36px" }}
+          style={{ fontSize: "12px", minHeight: "38px", display: "inline-flex", alignItems: "center", gap: "6px" }}
         >
           Go to Publishing Surface <span>→</span>
         </Link>
       </div>
+
+      {/* Search and Filters Bar */}
+      <section className="pegasus-admin-filter-bar">
+        <div style={{ flex: "1 1 200px", minWidth: "180px" }}>
+          <input
+            type="text"
+            className="pegasus-admin-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search competitor, chest #, or event..."
+            style={{ width: "100%", boxSizing: "border-box" }}
+            aria-label="Search verification queue"
+          />
+        </div>
+
+        {events.length > 0 && (
+          <div style={{ minWidth: "160px" }}>
+            <select
+              className="pegasus-admin-select"
+              value={eventFilter}
+              onChange={(e) => setEventFilter(e.target.value)}
+              aria-label="Filter by Event"
+              style={{ width: "100%" }}
+            >
+              <option value="all">All Events</option>
+              {events.map((ev) => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.name} ({ev.code})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {teams.length > 0 && (
+          <div style={{ minWidth: "140px" }}>
+            <select
+              className="pegasus-admin-select"
+              value={teamFilter}
+              onChange={(e) => setTeamFilter(e.target.value)}
+              aria-label="Filter by House"
+              style={{ width: "100%" }}
+            >
+              <option value="all">All Houses</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.code})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {isFiltering && (
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="pegasus-button pegasus-button--subtle"
+            style={{ fontSize: "12px", height: "38px", padding: "0 14px" }}
+          >
+            ✕ Clear Filters
+          </button>
+        )}
+      </section>
 
       {/* Main Results Queue */}
       <section
@@ -198,7 +411,7 @@ export default function AdminVerificationClient({
           padding: "24px",
           display: "flex",
           flexDirection: "column",
-          gap: "16px",
+          gap: "18px",
         }}
       >
         <div
@@ -213,11 +426,11 @@ export default function AdminVerificationClient({
           }}
         >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0, color: "var(--foreground)" }}>
               {activeTab === "submitted"
                 ? `Results Requiring Admin Attention (${submittedResults.length})`
                 : activeTab === "verified"
-                  ? `Verified Results (${verifiedResults.length})`
+                  ? `Verified Results Ready for Release (${verifiedResults.length})`
                   : `Master Lifecycle Queue (${results.length})`}
             </h2>
             <p
@@ -228,8 +441,8 @@ export default function AdminVerificationClient({
               }}
             >
               {activeTab === "submitted"
-                ? "Referee-submitted results waiting for Chief Scorer audit and sign-off."
-                : "Audited results with verified provenance ready for release."}
+                ? "Referee-submitted results waiting for Chief Scorer audit and official sign-off."
+                : "Audited results with verified provenance ready to advance to the publishing surface."}
             </p>
           </div>
         </div>
@@ -246,7 +459,11 @@ export default function AdminVerificationClient({
               border: "1px dashed var(--border)",
             }}
           >
-            No results in this queue. All submitted records are up to date.
+            {isFiltering
+              ? "No outcomes match your search and filter criteria."
+              : activeTab === "submitted"
+                ? "No pending marks in this queue. All submitted results have been audited."
+                : "No results currently in this queue."}
           </div>
         ) : (
           <div style={{ display: "grid", gap: "12px" }}>
@@ -274,7 +491,8 @@ export default function AdminVerificationClient({
                     display: "flex",
                     flexDirection: "column",
                     gap: "12px",
-                    background: "var(--surface)",
+                    background: "rgba(18, 20, 24, 0.9)",
+                    borderLeft: result.status === "submitted" ? "4px solid var(--accent)" : "1px solid var(--border)",
                   }}
                 >
                   <div
@@ -304,8 +522,8 @@ export default function AdminVerificationClient({
                       >
                         #{result.id.slice(0, 8)}
                       </span>
-                      <strong style={{ fontSize: "15px" }}>
-                        {event?.name ?? "Event"}
+                      <strong style={{ fontSize: "15px", color: "var(--foreground)" }}>
+                        {event?.name ?? "Event Slot"}
                       </strong>
                       {event?.code && (
                         <span
@@ -313,7 +531,8 @@ export default function AdminVerificationClient({
                             fontSize: "11px",
                             fontFamily: "monospace",
                             color: "var(--muted)",
-                            background: "rgba(255, 255, 255, 0.04)",
+                            background: "rgba(255, 255, 255, 0.05)",
+                            border: "1px solid var(--border)",
                             padding: "2px 6px",
                             borderRadius: "4px",
                           }}
@@ -347,7 +566,7 @@ export default function AdminVerificationClient({
                           className="pegasus-button pegasus-button--primary"
                           style={{
                             fontSize: "12px",
-                            padding: "6px 14px",
+                            padding: "7px 16px",
                             minHeight: "34px",
                           }}
                           disabled={isPending}
@@ -369,7 +588,7 @@ export default function AdminVerificationClient({
                     }}
                   >
                     <div>
-                      <strong>
+                      <strong style={{ color: "var(--foreground)" }}>
                         {participant?.name ?? team?.name ?? "Competitor"}
                       </strong>
                       {participant && (
@@ -389,16 +608,17 @@ export default function AdminVerificationClient({
                         display: "flex",
                         gap: "16px",
                         alignItems: "center",
+                        flexWrap: "wrap",
                       }}
                     >
                       {result.rank && (
                         <span>
-                          Rank: <strong>#{result.rank}</strong>
+                          Rank: <strong style={{ color: "var(--foreground)" }}>#{result.rank}</strong>
                         </span>
                       )}
                       {performanceText && (
                         <span>
-                          Mark: <strong>{performanceText}</strong>
+                          Mark: <strong style={{ color: "var(--foreground)" }}>{performanceText}</strong>
                         </span>
                       )}
                       <span
@@ -436,7 +656,7 @@ export default function AdminVerificationClient({
                     </span>
                     {result.verified_by && (
                       <span>
-                        Verified: <strong>Audited by Admin</strong>
+                        Verified: <strong>Audited by Desk</strong>
                       </span>
                     )}
                   </div>
@@ -450,12 +670,21 @@ export default function AdminVerificationClient({
       {/* Verification Confirmation Modal */}
       {selectedResult && (
         <div
-          className="pegasus-admin-drawer-backdrop is-open"
+          className="pegasus-modal-backdrop"
           style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 1000,
             padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isPending) setSelectedResult(null);
           }}
         >
           <div
@@ -463,26 +692,39 @@ export default function AdminVerificationClient({
             style={{
               maxWidth: "480px",
               width: "100%",
-              padding: "28px",
-              background: "var(--surface)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.8)",
+              padding: "26px",
+              background: "#121418",
+              border: "1px solid var(--border)",
+              boxShadow: "0 24px 48px rgba(0, 0, 0, 0.7)",
+              borderRadius: "12px",
               display: "flex",
               flexDirection: "column",
               gap: "16px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <p className="pegasus-eyebrow" style={{ margin: 0 }}>
+                  CHIEF SCORER AUDIT
+                </p>
+                <h3 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 800, color: "var(--foreground)" }}>
+                  Confirm Official Verification
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedResult(null)}
+                disabled={isPending}
                 style={{
-                  fontSize: "18px",
-                  color: "var(--accent)",
+                  background: "none",
+                  border: "none",
+                  color: "var(--muted)",
+                  fontSize: "20px",
+                  cursor: "pointer",
                 }}
               >
-                ⚖️
-              </span>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>
-                Confirm Official Verification
-              </h3>
+                ✕
+              </button>
             </div>
 
             <p
@@ -496,40 +738,39 @@ export default function AdminVerificationClient({
               You are officially verifying Result{" "}
               <strong>#{selectedResult.id.slice(0, 8)}</strong> with{" "}
               <strong>+{selectedResult.points} points</strong>. Once verified,
-              this outcome will advance to the Publishing Surface for final
-              release.
+              this outcome will advance to the Publishing Surface for release.
             </p>
 
             <div
               style={{
                 padding: "12px 16px",
                 background: "rgba(255, 255, 255, 0.03)",
-                borderRadius: "6px",
+                borderRadius: "8px",
                 border: "1px solid var(--border)",
                 fontSize: "12px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "4px",
+                gap: "6px",
               }}
             >
-              <span>
-                Event:{" "}
-                <strong>
+              <div>
+                <span style={{ color: "var(--muted)" }}>Event: </span>
+                <strong style={{ color: "var(--foreground)" }}>
                   {eventMap.get(selectedResult.event_id)?.name ?? "Event"}
                 </strong>
-              </span>
-              <span>
-                Competitor:{" "}
-                <strong>
-                  {participantMap.get(selectedResult.participant_id ?? "")
-                    ?.name ??
+              </div>
+              <div>
+                <span style={{ color: "var(--muted)" }}>Competitor: </span>
+                <strong style={{ color: "var(--foreground)" }}>
+                  {participantMap.get(selectedResult.participant_id ?? "")?.name ??
                     teamMap.get(selectedResult.team_id ?? "")?.name ??
                     "Competitor"}
                 </strong>
-              </span>
-              <span>
-                Awarded Points: <strong>+{selectedResult.points} pts</strong>
-              </span>
+              </div>
+              <div>
+                <span style={{ color: "var(--muted)" }}>Awarded Points: </span>
+                <strong style={{ color: "var(--accent)" }}>+{selectedResult.points} pts</strong>
+              </div>
             </div>
 
             <div
@@ -563,4 +804,3 @@ export default function AdminVerificationClient({
     </div>
   );
 }
-

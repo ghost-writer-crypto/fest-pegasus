@@ -118,7 +118,8 @@ export async function getPublishedResultsByFestival(
       const resolvedTeamId =
         row.team_id || row.participants?.team_id || null;
 
-      const { participants: _p, ...cleanRow } = row;
+      const cleanRow = { ...row };
+      delete (cleanRow as { participants?: unknown }).participants;
       return {
         ...cleanRow,
         team_id: resolvedTeamId,

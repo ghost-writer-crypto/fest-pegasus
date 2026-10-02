@@ -31,4 +31,34 @@ export const venues: Venue[] = [
     type: "Track & Field",
     location: "Main Campus",
   },
+  {
+    id: "badminton-court",
+    name: "Badminton Arena",
+    type: "Badminton Court",
+    location: "Sports Complex",
+  },
+  {
+    id: "arena-pit",
+    name: "Central Arena Pit",
+    type: "Tug of War Arena",
+    location: "Stadium Central",
+  },
+  {
+    id: "strength-zone",
+    name: "Power Pavilion",
+    type: "Strength Stage",
+    location: "East Wing",
+  },
+  {
+    id: "mind-sports-hall",
+    name: "Strategy Hall",
+    type: "Mind Sports Arena",
+    location: "Academic Block",
+  },
+  {
+    id: "festival-grounds",
+    name: "Festival Quad",
+    type: "Traditional Games Arena",
+    location: "Campus Quad",
+  },
 ];

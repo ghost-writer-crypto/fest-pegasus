@@ -28,7 +28,7 @@ export async function getProfileById(
 ): Promise<ProfileRow | null> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return null;
   }
@@ -79,7 +79,7 @@ export async function getAuthenticatedProfile(): Promise<{
   // 1. First, attempt to resolve via Supabase Auth
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     try {
       const supabase = await createClient();

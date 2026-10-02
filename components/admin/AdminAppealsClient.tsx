@@ -179,7 +179,7 @@ export default function AdminAppealsClient({
 
         <div className="pegasus-card" style={{ padding: "16px 20px" }}>
           <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "#00ff96", letterSpacing: "0.06em" }}>
-            Adjudicated / Resolved
+            Adjudicated • Resolved
           </span>
           <div style={{ fontSize: "28px", fontWeight: 900, marginTop: "4px", color: "#00ff96" }}>{resolvedCount}</div>
           <span style={{ fontSize: "12px", color: "var(--muted)" }}>Official findings published</span>
@@ -387,7 +387,7 @@ export default function AdminAppealsClient({
                   <option value="under_review">UNDER INVESTIGATION (Keep under review)</option>
                   <option value="accepted">ACCEPTED (Uphold protest in full)</option>
                   <option value="partially_upheld">PARTIALLY UPHELD (Accept with adjusted terms)</option>
-                  <option value="rejected">REJECTED / DISMISSED (Overrule protest)</option>
+                  <option value="rejected">REJECTED • DISMISSED (Overrule protest)</option>
                 </select>
               </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
+import ZenithrowAdminTheme from "./ZenithrowAdminTheme";
 
 export type AdminUserIdentity = {
   userId: string;
@@ -61,6 +62,7 @@ export default function AdminShellClient({
 
   return (
     <div className="pegasus-admin-shell">
+      <ZenithrowAdminTheme />
       {/* Mobile Drawer Backdrop */}
       <div
         className={`pegasus-admin-drawer-backdrop ${

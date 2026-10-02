@@ -10,6 +10,7 @@
 // ============================================================================
 
 export type { FestivalRow } from "./festivalRepository";
+export type { SportRow } from "./sportRepository";
 export type { EventRow } from "./eventRepository";
 export type { DivisionRow } from "./divisionRepository";
 export type {
@@ -40,6 +41,15 @@ export type { JudgeAssignmentRow } from "./judgeAssignmentRepository";
 // ============================================================================
 
 export { getActiveFestival } from "./festivalRepository";
+
+// ============================================================================
+// Sport Repository
+// ============================================================================
+
+export {
+  getSportsByFestival,
+  getSportById,
+} from "./sportRepository";
 
 // ============================================================================
 // Event Repository
@@ -178,6 +188,7 @@ export {
   createScheduleRecord,
   updateScheduleRecord,
   updateScheduleStatusRecord,
+  deleteScheduleRecord,
   checkScheduleConflict,
 } from "./scheduleRepository";
 

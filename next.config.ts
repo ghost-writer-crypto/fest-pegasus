@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         destination: "/sports",
         permanent: false,
       },
+      {
+        source: "/live",
+        destination: "/display",
+        permanent: false,
+      },
     ];
   },
 };

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { ScheduleRow, EventRow, VenueRow } from "@/lib/repositories";
+import Link from "next/link";
 import {
-  getScheduleStatusLabel,
-  getScheduleStatusBadgeClass,
-} from "@/lib/schedule/scheduleUtils";
+  Search,
+  X,
+  MapPin,
+  ArrowUpRight,
+} from "lucide-react";
+import type { ScheduleRow, EventRow, VenueRow } from "@/lib/repositories";
 
 type Props = {
   initialSchedules: ScheduleRow[];
@@ -18,8 +21,10 @@ export default function SchedulesClient({
   events,
   venues,
 }: Props) {
-  const [selectedDate, setSelectedDate] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeStatus, setActiveStatus] = useState<"all" | "live" | "scheduled" | "finished">("all");
+  const [selectedSport, setSelectedSport] = useState<string>("all");
+  const [selectedVenue, setSelectedVenue] = useState<string>("all");
 
   const eventMap = useMemo(
     () => new Map(events.map((e) => [e.id, e])),
@@ -37,317 +42,745 @@ export default function SchedulesClient({
     });
   }, [initialSchedules]);
 
-  // Derive distinct calendar dates
-  const distinctDates = useMemo(() => {
-    const dates = new Set<string>();
-    for (const item of sortedSchedules) {
-      const d = new Date(item.starts_at);
-      if (!isNaN(d.getTime())) {
-        const key = item.starts_at.split("T")[0];
-        dates.add(key);
-      }
-    }
-    return Array.from(dates).sort();
+  // Telemetry counts
+  const telemetry = useMemo(() => {
+    const total = sortedSchedules.length;
+    const live = sortedSchedules.filter((s) => (s.status as string).toLowerCase() === "live").length;
+    const finished = sortedSchedules.filter((s) => {
+      const st = (s.status as string).toLowerCase();
+      return st === "finished" || st === "completed" || st === "done";
+    }).length;
+    const scheduled = total - live - finished;
+    const activeVenues = new Set(sortedSchedules.map((s) => s.venue_id).filter(Boolean)).size;
+
+    return { total, live, finished, scheduled, activeVenues };
   }, [sortedSchedules]);
 
-  // Filtered schedule list
+  // Derive distinct sports from official events and schedule categories (excluding any Basketball or Chess)
+  const officialSports = useMemo(() => {
+    const list = new Set<string>();
+    for (const e of events) {
+      if (
+        e.competition_type &&
+        e.competition_type.toLowerCase() !== "basketball" &&
+        e.competition_type.toLowerCase() !== "chess"
+      ) {
+        list.add(e.competition_type);
+      }
+    }
+    for (const s of initialSchedules) {
+      if (
+        s.category &&
+        s.category.toLowerCase() !== "basketball" &&
+        s.category.toLowerCase() !== "chess"
+      ) {
+        list.add(s.category);
+      }
+    }
+    // Ensure primary disciplines are always present
+    ["Athletics", "Football", "Tug of War", "Volleyball", "Badminton", "Cricket"].forEach(
+      (s) => list.add(s),
+    );
+    return Array.from(list);
+  }, [events, initialSchedules]);
+
+  // Filtered schedules
   const filteredSchedules = useMemo(() => {
-    return sortedSchedules.filter((item) => {
-      // Date filter
-      if (selectedDate !== "all") {
-        if (!item.starts_at.startsWith(selectedDate)) {
-          return false;
-        }
+    return sortedSchedules.filter((s) => {
+      const event = s.event_id ? eventMap.get(s.event_id) : null;
+      const venue = s.venue_id ? venueMap.get(s.venue_id) : null;
+      const rawStatus = (s.status as string).toLowerCase();
+      const compType = (s.category || event?.competition_type || "").toLowerCase();
+      const eventName = (s.title || event?.name || "").toLowerCase();
+      const venueName = venue?.name?.toLowerCase() || "";
+      const notes = s.notes?.toLowerCase() || "";
+
+      // Exclude basketball or chess strictly
+      if (compType.includes("basketball") || compType.includes("chess")) {
+        return false;
       }
 
       // Status filter
-      if (statusFilter !== "all") {
-        if (statusFilter === "live" && item.status !== "live") {
+      if (activeStatus === "live" && rawStatus !== "live") return false;
+      if (
+        activeStatus === "finished" &&
+        rawStatus !== "finished" &&
+        rawStatus !== "completed" &&
+        rawStatus !== "done"
+      ) {
+        return false;
+      }
+      if (
+        activeStatus === "scheduled" &&
+        (rawStatus === "live" || rawStatus === "finished" || rawStatus === "completed" || rawStatus === "done")
+      ) {
+        return false;
+      }
+
+      // Sport filter
+      if (selectedSport !== "all") {
+        const targetSport = selectedSport.toLowerCase();
+        if (!compType.includes(targetSport) && !eventName.includes(targetSport) && !notes.includes(targetSport)) {
           return false;
         }
-        if (statusFilter === "scheduled" && item.status !== "scheduled") {
-          return false;
-        }
-        if (statusFilter === "finished" && item.status !== "finished") {
+      }
+
+      // Venue filter
+      if (selectedVenue !== "all" && s.venue_id !== selectedVenue) {
+        return false;
+      }
+
+      // Text search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesName = eventName.includes(q);
+        const matchesSport = compType.includes(q);
+        const matchesVenue = venueName.includes(q);
+        const matchesNotes = notes.includes(q);
+        if (!matchesName && !matchesSport && !matchesVenue && !matchesNotes) {
           return false;
         }
       }
 
       return true;
     });
-  }, [sortedSchedules, selectedDate, statusFilter]);
-
-  const isFiltering = selectedDate !== "all" || statusFilter !== "all";
+  }, [sortedSchedules, activeStatus, selectedSport, selectedVenue, searchQuery, eventMap, venueMap]);
 
   const handleResetFilters = () => {
-    setSelectedDate("all");
-    setStatusFilter("all");
+    setSearchQuery("");
+    setActiveStatus("all");
+    setSelectedSport("all");
+    setSelectedVenue("all");
   };
 
   return (
     <section>
-      {/* Date Tabs and Status Filters Bar */}
+      {/* 1. Telemetry Velocity Bar */}
       <div
-        className="pegasus-filter-row"
-        style={{ justifyContent: "space-between" }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: "12px",
+          marginBottom: "28px",
+        }}
       >
-        {/* Date Tabs */}
-        {distinctDates.length > 1 && (
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <button
-              type="button"
-              onClick={() => setSelectedDate("all")}
-              className={`pegasus-button ${
-                selectedDate === "all"
-                  ? "pegasus-button--primary"
-                  : "pegasus-button--secondary"
-              }`}
-              style={{ padding: "0 14px", minHeight: "40px", fontSize: "12px" }}
-            >
-              All Days
-            </button>
-            {distinctDates.map((dateKey) => {
-              const d = new Date(`${dateKey}T00:00:00.000Z`);
-              const label = isNaN(d.getTime())
-                ? dateKey
-                : d.toLocaleDateString([], {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    timeZone: "UTC",
-                  });
-
-              return (
-                <button
-                  key={dateKey}
-                  type="button"
-                  onClick={() => setSelectedDate(dateKey)}
-                  className={`pegasus-button ${
-                    selectedDate === dateKey
-                      ? "pegasus-button--primary"
-                      : "pegasus-button--secondary"
-                  }`}
-                  style={{
-                    padding: "0 14px",
-                    minHeight: "40px",
-                    fontSize: "12px",
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Status Dropdown */}
-        <div style={{ minWidth: "160px" }}>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="pegasus-select"
-            style={{ minHeight: "40px", fontSize: "12px" }}
-            aria-label="Filter by schedule status"
+        <div
+          style={{
+            padding: "16px 20px",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "14px",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "var(--muted)",
+              display: "block",
+            }}
           >
-            <option value="all">All Timetable Slots</option>
-            <option value="live">Live Now</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="finished">Finished</option>
-          </select>
+            Total Programme
+          </span>
+          <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "var(--foreground)" }}>
+            {telemetry.total}
+          </strong>
+          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
+            Official Festival Heats
+          </span>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 20px",
+            background: telemetry.live > 0 ? "rgba(239, 68, 68, 0.08)" : "rgba(255, 255, 255, 0.03)",
+            border: telemetry.live > 0 ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "14px",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: telemetry.live > 0 ? "#ef4444" : "var(--muted)",
+                boxShadow: telemetry.live > 0 ? "0 0 10px #ef4444" : "none",
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: telemetry.live > 0 ? "#ef4444" : "var(--muted)",
+              }}
+            >
+              Live Heats Now
+            </span>
+          </div>
+          <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: telemetry.live > 0 ? "#ef4444" : "var(--foreground)" }}>
+            {telemetry.live}
+          </strong>
+          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
+            Electronic timing active
+          </span>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 20px",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "14px",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "var(--muted)",
+              display: "block",
+            }}
+          >
+            Queued Heats
+          </span>
+          <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "#f59e0b" }}>
+            {telemetry.scheduled}
+          </strong>
+          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
+            Next on track & courts
+          </span>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 20px",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "14px",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "var(--muted)",
+              display: "block",
+            }}
+          >
+            Completed
+          </span>
+          <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "#10b981" }}>
+            {telemetry.finished}
+          </strong>
+          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
+            Verified on ledger
+          </span>
         </div>
       </div>
 
-      {/* Status Bar */}
+      {/* 2. Interactive Search & Filter Controls */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          fontSize: "13px",
-          color: "var(--muted)",
+          flexDirection: "column",
+          gap: "14px",
+          marginBottom: "24px",
+          background: "rgba(255, 255, 255, 0.02)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          padding: "18px 20px",
+          borderRadius: "18px",
         }}
       >
-        <span>
-          Showing <strong>{filteredSchedules.length}</strong> of{" "}
-          {initialSchedules.length} program slot
-          {initialSchedules.length === 1 ? "" : "s"}
-        </span>
+        {/* Search Row */}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+          <div
+            style={{
+              position: "relative",
+              flex: "1 1 280px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Search
+              size={16}
+              style={{
+                position: "absolute",
+                left: "14px",
+                color: "var(--muted)",
+                pointerEvents: "none",
+              }}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by heat, discipline, stage, or arena..."
+              style={{
+                width: "100%",
+                padding: "10px 38px 10px 40px",
+                background: "rgba(0, 0, 0, 0.4)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                borderRadius: "999px",
+                color: "var(--foreground)",
+                fontSize: "13px",
+                outline: "none",
+                fontFamily: "inherit",
+              }}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  background: "none",
+                  border: "none",
+                  color: "var(--muted)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                aria-label="Clear search"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
 
-        {isFiltering && (
+          {/* Venue Dropdown */}
+          <div style={{ minWidth: "180px" }}>
+            <select
+              value={selectedVenue}
+              onChange={(e) => setSelectedVenue(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                background: "rgba(0, 0, 0, 0.4)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                borderRadius: "999px",
+                color: "var(--foreground)",
+                fontSize: "12px",
+                fontWeight: 700,
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              <option value="all">All Arenas & Grounds</option>
+              {venues.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(searchQuery || activeStatus !== "all" || selectedSport !== "all" || selectedVenue !== "all") && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="btn"
+              style={{
+                fontSize: "12px",
+                padding: "8px 16px",
+                minHeight: "36px",
+                borderRadius: "999px",
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        {/* Status Filters Bar */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--muted)",
+              marginRight: "4px",
+            }}
+          >
+            Status:
+          </span>
           <button
             type="button"
-            onClick={handleResetFilters}
+            onClick={() => setActiveStatus("all")}
+            className={`filter ${activeStatus === "all" ? "active" : ""}`}
+            style={{ padding: "8px 16px" }}
+          >
+            All Slots ({telemetry.total})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveStatus("live")}
+            className={`filter ${activeStatus === "live" ? "active" : ""}`}
             style={{
-              background: "none",
-              border: "none",
-              color: "var(--accent)",
-              cursor: "pointer",
-              fontSize: "13px",
-              padding: 0,
+              padding: "8px 16px",
+              borderColor: activeStatus === "live" ? "#ef4444" : undefined,
+              color: activeStatus === "live" ? "#fff" : telemetry.live > 0 ? "#ef4444" : undefined,
+              background: activeStatus === "live" ? "#ef4444" : undefined,
             }}
           >
-            Clear active filters
+            ● Live Heats ({telemetry.live})
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => setActiveStatus("scheduled")}
+            className={`filter ${activeStatus === "scheduled" ? "active" : ""}`}
+            style={{ padding: "8px 16px" }}
+          >
+            Upcoming ({telemetry.scheduled})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveStatus("finished")}
+            className={`filter ${activeStatus === "finished" ? "active" : ""}`}
+            style={{ padding: "8px 16px" }}
+          >
+            Completed ({telemetry.finished})
+          </button>
+        </div>
+
+        {/* Sport Discipline Filter Pills */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--muted)",
+              marginRight: "4px",
+            }}
+          >
+            Sport:
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedSport("all")}
+            className={`filter ${selectedSport === "all" ? "active" : ""}`}
+            style={{ padding: "6px 14px", fontSize: "11px" }}
+          >
+            All Sports
+          </button>
+          {officialSports.map((sport) => (
+            <button
+              key={sport}
+              type="button"
+              onClick={() => setSelectedSport(sport)}
+              className={`filter ${selectedSport === sport ? "active" : ""}`}
+              style={{ padding: "6px 14px", fontSize: "11px" }}
+            >
+              {sport}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Filtered Empty State */}
-      {filteredSchedules.length === 0 ? (
+      {/* 3. Empty States */}
+      {initialSchedules.length === 0 ? (
         <div
-          className="pegasus-card"
+          className="card"
           style={{
-            padding: "48px 24px",
+            padding: "60px 24px",
             textAlign: "center",
             marginTop: "16px",
+            borderRadius: "20px",
+            background: "rgba(255, 255, 255, 0.02)",
+            border: "1px dashed rgba(255, 255, 255, 0.15)",
           }}
         >
-          <p
+          <div className="kicker" style={{ color: "var(--muted)" }}>
+            OFFICIAL TIMETABLE
+          </div>
+          <h3
             style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "var(--foreground)",
-              marginBottom: "8px",
+              margin: "12px 0 8px",
+              fontSize: "24px",
+              fontWeight: 900,
+              letterSpacing: "-0.02em",
             }}
           >
-            No timetable slots match your filter
+            Timetable in Preparation
+          </h3>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "var(--muted)",
+              marginBottom: "24px",
+              maxWidth: "520px",
+              margin: "0 auto 24px",
+              lineHeight: 1.6,
+            }}
+          >
+            Official festival timetable slots are being synchronized from the production database. Check back shortly as program heats, knockouts, and ceremonial slots are published.
           </p>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/events" className="btn primary">
+              View Events & Rules →
+            </Link>
+            <Link href="/sports" className="btn">
+              Explore Sports →
+            </Link>
+          </div>
+        </div>
+      ) : filteredSchedules.length === 0 ? (
+        <div
+          className="card"
+          style={{
+            padding: "54px 24px",
+            textAlign: "center",
+            marginTop: "16px",
+            borderRadius: "20px",
+            background: "rgba(255, 255, 255, 0.02)",
+            border: "1px dashed rgba(255, 255, 255, 0.15)",
+          }}
+        >
+          <div className="kicker" style={{ color: "var(--muted)" }}>
+            ZERO FIXTURES IN QUEUE
+          </div>
+          <h3
+            style={{
+              margin: "12px 0 8px",
+              fontSize: "22px",
+              fontWeight: 900,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            No timetable slots match the selected criteria
+          </h3>
           <p
             style={{
               fontSize: "14px",
               color: "var(--muted)",
               marginBottom: "20px",
+              maxWidth: "460px",
+              margin: "0 auto 20px",
             }}
           >
-            Try selecting a different date or clearing the status filter.
+            Try adjusting your search query, choosing a different sport discipline, or clearing active status filters.
           </p>
           <button
             type="button"
             onClick={handleResetFilters}
-            className="pegasus-button pegasus-button--secondary"
+            className="btn primary"
           >
-            Reset Filters
+            Reset All Filters
           </button>
         </div>
       ) : (
-        /* Schedule Items List */
-        <div style={{ display: "grid", gap: "16px" }}>
+        /* 4. Championship Schedule Table */
+        <div className="table" style={{ background: "rgba(13, 13, 13, 0.95)", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+          <div className="tr th" style={{ background: "rgba(255, 255, 255, 0.03)" }}>
+            <span>Time & Date</span>
+            <span>Programme & Discipline</span>
+            <span className="hide-sm">Venue Arena</span>
+            <span>Status</span>
+          </div>
+
           {filteredSchedules.map((item) => {
             const event = item.event_id ? eventMap.get(item.event_id) : null;
             const venue = item.venue_id ? venueMap.get(item.venue_id) : null;
-            const statusLabel = getScheduleStatusLabel(item.status);
-            const statusClass = getScheduleStatusBadgeClass(item.status);
 
             const startDate = new Date(item.starts_at);
-            const timeFormatted = isNaN(startDate.getTime())
-              ? item.starts_at
-              : startDate.toLocaleTimeString([], {
+            const isValidDate = !isNaN(startDate.getTime());
+            const dateFormatted = isValidDate
+              ? startDate.toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  timeZone: "Asia/Kolkata",
+                })
+              : "";
+            const timeFormatted = isValidDate
+              ? startDate.toLocaleTimeString("en-IN", {
                   hour: "2-digit",
                   minute: "2-digit",
-                });
-            const dateFormatted = isNaN(startDate.getTime())
-              ? ""
-              : startDate.toLocaleDateString([], {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                });
+                  hour12: false,
+                  timeZone: "Asia/Kolkata",
+                })
+              : item.starts_at;
+
+            const endDate = item.ends_at ? new Date(item.ends_at) : null;
+            const endTimeFormatted = endDate && !isNaN(endDate.getTime())
+              ? endDate.toLocaleTimeString("en-IN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "Asia/Kolkata",
+                })
+              : null;
+
+            const rawStatus = (item.status as string).toLowerCase();
+            const isLive = rawStatus === "live";
+            const isDone = rawStatus === "finished" || rawStatus === "completed" || rawStatus === "done";
+            const isDelayed = rawStatus === "delayed";
+            const isCancelled = rawStatus === "cancelled";
+
+            let statusClass = "";
+            let statusLabel = "Scheduled";
+
+            if (isLive) {
+              statusClass = "live";
+              statusLabel = "● Live Now";
+            } else if (isDone) {
+              statusClass = "done";
+              statusLabel = "✓ Completed";
+            } else if (isDelayed) {
+              statusLabel = "Delayed";
+            } else if (isCancelled) {
+              statusLabel = "Cancelled";
+            } else {
+              statusLabel = "Scheduled";
+            }
+
+            const eventName = item.title || event?.name || item.notes || "Festival Programme";
+            const categoryTag = item.category || event?.competition_type || "Championship";
+            const noteText = item.notes && item.notes !== eventName ? item.notes.replace(/\//g, "•") : categoryTag;
 
             return (
-              <article
+              <div
                 key={item.id}
-                className="pegasus-card pegasus-card--interactive"
+                className="tr"
+                style={{
+                  transition: "background 0.15s ease",
+                  background: isLive ? "rgba(239, 68, 68, 0.03)" : undefined,
+                }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: "14px",
-                  }}
-                >
-                  {/* Left: Time + Event + Venue */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "18px",
-                    }}
-                  >
-                    <div
+                {/* Time & Date Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  {dateFormatted && (
+                    <span
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "2px",
-                        minWidth: "75px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        color: "var(--accent, #f59e0b)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
                       }}
                     >
+                      {dateFormatted}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      fontFamily: "monospace",
+                      fontWeight: 900,
+                      fontSize: "15px",
+                      color: isLive ? "#ef4444" : "var(--foreground)",
+                    }}
+                  >
+                    {timeFormatted}{endTimeFormatted ? ` – ${endTimeFormatted}` : ""}
+                  </span>
+                  <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase" }}>
+                    IST
+                  </span>
+                </div>
+
+                {/* Programme Details */}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    <strong style={{ fontSize: "15px", color: "var(--foreground)" }}>
+                      {eventName}
+                    </strong>
+                    {event?.point_class === "W" && (
                       <span
                         style={{
-                          fontSize: "16px",
+                          fontSize: "9px",
                           fontWeight: 800,
-                          color: "var(--accent)",
+                          textTransform: "uppercase",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: "rgba(242, 184, 75, 0.15)",
+                          color: "#d97706",
+                          border: "1px solid rgba(242, 184, 75, 0.3)",
                         }}
                       >
-                        {timeFormatted}
+                        Tier 1 Point Matrix
                       </span>
-                      {dateFormatted && (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "var(--muted)",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          {dateFormatted}
-                        </span>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "18px",
-                          fontWeight: 750,
-                          color: "var(--foreground)",
-                        }}
-                      >
-                        {event?.name ?? "Scheduled Program Slot"}
-                      </h3>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          marginTop: "4px",
-                          fontSize: "12px",
-                          color: "var(--muted)",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span>{event?.competition_type ?? "Event"}</span>
-                        <span>•</span>
-                        <span>{venue?.name ?? "Venue Pending"}</span>
-                        {item.notes && (
-                          <>
-                            <span>•</span>
-                            <span style={{ color: "var(--muted-strong)" }}>
-                              {item.notes}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "3px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                      {noteText}
+                    </span>
+                    {isLive && (
+                      <Link
+                        href="/display"
+                        style={{
+                          fontSize: "11px",
+                          color: "#ef4444",
+                          fontWeight: 700,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          textDecoration: "none",
+                        }}
+                      >
+                        Watch Stream <ArrowUpRight size={12} />
+                      </Link>
+                    )}
+                    {isDone && (
+                      <Link
+                        href="/results"
+                        style={{
+                          fontSize: "11px",
+                          color: "#10b981",
+                          fontWeight: 700,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          textDecoration: "none",
+                        }}
+                      >
+                        View Official Scores <ArrowUpRight size={12} />
+                      </Link>
+                    )}
+                  </div>
+                </div>
 
-                  {/* Right: Status Badge */}
-                  <span className={`pegasus-status ${statusClass}`}>
-                    <span className="pegasus-status__dot" />
+                {/* Venue Column */}
+                <div className="hide-sm" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <MapPin size={13} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                  <span style={{ color: "var(--foreground)", fontSize: "13px", fontWeight: 600 }}>
+                    {venue?.name ?? "Main Campus Grounds / TBA"}
+                  </span>
+                </div>
+
+                {/* Status Column */}
+                <div>
+                  <span
+                    className={`status ${statusClass}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "4px",
+                      minWidth: "90px",
+                    }}
+                  >
                     {statusLabel}
                   </span>
                 </div>
-              </article>
+              </div>
             );
           })}
         </div>
@@ -355,4 +788,3 @@ export default function SchedulesClient({
     </section>
   );
 }
-

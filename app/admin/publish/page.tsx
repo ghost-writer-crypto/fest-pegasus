@@ -11,6 +11,11 @@ import {
 } from "@/lib/repositories";
 import AdminPublishClient from "@/components/admin/AdminPublishClient";
 
+export const metadata = {
+  title: "Publishing Surface | ZENITHROW Admin",
+  description: "Official result publication authority and public standings pipeline",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function AdminPublishPage() {
@@ -39,7 +44,7 @@ export default async function AdminPublishPage() {
   return (
     <main className="pegasus-page pegasus-animate-fade">
       <section className="pegasus-page__header">
-        <p className="pegasus-eyebrow">CONTROL ROOM • OFFICIAL PUBLIC RELEASE</p>
+        <p className="pegasus-eyebrow">ZENITHROW 2026 • OFFICIAL PUBLIC RELEASE</p>
         <h1 className="pegasus-page-title">Publishing Surface</h1>
         <p className="pegasus-page__description">
           Review verified competition outcomes and authorize final publication. Only verified results transition to published status to appear in public standings, athlete profiles, and championship points totals.

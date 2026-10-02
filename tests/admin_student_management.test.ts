@@ -7,8 +7,6 @@ import {
   updateParticipantChestNumberRecord,
   deleteParticipantRecord,
   getParticipantDependencies,
-  getParticipantByChestNumber,
-  getParticipantsByFestivalAdmin,
   validateAndPrepareParticipant,
 } from "../lib/repositories/participantRepository.ts";
 

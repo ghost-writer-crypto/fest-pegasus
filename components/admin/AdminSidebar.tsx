@@ -67,7 +67,7 @@ export default function AdminSidebar({
                 marginBottom: "4px",
               }}
             >
-              00 // CONTROL ROOM
+              00 • CONTROL ROOM
             </span>
             <strong
               style={{

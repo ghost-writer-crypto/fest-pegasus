@@ -3,6 +3,16 @@
 import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  Trophy,
+  Play,
+  CheckCircle2,
+  Clock,
+  Search,
+  ArrowUpRight,
+  X,
+  Layers,
+} from "lucide-react";
 import { createCompetitionAction } from "@/app/admin/actions";
 import type {
   CompetitionRow,
@@ -187,26 +197,26 @@ export default function AdminCompetitionsClient({
         return {
           background: "rgba(239, 68, 68, 0.15)",
           color: "#ef4444",
-          border: "1px solid rgba(239, 68, 68, 0.3)",
+          border: "1px solid rgba(239, 68, 68, 0.35)",
         };
       case "ready":
         return {
           background: "rgba(16, 185, 129, 0.15)",
           color: "#10b981",
-          border: "1px solid rgba(16, 185, 129, 0.3)",
+          border: "1px solid rgba(16, 185, 129, 0.35)",
         };
       case "completed":
       case "finished":
         return {
           background: "rgba(148, 163, 184, 0.15)",
           color: "#94a3b8",
-          border: "1px solid rgba(148, 163, 184, 0.3)",
+          border: "1px solid rgba(148, 163, 184, 0.35)",
         };
       case "cancelled":
         return {
           background: "rgba(100, 116, 139, 0.15)",
           color: "#64748b",
-          border: "1px solid rgba(100, 116, 139, 0.3)",
+          border: "1px solid rgba(100, 116, 139, 0.35)",
           textDecoration: "line-through",
         };
       case "draft":
@@ -215,30 +225,227 @@ export default function AdminCompetitionsClient({
         return {
           background: "rgba(234, 179, 8, 0.15)",
           color: "#eab308",
-          border: "1px solid rgba(234, 179, 8, 0.3)",
+          border: "1px solid rgba(234, 179, 8, 0.35)",
         };
     }
   };
 
   return (
-    <div className="pegasus-admin-content">
+    <div className="zenithrow-competitions-page">
+      <style>{`
+        .zenithrow-competitions-page {
+          --z0: #070809;
+          --z1: #0e1013;
+          --z2: #15181c;
+          --z3: #1e2228;
+          --z4: #262b33;
+          --line: rgba(255, 255, 255, 0.085);
+          --line2: rgba(255, 255, 255, 0.14);
+          --fg: #f8fafc;
+          --muted: #94a3b8;
+          --muted2: #64748b;
+          --red: #e53935;
+          --red2: #ff5252;
+          --blue: #2563eb;
+          --green: #22c55e;
+          --amber: #f59e0b;
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 24px 20px 48px;
+          color: var(--fg);
+          font-family: Inter, system-ui, -apple-system, sans-serif;
+        }
+
+        .zenithrow-competitions-page .kicker {
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: 0.16em;
+          color: var(--red);
+          text-transform: uppercase;
+          margin-bottom: 6px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        .zenithrow-competitions-page .header-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        .zenithrow-competitions-page .title {
+          font-size: 30px;
+          font-weight: 850;
+          letter-spacing: -0.035em;
+          margin: 4px 0 6px;
+          color: #fff;
+        }
+
+        .zenithrow-competitions-page .subtitle {
+          margin: 0;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.55;
+          max-width: 720px;
+        }
+
+        .zenithrow-competitions-page .btn {
+          height: 36px;
+          border-radius: 9px;
+          border: 1px solid var(--line);
+          background: #11151a;
+          color: #dce2ea;
+          padding: 0 14px;
+          font-size: 11px;
+          font-weight: 750;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.18s ease;
+          text-decoration: none;
+        }
+        .zenithrow-competitions-page .btn:hover:not(:disabled) {
+          background: #191f26;
+          border-color: var(--line2);
+          transform: translateY(-1px);
+        }
+        .zenithrow-competitions-page .btn-primary {
+          background: var(--red) !important;
+          border-color: var(--red) !important;
+          color: #fff !important;
+        }
+        .zenithrow-competitions-page .btn-primary:hover:not(:disabled) {
+          filter: brightness(1.1);
+        }
+
+        .zenithrow-competitions-page .telemetry-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+          gap: 14px;
+          margin-bottom: 22px;
+        }
+        .zenithrow-competitions-page .telemetry-card {
+          background: linear-gradient(180deg, #111419, #0d0f12);
+          border: 1px solid var(--line);
+          border-radius: 14px;
+          padding: 16px 18px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+          position: relative;
+          overflow: hidden;
+        }
+        .zenithrow-competitions-page .telemetry-label {
+          font-size: 10px;
+          font-weight: 800;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .zenithrow-competitions-page .telemetry-value {
+          font-size: 28px;
+          font-weight: 900;
+          margin: 6px 0 2px;
+          color: #fff;
+          font-variant-numeric: tabular-nums;
+        }
+        .zenithrow-competitions-page .telemetry-sub {
+          font-size: 11px;
+          color: var(--muted2);
+        }
+
+        .zenithrow-competitions-page .filters-bar {
+          background: rgba(14, 17, 21, 0.85);
+          border: 1px solid var(--line);
+          border-radius: 14px;
+          padding: 14px 16px;
+          margin-bottom: 20px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          align-items: center;
+        }
+        .zenithrow-competitions-page input,
+        .zenithrow-competitions-page select {
+          height: 34px;
+          background: #11151a;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          color: #fff;
+          font-size: 12px;
+          padding: 0 12px;
+          transition: border-color 0.18s ease;
+        }
+        .zenithrow-competitions-page input:focus,
+        .zenithrow-competitions-page select:focus {
+          outline: none;
+          border-color: var(--blue);
+        }
+
+        .zenithrow-competitions-page .table-shell {
+          background: #0d1014;
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 16px 45px rgba(0, 0, 0, 0.3);
+        }
+        .zenithrow-competitions-page table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+          text-align: left;
+        }
+        .zenithrow-competitions-page th {
+          background: #14181e;
+          padding: 13px 18px;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--muted);
+          font-weight: 800;
+          border-bottom: 1px solid var(--line);
+        }
+        .zenithrow-competitions-page td {
+          padding: 14px 18px;
+          border-bottom: 1px solid var(--line);
+          color: #cbd5e1;
+        }
+        .zenithrow-competitions-page tr:hover td {
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .zenithrow-competitions-page .modal-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.82);
+          backdrop-filter: blur(6px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 16px;
+        }
+        .zenithrow-competitions-page .modal-box {
+          background: #101317;
+          border: 1px solid var(--line2);
+          border-radius: 18px;
+          padding: 24px;
+          width: 100%;
+          max-width: 520px;
+          box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+        }
+      `}</style>
+
       {/* Page Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="header-section">
         <div>
-          <span className="pegasus-eyebrow">TOURNAMENTS & MATCHUPS</span>
-          <h1 className="pegasus-page-title" style={{ margin: "4px 0" }}>
-            Competition Operations
-          </h1>
-          <p className="pegasus-page__description" style={{ margin: 0, maxWidth: "680px" }}>
+          <div className="kicker">09 • TOURNAMENT OPERATIONS &amp; BRACKETS</div>
+          <h1 className="title">Competition Operations</h1>
+          <p className="subtitle">
             Create and orchestrate operational tournament instances, knockout brackets,
             and heat fixtures from verified event registrations.
           </p>
@@ -250,15 +457,9 @@ export default function AdminCompetitionsClient({
             setFeedback(null);
             setIsCreateModalOpen(true);
           }}
-          className="pegasus-button pegasus-button--primary"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            fontWeight: 700,
-          }}
+          className="btn btn-primary"
         >
-          <span>🏆</span>
+          <Trophy size={14} />
           <span>Create Competition</span>
         </button>
       </div>
@@ -268,26 +469,29 @@ export default function AdminCompetitionsClient({
         <div
           style={{
             padding: "12px 16px",
-            borderRadius: "6px",
+            borderRadius: "10px",
             marginBottom: "20px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             background:
               feedback.type === "success"
-                ? "rgba(16, 185, 129, 0.12)"
+                ? "rgba(34, 197, 94, 0.12)"
                 : "rgba(239, 68, 68, 0.12)",
             border: `1px solid ${
               feedback.type === "success"
-                ? "rgba(16, 185, 129, 0.4)"
-                : "rgba(239, 68, 68, 0.4)"
+                ? "rgba(34, 197, 94, 0.35)"
+                : "rgba(239, 68, 68, 0.35)"
             }`,
-            color: feedback.type === "success" ? "#10b981" : "#ef4444",
-            fontSize: "14px",
-            fontWeight: 600,
+            color: feedback.type === "success" ? "#86efac" : "#fca5a5",
+            fontSize: "13px",
+            fontWeight: 700,
           }}
         >
-          <span>{feedback.message}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {feedback.type === "success" ? <CheckCircle2 size={15} /> : <X size={15} />}
+            <span>{feedback.message}</span>
+          </div>
           <button
             type="button"
             onClick={() => setFeedback(null)}
@@ -296,7 +500,7 @@ export default function AdminCompetitionsClient({
               border: "none",
               color: "inherit",
               cursor: "pointer",
-              fontSize: "16px",
+              fontSize: "14px",
             }}
           >
             ✕
@@ -305,103 +509,88 @@ export default function AdminCompetitionsClient({
       )}
 
       {/* Telemetry KPIs */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
-        <div className="pegasus-card" style={{ padding: "16px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Total Competitions
-          </span>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--foreground)", marginTop: "4px" }}>
-            {telemetry.total}
+      <div className="telemetry-grid">
+        <div className="telemetry-card">
+          <div className="telemetry-label">
+            <Layers size={12} />
+            <span>Total Competitions</span>
           </div>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Configured instances
-          </span>
+          <div className="telemetry-value">{telemetry.total}</div>
+          <div className="telemetry-sub">Configured instances</div>
         </div>
 
-        <div className="pegasus-card" style={{ padding: "16px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Drafting / Setup
-          </span>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "#eab308", marginTop: "4px" }}>
+        <div className="telemetry-card">
+          <div className="telemetry-label" style={{ color: "#facc15" }}>
+            <Clock size={12} />
+            <span>Drafting • Setup</span>
+          </div>
+          <div className="telemetry-value" style={{ color: "#facc15" }}>
             {telemetry.draft}
           </div>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Awaiting entrant draw
-          </span>
+          <div className="telemetry-sub">Awaiting entrant draw</div>
         </div>
 
-        <div className="pegasus-card" style={{ padding: "16px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Operational Ready
-          </span>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "#10b981", marginTop: "4px" }}>
+        <div className="telemetry-card">
+          <div className="telemetry-label" style={{ color: "#4ade80" }}>
+            <CheckCircle2 size={12} />
+            <span>Operational Ready</span>
+          </div>
+          <div className="telemetry-value" style={{ color: "#4ade80" }}>
             {telemetry.ready}
           </div>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Fixtures confirmed
-          </span>
+          <div className="telemetry-sub">Fixtures confirmed</div>
         </div>
 
-        <div className="pegasus-card" style={{ padding: "16px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Live In Action
-          </span>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "#ef4444", marginTop: "4px" }}>
+        <div className="telemetry-card">
+          <div className="telemetry-label" style={{ color: "#f87171" }}>
+            <Play size={12} />
+            <span>Live In Action</span>
+          </div>
+          <div className="telemetry-value" style={{ color: "#f87171" }}>
             {telemetry.live}
           </div>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Underway on courts
-          </span>
+          <div className="telemetry-sub">Underway on courts</div>
         </div>
 
-        <div className="pegasus-card" style={{ padding: "16px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Completed
-          </span>
-          <div style={{ fontSize: "28px", fontWeight: 900, color: "var(--accent)", marginTop: "4px" }}>
+        <div className="telemetry-card">
+          <div className="telemetry-label" style={{ color: "#60a5fa" }}>
+            <Trophy size={12} />
+            <span>Completed</span>
+          </div>
+          <div className="telemetry-value" style={{ color: "#60a5fa" }}>
             {telemetry.completed}
           </div>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            All fixtures concluded
-          </span>
+          <div className="telemetry-sub">All fixtures concluded</div>
         </div>
       </div>
 
       {/* Filter Controls */}
-      <div
-        className="pegasus-card"
-        style={{
-          padding: "16px",
-          marginBottom: "20px",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: "1 1 200px" }}>
+      <div className="filters-bar">
+        <div style={{ flex: "1 1 220px", position: "relative" }}>
           <input
             type="text"
             placeholder="Search competitions or events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pegasus-input"
-            style={{ width: "100%" }}
+            style={{ width: "100%", paddingLeft: "32px" }}
+          />
+          <Search
+            size={14}
+            style={{
+              position: "absolute",
+              left: "10px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--muted)",
+              pointerEvents: "none",
+            }}
           />
         </div>
 
-        <div style={{ flex: "0 1 170px" }}>
+        <div style={{ flex: "0 1 180px" }}>
           <select
             value={eventFilter}
             onChange={(e) => setEventFilter(e.target.value)}
-            className="pegasus-select"
             style={{ width: "100%" }}
           >
             <option value="all">All Events</option>
@@ -413,11 +602,10 @@ export default function AdminCompetitionsClient({
           </select>
         </div>
 
-        <div style={{ flex: "0 1 170px" }}>
+        <div style={{ flex: "0 1 180px" }}>
           <select
             value={divisionFilter}
             onChange={(e) => setDivisionFilter(e.target.value)}
-            className="pegasus-select"
             style={{ width: "100%" }}
           >
             <option value="all">All Divisions</option>
@@ -429,11 +617,10 @@ export default function AdminCompetitionsClient({
           </select>
         </div>
 
-        <div style={{ flex: "0 1 150px" }}>
+        <div style={{ flex: "0 1 160px" }}>
           <select
             value={formatFilter}
             onChange={(e) => setFormatFilter(e.target.value as any)}
-            className="pegasus-select"
             style={{ width: "100%" }}
           >
             <option value="all">All Formats</option>
@@ -445,11 +632,10 @@ export default function AdminCompetitionsClient({
           </select>
         </div>
 
-        <div style={{ flex: "0 1 150px" }}>
+        <div style={{ flex: "0 1 160px" }}>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="pegasus-select"
             style={{ width: "100%" }}
           >
             <option value="all">All Statuses</option>
@@ -471,20 +657,21 @@ export default function AdminCompetitionsClient({
               setFormatFilter("all");
               setStatusFilter("all");
             }}
-            className="pegasus-button pegasus-button--subtle"
-            style={{ fontSize: "13px", padding: "6px 12px" }}
+            className="btn"
+            style={{ fontSize: "11px" }}
           >
-            Reset Filters
+            <X size={12} />
+            <span>Reset Filters</span>
           </button>
         )}
       </div>
 
       {/* Competitions Table */}
-      <div className="pegasus-card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="table-shell">
         {filteredCompetitions.length === 0 ? (
           <div style={{ padding: "48px 24px", textAlign: "center", color: "var(--muted)" }}>
-            <span style={{ fontSize: "32px", display: "block", marginBottom: "8px" }}>🏆</span>
-            <strong style={{ display: "block", fontSize: "16px", color: "var(--foreground)" }}>
+            <span style={{ fontSize: "36px", display: "block", marginBottom: "8px" }}>🏆</span>
+            <strong style={{ display: "block", fontSize: "16px", color: "#f8fafc" }}>
               No competitions found
             </strong>
             <p style={{ margin: "4px 0 0", fontSize: "13px" }}>
@@ -495,31 +682,15 @@ export default function AdminCompetitionsClient({
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "13px",
-              }}
-            >
+            <table>
               <thead>
-                <tr
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    borderBottom: "1px solid var(--border)",
-                    color: "var(--muted)",
-                    fontSize: "11px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  <th style={{ padding: "12px 16px" }}>Status</th>
-                  <th style={{ padding: "12px 16px" }}>Competition Instance</th>
-                  <th style={{ padding: "12px 16px" }}>Event & Division</th>
-                  <th style={{ padding: "12px 16px" }}>Format & Round</th>
-                  <th style={{ padding: "12px 16px" }}>Fixtures</th>
-                  <th style={{ padding: "12px 16px", textAlign: "right" }}>Actions</th>
+                <tr>
+                  <th style={{ width: "120px" }}>Status</th>
+                  <th>Competition Instance</th>
+                  <th>Event &amp; Division</th>
+                  <th>Format &amp; Round</th>
+                  <th style={{ width: "140px" }}>Fixtures</th>
+                  <th style={{ width: "120px", textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -530,37 +701,34 @@ export default function AdminCompetitionsClient({
                   const statusStyle = getStatusBadgeStyle(comp.status);
 
                   return (
-                    <tr
-                      key={comp.id}
-                      style={{
-                        borderBottom: "1px solid var(--border)",
-                      }}
-                    >
+                    <tr key={comp.id}>
                       {/* Status */}
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <span
                           style={{
                             padding: "3px 8px",
-                            borderRadius: "4px",
-                            fontSize: "11px",
-                            fontWeight: 800,
+                            borderRadius: "5px",
+                            fontSize: "10px",
+                            fontWeight: 850,
                             textTransform: "uppercase",
+                            letterSpacing: "0.05em",
                             ...statusStyle,
                           }}
                         >
-                          {comp.status}
+                          ● {comp.status}
                         </span>
                       </td>
 
                       {/* Name */}
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <Link
                           href={`/admin/competitions/${comp.id}`}
                           style={{
-                            fontWeight: 750,
+                            fontWeight: 800,
                             fontSize: "14px",
-                            color: "var(--foreground)",
+                            color: "#fff",
                             textDecoration: "none",
+                            display: "inline-block",
                           }}
                         >
                           {comp.name}
@@ -568,40 +736,44 @@ export default function AdminCompetitionsClient({
                       </td>
 
                       {/* Event & Division */}
-                      <td style={{ padding: "14px 16px" }}>
-                        <div>{event ? event.name : comp.event_id}</div>
+                      <td>
+                        <div style={{ fontWeight: 700, color: "#e2e8f0" }}>
+                          {event ? event.name : comp.event_id}
+                        </div>
                         <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
                           {division ? `${division.name} (${division.code})` : "All Divisions"}
                         </div>
                       </td>
 
                       {/* Format & Round */}
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <span
                           style={{
                             background: "rgba(255, 255, 255, 0.06)",
-                            padding: "2px 6px",
-                            borderRadius: "3px",
-                            fontSize: "11px",
-                            fontWeight: 700,
+                            padding: "2px 7px",
+                            borderRadius: "4px",
+                            fontSize: "10px",
+                            fontWeight: 800,
                             textTransform: "uppercase",
+                            color: "#60a5fa",
                           }}
                         >
                           {comp.format}
                         </span>
                         {comp.round_name && (
-                          <span style={{ fontSize: "12px", color: "var(--muted)", marginLeft: "6px" }}>
+                          <span style={{ fontSize: "12px", color: "var(--muted)", marginLeft: "8px" }}>
                             {comp.round_name}
                           </span>
                         )}
                       </td>
 
                       {/* Fixtures Count */}
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <span
                           style={{
-                            fontWeight: 700,
-                            color: fixCount > 0 ? "var(--accent)" : "var(--muted)",
+                            fontWeight: 800,
+                            fontSize: "12px",
+                            color: fixCount > 0 ? "#86efac" : "var(--muted)",
                           }}
                         >
                           {fixCount} {fixCount === 1 ? "fixture" : "fixtures"}
@@ -609,20 +781,18 @@ export default function AdminCompetitionsClient({
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                      <td style={{ textAlign: "right" }}>
                         <Link
                           href={`/admin/competitions/${comp.id}`}
-                          className="pegasus-button pegasus-button--subtle"
+                          className="btn"
                           style={{
-                            padding: "4px 10px",
-                            fontSize: "12px",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
+                            padding: "0 10px",
+                            height: "28px",
+                            fontSize: "11px",
                           }}
                         >
                           <span>Manage</span>
-                          <span>↗</span>
+                          <ArrowUpRight size={13} />
                         </Link>
                       </td>
                     </tr>
@@ -634,32 +804,10 @@ export default function AdminCompetitionsClient({
         )}
       </div>
 
-      {/* ============================================================ */}
       {/* CREATE COMPETITION MODAL */}
-      {/* ============================================================ */}
       {isCreateModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "16px",
-          }}
-        >
-          <div
-            className="pegasus-card"
-            style={{
-              width: "100%",
-              maxWidth: "520px",
-              padding: "24px",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
-            }}
-          >
+        <div className="modal-backdrop">
+          <div className="modal-box">
             <div
               style={{
                 display: "flex",
@@ -668,7 +816,7 @@ export default function AdminCompetitionsClient({
                 marginBottom: "16px",
               }}
             >
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>
+              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 850 }}>
                 Create Competition Instance
               </h3>
               <button
@@ -687,14 +835,14 @@ export default function AdminCompetitionsClient({
             </div>
 
             <form onSubmit={handleCreateSubmit}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 {/* Event Select */}
                 <div>
                   <label
                     style={{
                       display: "block",
-                      fontSize: "12px",
-                      fontWeight: 700,
+                      fontSize: "11px",
+                      fontWeight: 750,
                       marginBottom: "6px",
                       color: "var(--muted)",
                     }}
@@ -705,7 +853,6 @@ export default function AdminCompetitionsClient({
                     value={createForm.eventId}
                     onChange={(e) => handleEventChange(e.target.value)}
                     required
-                    className="pegasus-select"
                     style={{ width: "100%" }}
                   >
                     <option value="">Select Event...</option>
@@ -722,21 +869,20 @@ export default function AdminCompetitionsClient({
                   <label
                     style={{
                       display: "block",
-                      fontSize: "12px",
-                      fontWeight: 700,
+                      fontSize: "11px",
+                      fontWeight: 750,
                       marginBottom: "6px",
                       color: "var(--muted)",
                     }}
                   >
-                    Division (Optional / Specific Cohort)
+                    Division (Optional • Specific Cohort)
                   </label>
                   <select
                     value={createForm.divisionId}
                     onChange={(e) => handleDivisionChange(e.target.value)}
-                    className="pegasus-select"
                     style={{ width: "100%" }}
                   >
-                    <option value="">All Divisions / Open</option>
+                    <option value="">All Divisions • Open</option>
                     {divisions.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.name} ({d.code})
@@ -750,8 +896,8 @@ export default function AdminCompetitionsClient({
                   <label
                     style={{
                       display: "block",
-                      fontSize: "12px",
-                      fontWeight: 700,
+                      fontSize: "11px",
+                      fontWeight: 750,
                       marginBottom: "6px",
                       color: "var(--muted)",
                     }}
@@ -767,14 +913,13 @@ export default function AdminCompetitionsClient({
                       })
                     }
                     required
-                    className="pegasus-select"
                     style={{ width: "100%" }}
                   >
                     <option value="knockout">Knockout Tournament (Head-to-head bracket)</option>
-                    <option value="heats">Heats & Lane Progression (Track/Pool)</option>
-                    <option value="final">Direct Final (Field / Timed)</option>
+                    <option value="heats">Heats &amp; Lane Progression (Track • Pool)</option>
+                    <option value="final">Direct Final (Field • Timed)</option>
                     <option value="round_robin">Round Robin (League Stage)</option>
-                    <option value="match">Single Match / Exhibition</option>
+                    <option value="match">Single Match • Exhibition</option>
                   </select>
                 </div>
 
@@ -783,8 +928,8 @@ export default function AdminCompetitionsClient({
                   <label
                     style={{
                       display: "block",
-                      fontSize: "12px",
-                      fontWeight: 700,
+                      fontSize: "11px",
+                      fontWeight: 750,
                       marginBottom: "6px",
                       color: "var(--muted)",
                     }}
@@ -797,7 +942,6 @@ export default function AdminCompetitionsClient({
                     onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                     placeholder="e.g., Football — Senior Boys"
                     required
-                    className="pegasus-input"
                     style={{ width: "100%" }}
                   />
                 </div>
@@ -807,20 +951,19 @@ export default function AdminCompetitionsClient({
                   <label
                     style={{
                       display: "block",
-                      fontSize: "12px",
-                      fontWeight: 700,
+                      fontSize: "11px",
+                      fontWeight: 750,
                       marginBottom: "6px",
                       color: "var(--muted)",
                     }}
                   >
-                    Stage / Round Tag (Optional)
+                    Stage • Round Tag (Optional)
                   </label>
                   <input
                     type="text"
                     value={createForm.roundName}
                     onChange={(e) => setCreateForm({ ...createForm, roundName: e.target.value })}
                     placeholder="e.g., Main Championship, Quarter Finals"
-                    className="pegasus-input"
                     style={{ width: "100%" }}
                   />
                 </div>
@@ -830,7 +973,7 @@ export default function AdminCompetitionsClient({
                   style={{
                     display: "flex",
                     justifyContent: "flex-end",
-                    gap: "12px",
+                    gap: "10px",
                     marginTop: "8px",
                   }}
                 >
@@ -838,14 +981,14 @@ export default function AdminCompetitionsClient({
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
                     disabled={isPending}
-                    className="pegasus-button pegasus-button--subtle"
+                    className="btn"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="pegasus-button pegasus-button--primary"
+                    className="btn btn-primary"
                   >
                     {isPending ? "Creating..." : "Confirm & Create"}
                   </button>
@@ -858,4 +1001,3 @@ export default function AdminCompetitionsClient({
     </div>
   );
 }
-

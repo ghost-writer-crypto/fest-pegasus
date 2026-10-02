@@ -12,7 +12,7 @@ import {
 import AdminScheduleClient from "@/components/admin/AdminScheduleClient";
 
 export const metadata = {
-  title: "Schedule Operations | Pegasus Admin",
+  title: "Schedule Operations | ZENITHROW Admin",
   description: "Master competition timetable, conflict detection, and venue allocations",
 };
 

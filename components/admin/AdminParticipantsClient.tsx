@@ -419,7 +419,7 @@ export default function AdminParticipantsClient({
           id: res.participantId || String(Date.now()),
           festival_id: festivalId,
           name: addForm.name.trim(),
-          public_id: "PGS-PENDING",
+          public_id: "ZTR-PENDING",
           team_id: addForm.teamId || null,
           division_id: addForm.divisionId || null,
           chest_number: addForm.chestNumber.trim() || null,
@@ -2082,7 +2082,7 @@ export default function AdminParticipantsClient({
                 }}
               >
                 <span style={{ fontSize: "11px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
-                  Official Team / House
+                  Official Team • House
                 </span>
                 <p style={{ margin: "4px 0 0", fontSize: "15px", fontWeight: 800, color: "var(--foreground)" }}>
                   {viewingParticipant.team_id ? teamMap.get(viewingParticipant.team_id)?.name ?? "—" : "No Team Assigned"}
@@ -2252,7 +2252,7 @@ export default function AdminParticipantsClient({
                   className="pegasus-button pegasus-button--subtle"
                   style={{ fontSize: "12px", color: "var(--destructive, #ef4444)" }}
                 >
-                  Delete / Deactivate
+                  Delete • Deactivate
                 </button>
               </div>
 

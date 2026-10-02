@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Search, X, ArrowRight, UserCheck } from "lucide-react";
+import styles from "@/components/athlete/athletePass.module.css";
 
 type Props = {
   initialQuery?: string;
@@ -27,63 +30,62 @@ export default function MyResultSearchForm({ initialQuery = "" }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "640px" }}>
-      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <div className="pegasus-search" style={{ flexGrow: 1 }}>
-          <span className="pegasus-search__icon" aria-hidden="true">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </span>
+    <div className={styles.searchCard}>
+      <form onSubmit={handleSubmit} className={styles.searchForm}>
+        <div className={styles.inputWrapper}>
+          <Search size={18} className={styles.searchIcon} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter Public ID (e.g. PGS-0001) or Chest Number..."
-            className="pegasus-search__input"
-            aria-label="Enter public identifier or chest number"
+            placeholder="Search by Chest Number (e.g. 1001) or Athlete ID..."
+            className={styles.searchInput}
+            aria-label="Enter athlete chest number or identifier"
             autoFocus={!initialQuery}
           />
           {query && (
             <button
               type="button"
               onClick={handleClear}
-              style={{
-                position: "absolute",
-                right: "14px",
-                background: "none",
-                border: "none",
-                color: "var(--muted)",
-                cursor: "pointer",
-                fontSize: "16px",
-                padding: "4px",
-              }}
+              className={styles.clearButton}
               aria-label="Clear search"
             >
-              ✕
+              <X size={16} />
             </button>
           )}
         </div>
 
-        <button
-          type="submit"
-          className="pegasus-button pegasus-button--primary"
-          style={{ minHeight: "48px", padding: "0 24px", flexShrink: 0 }}
-        >
-          Lookup Result
+        <button type="submit" className={styles.submitButton}>
+          <span>Lookup Athlete</span>
+          <ArrowRight size={16} />
         </button>
+      </form>
+
+      {/* Quick Access Verified Athlete Demo Chips */}
+      <div className={styles.quickAccessRow}>
+        <span className={styles.quickAccessLabel}>
+          <UserCheck size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: "4px" }} />
+          QUICK ACCESS DEMO ATHLETES:
+        </span>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <Link href="/my-result?q=1001" className={styles.quickChip}>
+            <strong style={{ color: "#f59e0b" }}>#1001</strong>
+            <span>Participant One • Gold</span>
+          </Link>
+          <Link href="/my-result?q=1002" className={styles.quickChip}>
+            <strong style={{ color: "#cbd5e1" }}>#1002</strong>
+            <span>Participant Two • Silver</span>
+          </Link>
+          <Link href="/my-result?q=1003" className={styles.quickChip}>
+            <strong style={{ color: "#38bdf8" }}>#1003</strong>
+            <span>Participant Three • Toofan</span>
+          </Link>
+          <Link href="/my-result?q=1004" className={styles.quickChip}>
+            <strong style={{ color: "#a855f7" }}>#1004</strong>
+            <span>Participant Four • Trojan</span>
+          </Link>
+        </div>
       </div>
-    </form>
+    </div>
   );
 }
-

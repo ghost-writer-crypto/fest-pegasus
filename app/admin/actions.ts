@@ -21,6 +21,7 @@ import {
   createScheduleRecord,
   updateScheduleRecord,
   updateScheduleStatusRecord,
+  deleteScheduleRecord,
   createPenaltyRecord,
   reversePenaltyRecord,
   createCompetitionRecord,
@@ -43,7 +44,6 @@ import {
   rotateQrIdentity,
   type QrEntityType,
   type ReviewAppealInput,
-  type CreateAppealInput,
   type CreateParticipantInput,
   type UpdateParticipantInput,
   type CreateVenueInput,
@@ -88,7 +88,7 @@ export type AdminActionResult = {
 export async function logoutAction(): Promise<void> {
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     try {
       const supabase = await createClient();
@@ -97,6 +97,10 @@ export async function logoutAction(): Promise<void> {
       console.error("[logoutAction] Error during signOut:", error);
     }
   }
+
+  // Clear dev session cookie (no-op in production)
+  const { clearSessionCookie } = await import("@/lib/auth/session");
+  await clearSessionCookie();
 
   redirect("/?logged_out=1");
 }
@@ -609,6 +613,38 @@ export async function updateScheduleStatusAction(
 }
 
 /**
+ * Server action to delete a timetable schedule slot.
+ * Strictly requires authenticated active administrator and records audit history.
+ */
+export async function deleteScheduleAction(
+  scheduleId: string,
+  reason?: string,
+): Promise<AdminActionResult> {
+  // 1. Authenticate and authorize admin server-side
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to delete schedule slots.",
+    };
+  }
+
+  // 2. Perform deletion
+  const res = await deleteScheduleRecord(scheduleId, profile.userId, reason);
+  if (!res.success) {
+    return { success: false, error: res.error };
+  }
+
+  // 3. Revalidate
+  revalidatePath("/admin/schedule");
+  revalidatePath("/admin/venues");
+  revalidatePath("/admin");
+  revalidatePath("/schedules");
+
+  return { success: true };
+}
+
+/**
  * Server action to issue a new team penalty.
  * Derived server-side (-10 pts) and strictly restricted to active administrators.
  */
@@ -1065,6 +1101,14 @@ export async function createSubstitutionAction(
     return {
       success: false,
       error: "Unauthorized: Active session required to submit substitutions.",
+    };
+  }
+
+  // Only admin and team_manager roles may create substitutions
+  if (profile.role !== "admin" && profile.role !== "team_manager") {
+    return {
+      success: false,
+      error: "Unauthorized: Only administrators and team managers may submit substitutions.",
     };
   }
 

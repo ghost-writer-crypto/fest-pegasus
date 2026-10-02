@@ -206,7 +206,7 @@ export default function AdminPenaltiesClient({
         }}
       >
         <div>
-          <span className="pegasus-eyebrow">STANDINGS & SANCTIONS</span>
+          <span className="pegasus-eyebrow">ZENITHROW 2026 • STANDINGS & SANCTIONS</span>
           <h1 className="pegasus-page-title" style={{ margin: "4px 0" }}>
             Team Penalty Operations
           </h1>
@@ -379,7 +379,7 @@ export default function AdminPenaltiesClient({
             className="pegasus-select"
             style={{ width: "100%" }}
           >
-            <option value="all">All Teams / Houses</option>
+            <option value="all">All Teams • Houses</option>
             {teams.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name} ({t.code})
@@ -440,8 +440,8 @@ export default function AdminPenaltiesClient({
                   }}
                 >
                   <th style={{ padding: "12px 16px" }}>Status & Points</th>
-                  <th style={{ padding: "12px 16px" }}>House / Team</th>
-                  <th style={{ padding: "12px 16px" }}>Context / Event</th>
+                  <th style={{ padding: "12px 16px" }}>House • Team</th>
+                  <th style={{ padding: "12px 16px" }}>Context • Event</th>
                   <th style={{ padding: "12px 16px" }}>Violation Reason</th>
                   <th style={{ padding: "12px 16px" }}>Issued Details</th>
                   <th style={{ padding: "12px 16px", textAlign: "right" }}>Actions</th>
@@ -655,7 +655,7 @@ export default function AdminPenaltiesClient({
                       color: "var(--muted)",
                     }}
                   >
-                    Target House / Team *
+                    Target House • Team *
                   </label>
                   <select
                     value={issueForm.teamId}
@@ -732,7 +732,7 @@ export default function AdminPenaltiesClient({
                       marginTop: "4px",
                     }}
                   >
-                    Standard Pegasus regulation sanction deducted at the championship level.
+                    Standard ZENITHROW regulation sanction deducted at the championship level.
                   </span>
                 </div>
 

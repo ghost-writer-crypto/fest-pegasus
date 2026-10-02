@@ -12,7 +12,7 @@ import {
 import AdminCompetitionsClient from "@/components/admin/AdminCompetitionsClient";
 
 export const metadata = {
-  title: "Competition Operations | Pegasus Admin",
+  title: "Competition Operations | ZENITHROW Admin",
   description: "Tournament structures, knockout brackets, heats, and matchup draws",
 };
 

@@ -165,23 +165,231 @@ export default function AdminImportClient({ festivalId }: AdminImportClientProps
   }, [previewData, activeTab, statusFilter, searchQuery]);
 
   return (
-    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "24px 16px" }}>
+    <div className="zenithrow-import-page">
+      <style>{`
+        .zenithrow-import-kicker {
+          color: var(--red);
+          font: 800 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        /* ZENITHROW Data Import — presentation layer only */
+        .zenithrow-import-page {
+          --z0: #070707;
+          --z1: #0e1013;
+          --z2: #15181c;
+          --z3: #1e2228;
+          --z4: #262b33;
+          --line: rgba(255, 255, 255, 0.08);
+          --line2: rgba(255, 255, 255, 0.14);
+          --fg: #f8fafc;
+          --muted: #94a3b8;
+          --muted2: #64748b;
+          --red: #e53935;
+          --red2: #ff5252;
+          --blue: #2563eb;
+          --green: #22c55e;
+          --amber: #f59e0b;
+          max-width: 1440px;
+          margin: 0 auto;
+          padding: 28px 24px 48px;
+          color: var(--fg);
+        }
+        .zenithrow-import-header {
+          margin-bottom: 24px;
+        }
+        .zenithrow-import-header > div:first-child {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 20px;
+        }
+        .zenithrow-import-title {
+          font-size: 30px;
+          line-height: 1.05;
+          font-weight: 850;
+          letter-spacing: -0.035em;
+          margin: 0;
+          color: #fff;
+        }
+        .zenithrow-import-subtitle {
+          margin: 8px 0 0;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.55;
+          max-width: 760px;
+        }
+        .zenithrow-import-page a {
+          transition: 0.2s ease;
+        }
+        .zenithrow-import-page button,
+        .zenithrow-import-page input,
+        .zenithrow-import-page select {
+          font: inherit;
+        }
+        .zenithrow-import-page code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          color: #cbd5e1;
+        }
+        .zenithrow-import-stepper {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 22px;
+          padding: 14px 16px;
+          background: linear-gradient(180deg, rgba(21, 24, 28, 0.9), rgba(14, 16, 19, 0.9));
+          border: 1px solid var(--line);
+          border-radius: 14px;
+          box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
+        }
+        .zenithrow-import-stepper > div {
+          min-width: 0;
+        }
+        .zenithrow-import-page [style*="background: #0f172a"] {
+          background: linear-gradient(180deg, #111419, #0d0f12) !important;
+          border-color: var(--line) !important;
+          border-radius: 16px !important;
+          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.035);
+        }
+        .zenithrow-import-page [style*="background: #1e293b"] {
+          background: #181c21 !important;
+          border-color: var(--line) !important;
+        }
+        .zenithrow-import-page [style*="#2563eb"] {
+          background: var(--blue) !important;
+        }
+        .zenithrow-import-page [style*="#16a34a"] {
+          background: var(--green) !important;
+        }
+        .zenithrow-import-page [style*="#334155"] {
+          border-color: var(--line2) !important;
+        }
+        .zenithrow-import-page input:focus,
+        .zenithrow-import-page select:focus {
+          outline: none;
+          border-color: rgba(37, 99, 235, 0.65) !important;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .zenithrow-import-page table thead tr {
+          background: #181c21 !important;
+        }
+        .zenithrow-import-page table tbody tr {
+          transition: background 0.16s ease;
+        }
+        .zenithrow-import-page table tbody tr:hover {
+          background: rgba(255, 255, 255, 0.025) !important;
+        }
+        .zenithrow-import-page th {
+          font-size: 10px !important;
+          text-transform: uppercase;
+          letter-spacing: 0.09em;
+          font-weight: 800 !important;
+        }
+        .zenithrow-import-page td {
+          border-color: var(--line) !important;
+        }
+        .zenithrow-import-page button:not(:disabled):hover {
+          filter: brightness(1.08);
+          transform: translateY(-1px);
+        }
+        .zenithrow-import-page button {
+          transition: filter 0.18s ease, transform 0.18s ease, background 0.18s ease;
+        }
+        .zenithrow-import-page [style*="border: 2px dashed"] {
+          border-color: rgba(255, 255, 255, 0.14) !important;
+          background: radial-gradient(circle at 50% 0, rgba(37, 99, 235, 0.08), transparent 48%) !important;
+          min-height: 220px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .zenithrow-import-page [style*="border: 2px dashed"]:hover {
+          border-color: rgba(229, 57, 53, 0.55) !important;
+        }
+        .zenithrow-import-page [style*="color: #2563eb"] {
+          color: #60a5fa !important;
+        }
+        .zenithrow-import-page [style*="color: #f8fafc"] {
+          color: #f8fafc !important;
+        }
+        .zenithrow-import-page [style*="color: #94a3b8"] {
+          color: #94a3b8 !important;
+        }
+        .zenithrow-import-page [style*="color: #64748b"] {
+          color: #64748b !important;
+        }
+        .zenithrow-import-page [style*="color: #22c55e"] {
+          color: #4ade80 !important;
+        }
+        .zenithrow-import-page [style*="color: #ef4444"] {
+          color: #f87171 !important;
+        }
+        .zenithrow-import-page [style*="rgba(234, 179, 8"] {
+          border-color: rgba(245, 158, 11, 0.24) !important;
+        }
+        @media (max-width: 900px) {
+          .zenithrow-import-page {
+            padding: 20px 14px 36px;
+          }
+          .zenithrow-import-header > div:first-child {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+          .zenithrow-import-title {
+            font-size: 25px;
+          }
+          .zenithrow-import-stepper {
+            overflow-x: auto;
+            padding: 12px;
+            gap: 9px;
+          }
+          .zenithrow-import-stepper > * {
+            flex: 0 0 auto;
+          }
+          .zenithrow-import-page table {
+            min-width: 860px;
+          }
+        }
+        @media (max-width: 640px) {
+          .zenithrow-import-page {
+            padding: 16px 10px 28px;
+          }
+          .zenithrow-import-title {
+            font-size: 22px;
+          }
+          .zenithrow-import-subtitle {
+            font-size: 12px;
+          }
+          .zenithrow-import-page [style*='gridTemplateColumns: "1fr 340px"'] {
+            display: flex !important;
+            flex-direction: column;
+          }
+          .zenithrow-import-page [style*='padding: "32px"'] {
+            padding: 18px !important;
+          }
+          .zenithrow-import-page [style*='padding: "48px 24px"'] {
+            padding: 34px 16px !important;
+          }
+          .zenithrow-import-page [style*='gridTemplateColumns: "repeat(3, 1fr)"'] {
+            grid-template-columns: 1fr !important;
+          }
+          .zenithrow-import-page [style*='display: "flex"'][style*='justifyContent: "center"'] {
+            flex-wrap: wrap;
+          }
+        }
+      `}</style>
+
       {/* Header */}
-      <div style={{ marginBottom: "28px" }}>
+      <div className="zenithrow-import-header">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <h1
-              style={{
-                fontSize: "26px",
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-                color: "#f8fafc",
-                margin: 0,
-              }}
-            >
+            <div className="zenithrow-import-kicker">07 • DATA MANAGEMENT &amp; INGESTION</div>
+            <h1 className="zenithrow-import-title">
               Festival Data Ingestion
             </h1>
-            <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "6px" }}>
+            <p className="zenithrow-import-subtitle">
               Production workbook importer for Students, Events, and Registrations (Strict CREATE-ONLY mode)
             </p>
           </div>
@@ -204,18 +412,7 @@ export default function AdminImportClient({ festivalId }: AdminImportClientProps
         </div>
 
         {/* Stepper Progress Bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            marginTop: "24px",
-            padding: "12px 16px",
-            background: "#0f172a",
-            borderRadius: "10px",
-            border: "1px solid #1e293b",
-          }}
-        >
+        <div className="zenithrow-import-stepper">
           <StepBadge num={1} label="Upload (.xlsx)" active={step === "upload"} completed={step !== "upload"} />
           <StepDivider />
           <StepBadge num={2} label="Validate & Preview" active={step === "preview"} completed={step === "confirm" || step === "completed"} />

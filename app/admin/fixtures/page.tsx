@@ -14,7 +14,7 @@ import {
 } from "@/lib/repositories";
 
 export const metadata = {
-  title: "Tournament Fixtures | Pegasus Admin",
+  title: "Tournament Fixtures | ZENITHROW Admin",
   description: "Operational overview of all festival match pairings and schedules",
 };
 
@@ -71,7 +71,7 @@ export default async function AdminFixturesPage() {
         }}
       >
         <div>
-          <span className="pegasus-eyebrow">OPERATIONAL OVERVIEW</span>
+          <span className="pegasus-eyebrow">ZENITHROW 2026 • OPERATIONAL OVERVIEW</span>
           <h1 className="pegasus-page-title" style={{ margin: "4px 0" }}>
             Tournament Fixtures
           </h1>

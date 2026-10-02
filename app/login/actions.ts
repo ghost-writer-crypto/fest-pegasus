@@ -7,7 +7,6 @@ import {
   clearSessionCookie,
   PRESET_OPERATORS,
   getSafeRedirectDestination,
-  type SessionData,
 } from "@/lib/auth/session";
 
 export type LoginActionResult = {
@@ -77,7 +76,7 @@ export async function loginWithCredentialsAction(
   // 1. Supabase Auth Individual Account Authentication
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     try {
       const supabase = await createClient();
@@ -165,7 +164,7 @@ export async function logoutAction(): Promise<void> {
   // Clear Supabase session if present
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     try {
       const supabase = await createClient();

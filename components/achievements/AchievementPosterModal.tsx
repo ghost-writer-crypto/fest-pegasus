@@ -236,7 +236,7 @@ export default function AchievementPosterModal({ achievement }: AchievementPoste
             {/* Poster Header */}
             <div className="text-center pb-6 border-b border-white/10">
               <span className="font-mono text-xs font-bold tracking-widest text-[#5B9BD5] uppercase block mb-1">
-                {achievement.festival} // OFFICIAL RECORD
+                {achievement.festival} {"//"} OFFICIAL RECORD
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F2B84B] tracking-tight">
                 {achievement.competition}

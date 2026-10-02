@@ -97,7 +97,7 @@ function selectVersion(byteLength: number): { version: QRVersion; dataBytes: num
 function encodeByteData(text: string, capacity: number): number[] {
   const utf8: number[] = [];
   for (let i = 0; i < text.length; i++) {
-    let charCode = text.charCodeAt(i);
+    const charCode = text.charCodeAt(i);
     if (charCode < 0x80) {
       utf8.push(charCode);
     } else if (charCode < 0x800) {
@@ -164,12 +164,6 @@ export function generateQrMatrix(text: string): boolean[][] {
 
   const size = 17 + versionInfo.version * 4;
   const matrix: (boolean | null)[][] = Array.from({ length: size }, () => new Array(size).fill(null));
-
-  function setModule(r: number, c: number, val: boolean) {
-    if (r >= 0 && r < size && c >= 0 && c < size) {
-      matrix[r][c] = val;
-    }
-  }
 
   // Draw 7x7 Finder Patterns at 3 corners
   function drawFinderPattern(row: number, col: number) {

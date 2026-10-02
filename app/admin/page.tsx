@@ -6,6 +6,11 @@ import AdminHeroMediaClient from "@/components/admin/AdminHeroMediaClient";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Admin Command Center | ZENITHROW",
+  description: "Live operational telemetry and festival management command center",
+};
+
 export default async function AdminCommandCenterPage() {
   const data = await getAdminDashboardData();
   const profile = await getAuthenticatedProfile();
@@ -41,7 +46,7 @@ export default async function AdminCommandCenterPage() {
         >
           <div>
             <p className="zenith-kicker" style={{ margin: "0 0 6px" }}>
-              00 // OPERATIONAL TELEMETRY
+              00 • OPERATIONAL TELEMETRY
             </p>
             <h1
               style={{
@@ -133,74 +138,74 @@ export default async function AdminCommandCenterPage() {
 
       {/* 4-Pillar Operational Cockpit */}
       <section>
-        <div style={{ marginBottom: "12px" }}>
-          <p className="pegasus-eyebrow" style={{ margin: 0 }}>OPERATIONAL TRIAGE</p>
-          <h2 style={{ fontSize: "18px", fontWeight: 850, margin: "2px 0 0" }}>
-            4-PILLAR FESTIVAL STATUS
+        <div style={{ marginBottom: "14px" }}>
+          <p className="pegasus-eyebrow" style={{ margin: 0 }}>01 • 4-PILLAR FESTIVAL STATUS</p>
+          <h2 style={{ fontSize: "20px", fontWeight: 900, letterSpacing: "-0.02em", margin: "3px 0 0" }}>
+            OPERATIONAL COMMAND MATRIX
           </h2>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
           {/* Pillar 1: WHAT IS HAPPENING */}
-          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #5B9BD5" }}>
-            <span className="font-mono text-[11px] font-bold text-[#5B9BD5] uppercase tracking-wider block">
-              01 // WHAT IS HAPPENING
+          <div className="pegasus-card" style={{ padding: "20px 22px", borderLeft: "4px solid #38bdf8", background: "var(--surface)" }}>
+            <span className="font-mono text-[11px] font-bold text-[#38bdf8] uppercase tracking-wider block">
+              01 • WHAT IS HAPPENING
             </span>
-            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+            <strong className="text-xl font-black block mt-1" style={{ color: "var(--foreground)" }}>
               {data.events.liveEvents > 0 ? `${data.events.liveEvents} Heats In Progress` : "Standby Session Active"}
             </strong>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1" style={{ color: "var(--muted)" }}>
               Arena status: Electronic timing armed. Track 01, Field Mat, Turf active.
             </p>
-            <Link href="/admin/live" className="text-xs font-mono font-bold text-[#5B9BD5] inline-flex items-center gap-1 mt-3">
+            <Link href="/admin/live" className="text-xs font-mono font-bold text-[#38bdf8] inline-flex items-center gap-1 mt-3">
               Monitor Live Arena <span>↗</span>
             </Link>
           </div>
 
           {/* Pillar 2: WHAT NEEDS ACTION */}
-          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #E53737" }}>
-            <span className="font-mono text-[11px] font-bold text-[#E53737] uppercase tracking-wider block">
-              02 // WHAT NEEDS ACTION
+          <div className="pegasus-card" style={{ padding: "20px 22px", borderLeft: "4px solid #ef4444", background: "var(--surface)" }}>
+            <span className="font-mono text-[11px] font-bold text-[#ef4444] uppercase tracking-wider block">
+              02 • WHAT NEEDS ACTION
             </span>
-            <strong className="text-xl font-black text-[#E53737] block mt-1">
+            <strong className="text-xl font-black block mt-1" style={{ color: "var(--status-dns, #ef4444)" }}>
               {totalAttentionCount > 0 ? `${totalAttentionCount} Items Requiring Decision` : "0 Pending Actions"}
             </strong>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1" style={{ color: "var(--muted)" }}>
               Verification queue: {data.results.submittedResults} submitted scorecards, {totalAttentionCount} critical attention queues.
             </p>
-            <Link href="/admin/verification" className="text-xs font-mono font-bold text-[#E53737] inline-flex items-center gap-1 mt-3">
+            <Link href="/admin/verification" className="text-xs font-mono font-bold text-[#ef4444] inline-flex items-center gap-1 mt-3">
               Review Verification Queue <span>↗</span>
             </Link>
           </div>
 
           {/* Pillar 3: WHAT IS WAITING */}
-          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #F2B84B" }}>
-            <span className="font-mono text-[11px] font-bold text-[#b07d1d] uppercase tracking-wider block">
-              03 // WHAT IS WAITING
+          <div className="pegasus-card" style={{ padding: "20px 22px", borderLeft: "4px solid #f59e0b", background: "var(--surface)" }}>
+            <span className="font-mono text-[11px] font-bold text-[#f59e0b] uppercase tracking-wider block">
+              03 • WHAT IS WAITING
             </span>
-            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+            <strong className="text-xl font-black block mt-1" style={{ color: "var(--foreground)" }}>
               {data.events.scheduledEvents} Events Scheduled
             </strong>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1" style={{ color: "var(--muted)" }}>
               Next scheduled: Tug of War 600kg weigh-in, afternoon track heats, and football knockouts.
             </p>
-            <Link href="/admin/schedule" className="text-xs font-mono font-bold text-[#b07d1d] inline-flex items-center gap-1 mt-3">
+            <Link href="/admin/schedule" className="text-xs font-mono font-bold text-[#f59e0b] inline-flex items-center gap-1 mt-3">
               Inspect Timetable <span>↗</span>
             </Link>
           </div>
 
           {/* Pillar 4: WHAT HAS BEEN PUBLISHED */}
-          <div className="pegasus-card" style={{ padding: "18px 20px", borderLeft: "4px solid #1A3663" }}>
-            <span className="font-mono text-[11px] font-bold text-[#1A3663] uppercase tracking-wider block">
-              04 // WHAT HAS BEEN PUBLISHED
+          <div className="pegasus-card" style={{ padding: "20px 22px", borderLeft: "4px solid #10b981", background: "var(--surface)" }}>
+            <span className="font-mono text-[11px] font-bold text-[#10b981] uppercase tracking-wider block">
+              04 • WHAT HAS BEEN PUBLISHED
             </span>
-            <strong className="text-xl font-black text-[#1A3663] block mt-1">
+            <strong className="text-xl font-black block mt-1" style={{ color: "var(--foreground)" }}>
               {data.results.publishedResults} Official Results Live
             </strong>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1" style={{ color: "var(--muted)" }}>
               Authoritative points synced to public House Shield radar and athlete achievement desks.
             </p>
-            <Link href="/admin/publish" className="text-xs font-mono font-bold text-[#1A3663] inline-flex items-center gap-1 mt-3">
+            <Link href="/admin/publish" className="text-xs font-mono font-bold text-[#10b981] inline-flex items-center gap-1 mt-3">
               View Published Results <span>↗</span>
             </Link>
           </div>
@@ -208,13 +213,21 @@ export default async function AdminCommandCenterPage() {
       </section>
 
       {/* 2. Primary Metrics Bar */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: "12px",
-        }}
-      >
+      <section>
+        <div style={{ marginBottom: "12px" }}>
+          <p className="pegasus-eyebrow" style={{ margin: 0 }}>02 • TELEMETRY VELOCITY & PERFORMANCE METRICS</p>
+          <h2 style={{ fontSize: "18px", fontWeight: 850, margin: "2px 0 0" }}>
+            Operational Throughput
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+            gap: "12px",
+          }}
+        >
         {/* Total Events */}
         <div
           className="pegasus-card"
@@ -391,6 +404,7 @@ export default async function AdminCommandCenterPage() {
             {totalAttentionCount > 0 ? "Actions required" : "Queues clear"}
           </span>
         </div>
+        </div>
       </section>
 
       {/* 3. Needs Attention Queue (Top Operational Priority) */}
@@ -400,13 +414,16 @@ export default async function AdminCommandCenterPage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "12px",
+            marginBottom: "14px",
             flexWrap: "wrap",
             gap: "8px",
           }}
         >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
+            <p className="pegasus-eyebrow" style={{ margin: 0 }}>
+              03 • CRITICAL ACTION QUEUES & ANOMALIES
+            </p>
+            <h2 style={{ fontSize: "18px", fontWeight: 850, margin: "2px 0 0" }}>
               Needs Attention
             </h2>
             <span style={{ fontSize: "12px", color: "var(--muted)" }}>
@@ -554,7 +571,7 @@ export default async function AdminCommandCenterPage() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="pegasus-eyebrow" style={{ margin: 0, color: "var(--status-live)" }}>
-              FIELD TELEMETRY
+              04 • ARENA TELEMETRY • LIVE OPERATIONS
             </span>
             <span
               className={`pegasus-status ${
@@ -647,7 +664,7 @@ export default async function AdminCommandCenterPage() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="pegasus-eyebrow" style={{ margin: 0 }}>
-              TIMETABLE SCHEDULE
+              04 • TIMETABLE CHRONOLOGY • UPCOMING
             </span>
             <span style={{ fontSize: "12px", color: "var(--muted)" }}>
               Chronological Queue
@@ -742,7 +759,10 @@ export default async function AdminCommandCenterPage() {
           }}
         >
           <div>
-            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
+            <p className="pegasus-eyebrow" style={{ margin: 0 }}>
+              05 • SYSTEM AUDIT LEDGER
+            </p>
+            <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "2px 0 0" }}>
               Recent Audit Activity
             </h2>
             <span style={{ fontSize: "12px", color: "var(--muted)" }}>
@@ -854,11 +874,14 @@ export default async function AdminCommandCenterPage() {
       {/* 7. Quick Access Navigation Grid */}
       <section>
         <div style={{ marginBottom: "12px" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>
-            Operational Control Surfaces
+          <p className="pegasus-eyebrow" style={{ margin: 0 }}>
+            07 • OPERATIONAL CONTROL SURFACES
+          </p>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, margin: "2px 0 0" }}>
+            Master Administrative Registry
           </h2>
           <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-            Direct shortcuts to active administrative modules and registries
+            Direct shortcuts to active administrative modules, registries, and consoles
           </span>
         </div>
 
@@ -878,6 +901,10 @@ export default async function AdminCommandCenterPage() {
             { label: "Timetable Schedule", href: "/admin/schedule", desc: `${data.general.scheduleCount} slots` },
             { label: "Match Fixtures", href: "/admin/fixtures", desc: `${data.general.fixtureCount} matches` },
             { label: "Field Operations", href: "/judge", desc: "Referee console" },
+            { label: "Sports Catalog", href: "/admin/sports", desc: "10 official disciplines" },
+            { label: "Festival Venues", href: "/admin/venues", desc: "5 certified arenas" },
+            { label: "Data Ingest", href: "/admin/import", desc: "CSV & schema import" },
+            { label: "Penalties Desk", href: "/admin/penalties", desc: "Sanction points ledger" },
           ].map((action) => (
             <Link
               key={action.label}

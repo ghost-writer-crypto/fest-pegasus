@@ -5158,6 +5158,63 @@ select:focus-visible {
   font-weight: 700;
 }
 
+/* Sports / Feature Cards */
+.card.feature,
+.feature {
+  min-height: 420px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border-radius: var(--hsu-radius);
+  overflow: hidden;
+  border: 1px solid var(--hsu-line);
+  text-decoration: none;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.card.feature:after,
+.feature:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 20%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+.card.feature .inside,
+.feature .inside {
+  position: relative;
+  z-index: 2;
+  padding: 28px;
+}
+
+.card.feature:hover,
+.feature:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.4);
+}
+
+.card.feature h3,
+.feature h3 {
+  font-size: 38px;
+  letter-spacing: -0.055em;
+  margin: 8px 0;
+  font-weight: 900;
+  color: #fff;
+}
+
+.card.feature p,
+.feature p {
+  color: #bbb;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 /* Sports Cards */
 .card.sport {
   min-height: 280px;
@@ -5277,6 +5334,152 @@ select:focus-visible {
   margin-top: 50px;
 }
 
+/* Filter Buttons */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.filter {
+  border: 1px solid var(--hsu-line);
+  background: #101010;
+  color: #aaa;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.filter:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.filter.active {
+  background: #fff;
+  color: #111;
+  border-color: #fff;
+}
+
+/* Committee Schedule & Fixture Table */
+.table {
+  border: 1px solid var(--hsu-line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #0d0d0d;
+}
+
+.tr {
+  display: grid;
+  grid-template-columns: 70px 1.5fr 1fr 100px;
+  gap: 12px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--hsu-line);
+  align-items: center;
+}
+
+.tr:last-child {
+  border: 0;
+}
+
+.th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #777;
+  background: #0d0d0d;
+  font-weight: 700;
+}
+
+.status {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  display: inline-block;
+  text-align: center;
+  color: #aaa;
+  letter-spacing: 0.05em;
+}
+
+.status.live {
+  color: #ff6d63;
+  background: rgba(239, 61, 50, 0.1);
+}
+
+.status.done {
+  color: var(--hsu-green, #53d58a);
+  background: rgba(83, 213, 138, 0.08);
+}
+
+/* Notice Banner */
+.notice {
+  padding: 14px 18px;
+  border: 1px solid rgba(239, 61, 50, 0.3);
+  background: rgba(239, 61, 50, 0.06);
+  border-radius: 15px;
+  color: #ddd;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Big Numerical KPI */
+.num {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: #fff;
+  line-height: 1;
+}
+
+.label {
+  color: #777;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 5px;
+}
+
+/* Team & Crest */
+.team {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 700;
+}
+
+.crest {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #222;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-style: normal;
+  flex-shrink: 0;
+  font-size: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Live Board Table Override */
+.table.live-table .tr {
+  grid-template-columns: 1.4fr 1.3fr 1fr 100px;
+}
+
+@media (max-width: 600px) {
+  .table.live-table .tr {
+    grid-template-columns: 1.2fr 1fr 70px;
+  }
+}
+
 /* Mobile Queries */
 @media (max-width: 900px) {
   .navlinks {
@@ -5384,5 +5587,13 @@ select:focus-visible {
   }
   .split-feature .copy {
     padding: 28px;
+  }
+  .tr {
+    grid-template-columns: 48px 1.4fr 70px;
+    padding: 13px 14px;
+    gap: 8px;
+  }
+  .tr .hide-sm {
+    display: none;
   }
 }

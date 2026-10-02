@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import type { ScheduleStatus } from "@/lib/types";
+import { createClient } from "../supabase/server.ts";
+import type { ScheduleStatus } from "../types/index.ts";
 
 /**
  * Shape of a row in public.schedules as defined by migration 20260920000100 & 20260921000700.
@@ -15,6 +15,8 @@ export type ScheduleRow = {
   ends_at: string | null;
   status: ScheduleStatus;
   notes: string | null;
+  title?: string | null;
+  category?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -41,8 +43,11 @@ export type CreateScheduleInput = {
   endsAt?: string | null;
   status?: ScheduleStatus;
   notes?: string | null;
+  title?: string | null;
+  category?: string | null;
   competitionId?: string | null;
   fixtureId?: string | null;
+  ignoreConflict?: boolean;
 };
 
 export type UpdateScheduleInput = {
@@ -53,7 +58,12 @@ export type UpdateScheduleInput = {
   endsAt?: string | null;
   status?: ScheduleStatus;
   notes?: string | null;
+  title?: string | null;
+  category?: string | null;
+  competitionId?: string | null;
+  fixtureId?: string | null;
   reason?: string | null;
+  ignoreConflict?: boolean;
 };
 
 export type ScheduleConflict = {
@@ -64,6 +74,9 @@ export type ScheduleConflict = {
 };
 
 const SCHEDULE_COLUMNS =
+  "id, festival_id, event_id, competition_id, fixture_id, venue_id, starts_at, ends_at, status, notes, title, category, created_at, updated_at" as const;
+
+const LEGACY_SCHEDULE_COLUMNS =
   "id, festival_id, event_id, competition_id, fixture_id, venue_id, starts_at, ends_at, status, notes, created_at, updated_at" as const;
 
 const SCHEDULE_CHANGE_COLUMNS =
@@ -89,6 +102,23 @@ export async function getSchedulesByFestival(
     .select(SCHEDULE_COLUMNS)
     .eq("festival_id", festivalId)
     .order("starts_at", { ascending: true });
+
+  if (error && (error as any).code === "42703") {
+    // Fallback if title/category columns are pending migration
+    const fallback = await supabase
+      .from("schedules")
+      .select(LEGACY_SCHEDULE_COLUMNS)
+      .eq("festival_id", festivalId)
+      .order("starts_at", { ascending: true });
+
+    if (!fallback.error && fallback.data) {
+      return (fallback.data as any[]).map((r) => ({
+        ...r,
+        title: null,
+        category: null,
+      })) as ScheduleRow[];
+    }
+  }
 
   if (error) {
     console.error(
@@ -131,6 +161,24 @@ export async function getSchedulesByDate(
     .lt("starts_at", dayEnd.toISOString())
     .order("starts_at", { ascending: true });
 
+  if (error && (error as any).code === "42703") {
+    const fallback = await supabase
+      .from("schedules")
+      .select(LEGACY_SCHEDULE_COLUMNS)
+      .eq("festival_id", festivalId)
+      .gte("starts_at", dayStart.toISOString())
+      .lt("starts_at", dayEnd.toISOString())
+      .order("starts_at", { ascending: true });
+
+    if (!fallback.error && fallback.data) {
+      return (fallback.data as any[]).map((r) => ({
+        ...r,
+        title: null,
+        category: null,
+      })) as ScheduleRow[];
+    }
+  }
+
   if (error) {
     console.error(
       `[scheduleRepository.getSchedulesByDate] Failed to retrieve schedules for festival ${festivalId} on date ${date}:`,
@@ -164,6 +212,22 @@ export async function getScheduleById(
     .select(SCHEDULE_COLUMNS)
     .eq("id", scheduleId)
     .maybeSingle();
+
+  if (error && (error as any).code === "42703") {
+    const fallback = await supabase
+      .from("schedules")
+      .select(LEGACY_SCHEDULE_COLUMNS)
+      .eq("id", scheduleId)
+      .maybeSingle();
+
+    if (!fallback.error && fallback.data) {
+      return {
+        ...(fallback.data as any),
+        title: null,
+        category: null,
+      } as ScheduleRow;
+    }
+  }
 
   if (error) {
     console.error(
@@ -291,7 +355,7 @@ export async function checkScheduleConflict(
   // Fetch all active schedules for the festival
   let query = supabase
     .from("schedules")
-    .select("id, event_id, venue_id, starts_at, ends_at, status")
+    .select("id, event_id, venue_id, starts_at, ends_at, status, title, category")
     .eq("festival_id", params.festivalId)
     .neq("status", "cancelled");
 
@@ -318,11 +382,12 @@ export async function checkScheduleConflict(
       // 1. Venue conflict
       if (params.venueId && slot.venue_id === params.venueId) {
         const timeStr = `${new Date(slot.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(endB).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+        const slotName = (slot as any).title || "another active program slot";
         return {
           hasConflict: true,
           type: "venue",
           conflictingScheduleId: slot.id,
-          message: `Venue Conflict: The selected venue is already occupied by another active program slot (${timeStr}).`,
+          message: `Venue Conflict: The selected venue is already occupied by '${slotName}' (${timeStr}).`,
         };
       }
 
@@ -348,7 +413,8 @@ export async function checkScheduleConflict(
 export async function createScheduleRecord(
   input: CreateScheduleInput,
   actorUserId?: string,
-): Promise<{ success: boolean; data?: ScheduleRow; error?: string }> {
+  client?: any,
+): Promise<{ success: boolean; data?: ScheduleRow; error?: string; hasConflictWarning?: boolean }> {
   if (!input.festivalId || input.festivalId.trim() === "") {
     return { success: false, error: "Festival ID is required." };
   }
@@ -356,19 +422,25 @@ export async function createScheduleRecord(
     return { success: false, error: "A valid start time is required." };
   }
 
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
 
   // 1. Check for conflicts
-  const conflict = await checkScheduleConflict(supabase, {
-    festivalId: input.festivalId,
-    startsAt: input.startsAt,
-    endsAt: input.endsAt,
-    venueId: input.venueId,
-    eventId: input.eventId,
-  });
+  if (!input.ignoreConflict) {
+    const conflict = await checkScheduleConflict(supabase, {
+      festivalId: input.festivalId,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      venueId: input.venueId,
+      eventId: input.eventId,
+    });
 
-  if (conflict.hasConflict) {
-    return { success: false, error: conflict.message || "Schedule conflict detected." };
+    if (conflict.hasConflict) {
+      return {
+        success: false,
+        error: conflict.message || "Schedule conflict detected.",
+        hasConflictWarning: true,
+      };
+    }
   }
 
   // 2. Insert schedule row
@@ -382,13 +454,33 @@ export async function createScheduleRecord(
     ends_at: input.endsAt || null,
     status: input.status || "scheduled",
     notes: input.notes ? input.notes.trim() : null,
+    title: input.title ? input.title.trim() : null,
+    category: input.category ? input.category.trim() : null,
   };
 
-  const { data: newSchedule, error: insertError } = await supabase
+  let { data: newSchedule, error: insertError } = await supabase
     .from("schedules")
     .insert(insertPayload)
     .select(SCHEDULE_COLUMNS)
     .single();
+
+  if (insertError && (insertError as any).code === "42703") {
+    // Graceful fallback if title/category columns are pending migration
+    const { title: _title, category: _category, ...legacyPayload } = insertPayload;
+    const legacyRes = await supabase
+      .from("schedules")
+      .insert(legacyPayload)
+      .select(LEGACY_SCHEDULE_COLUMNS)
+      .single();
+    if (!legacyRes.error && legacyRes.data) {
+      newSchedule = {
+        ...legacyRes.data,
+        title: input.title || null,
+        category: input.category || null,
+      };
+      insertError = null;
+    }
+  }
 
   if (insertError || !newSchedule) {
     console.error(`[scheduleRepository.createScheduleRecord] Insert failed:`, insertError);
@@ -421,12 +513,13 @@ export async function createScheduleRecord(
 export async function updateScheduleRecord(
   input: UpdateScheduleInput,
   actorUserId?: string,
-): Promise<{ success: boolean; data?: ScheduleRow; error?: string }> {
+  client?: any,
+): Promise<{ success: boolean; data?: ScheduleRow; error?: string; hasConflictWarning?: boolean }> {
   if (!input.scheduleId || input.scheduleId.trim() === "") {
     return { success: false, error: "Schedule ID is required." };
   }
 
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
 
   // 1. Fetch current schedule state
   const { data: current, error: fetchError } = await supabase
@@ -445,27 +538,37 @@ export async function updateScheduleRecord(
   const effectiveEventId = input.eventId !== undefined ? input.eventId : current.event_id;
 
   // 2. Conflict check
-  const conflict = await checkScheduleConflict(supabase, {
-    festivalId: current.festival_id,
-    startsAt: effectiveStartsAt,
-    endsAt: effectiveEndsAt,
-    venueId: effectiveVenueId,
-    eventId: effectiveEventId,
-    excludeScheduleId: input.scheduleId,
-  });
+  if (!input.ignoreConflict) {
+    const conflict = await checkScheduleConflict(supabase, {
+      festivalId: current.festival_id,
+      startsAt: effectiveStartsAt,
+      endsAt: effectiveEndsAt,
+      venueId: effectiveVenueId,
+      eventId: effectiveEventId,
+      excludeScheduleId: input.scheduleId,
+    });
 
-  if (conflict.hasConflict) {
-    return { success: false, error: conflict.message || "Schedule conflict detected." };
+    if (conflict.hasConflict) {
+      return {
+        success: false,
+        error: conflict.message || "Schedule conflict detected.",
+        hasConflictWarning: true,
+      };
+    }
   }
 
   // 3. Construct update payload
   const updatePayload: Record<string, unknown> = {};
   if (input.eventId !== undefined) updatePayload.event_id = input.eventId || null;
   if (input.venueId !== undefined) updatePayload.venue_id = input.venueId || null;
+  if (input.competitionId !== undefined) updatePayload.competition_id = input.competitionId || null;
+  if (input.fixtureId !== undefined) updatePayload.fixture_id = input.fixtureId || null;
   if (input.startsAt !== undefined) updatePayload.starts_at = input.startsAt;
   if (input.endsAt !== undefined) updatePayload.ends_at = input.endsAt || null;
   if (input.status !== undefined) updatePayload.status = input.status;
   if (input.notes !== undefined) updatePayload.notes = input.notes ? input.notes.trim() : null;
+  if (input.title !== undefined) updatePayload.title = input.title ? input.title.trim() : null;
+  if (input.category !== undefined) updatePayload.category = input.category ? input.category.trim() : null;
 
   const { data: updatedSchedule, error: updateError } = await supabase
     .from("schedules")
@@ -522,4 +625,61 @@ export async function updateScheduleStatusRecord(
     { scheduleId, status, reason: reason || `Status changed to ${status}` },
     actorUserId,
   );
+}
+
+/**
+ * Deletes a schedule slot and logs change audit history.
+ */
+export async function deleteScheduleRecord(
+  scheduleId: string,
+  actorUserId?: string,
+  reason?: string,
+  client?: any,
+): Promise<{ success: boolean; error?: string }> {
+  if (!scheduleId || scheduleId.trim() === "") {
+    return { success: false, error: "Schedule ID is required." };
+  }
+
+  const supabase = client ?? (await createClient());
+
+  // 1. Fetch current schedule state
+  const { data: current, error: fetchError } = await supabase
+    .from("schedules")
+    .select(SCHEDULE_COLUMNS)
+    .eq("id", scheduleId)
+    .maybeSingle();
+
+  if (fetchError || !current) {
+    return { success: false, error: `Schedule item ${scheduleId} not found.` };
+  }
+
+  // 2. Write deletion audit history before cascade deletion
+  try {
+    await supabase.from("schedule_change_entries").insert({
+      schedule_id: scheduleId,
+      actor_id: actorUserId || null,
+      action: "deleted",
+      reason: reason || "Slot removed by administrator",
+      before_state: current,
+      after_state: null,
+    });
+  } catch (auditErr) {
+    console.warn(`[scheduleRepository.deleteScheduleRecord] Audit write failed:`, auditErr);
+  }
+
+  // 3. Delete row
+  const { error: deleteError } = await supabase
+    .from("schedules")
+    .delete()
+    .eq("id", scheduleId);
+
+  if (deleteError) {
+    console.error(`[scheduleRepository.deleteScheduleRecord] Delete failed:`, deleteError);
+    return {
+      success: false,
+      error: `Failed to delete schedule item: ${deleteError.message}`,
+    };
+  }
+
+  return { success: true };
 }

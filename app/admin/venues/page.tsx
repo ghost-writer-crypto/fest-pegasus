@@ -8,7 +8,7 @@ import {
 import AdminVenuesClient from "@/components/admin/AdminVenuesClient";
 
 export const metadata = {
-  title: "Venue Management | Pegasus Admin",
+  title: "Venue Management | ZENITHROW Admin",
   description: "Campus grounds, courts, tracks, and facility allocation",
 };
 

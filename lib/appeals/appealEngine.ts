@@ -14,7 +14,6 @@
 import type {
   AppealRow,
   AppealStatus,
-  AppealReasonCategory,
   CreateAppealInput,
   IdentityRole,
   CorrectedResultPayload,

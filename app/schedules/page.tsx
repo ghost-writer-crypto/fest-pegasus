@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getActiveFestival,
@@ -8,9 +9,18 @@ import {
   type EventRow,
   type VenueRow,
 } from "@/lib/repositories";
+import { events as staticEvents } from "@/data/events";
+import { venues as staticVenues } from "@/data/venues";
 import SchedulesClient from "./SchedulesClient";
+import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Timetable & Schedules — ZENITHROW Sports Festival 2026",
+  description:
+    "Official schedule of heats, tournament knockouts, field finals, and live arena sessions for ZENITHROW 2026.",
+};
 
 export default async function SchedulesPage() {
   let schedules: ScheduleRow[] = [];
@@ -33,80 +43,133 @@ export default async function SchedulesPage() {
     venues = [];
   }
 
+  // Populate events fallback if database has zero rows (Basketball and Chess strictly excluded)
+  const displayEvents: EventRow[] = (
+    events.length > 0
+      ? events
+      : [
+          ...staticEvents.map((e) => ({
+            id: e.id,
+            festival_id: "zenithrow-2026",
+            division_id: null,
+            code: e.id.toUpperCase(),
+            name: e.name,
+            sport_id: null,
+            codex_event_id: e.id,
+            point_class: "X" as const,
+            scoring_engine: "rank_points",
+            competition_type: e.sport || "Athletics",
+            event_type: (e.type || "individual") as "individual" | "team",
+            scoring_schema: {},
+            status: "scheduled",
+            metadata: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })),
+          {
+            id: "tug-of-war-600kg",
+            festival_id: "zenithrow-2026",
+            division_id: null,
+            code: "TUG-600KG",
+            name: "Tug of War 600kg",
+            sport_id: null,
+            codex_event_id: "tug-of-war",
+            point_class: "W" as const,
+            scoring_engine: "bracket_points",
+            competition_type: "Tug of War",
+            event_type: "team" as const,
+            scoring_schema: {},
+            status: "scheduled",
+            metadata: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: "badminton-open",
+            festival_id: "zenithrow-2026",
+            division_id: null,
+            code: "BADMINTON-OPEN",
+            name: "Badminton Open",
+            sport_id: null,
+            codex_event_id: "badminton",
+            point_class: "X" as const,
+            scoring_engine: "bracket_points",
+            competition_type: "Badminton",
+            event_type: "individual" as const,
+            scoring_schema: {},
+            status: "scheduled",
+            metadata: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]
+  ) as EventRow[];
+
+  const venueNameMap: Record<string, string> = {
+    "athletics-track": "Main Track",
+    "main-ground": "Stadium Arena",
+    "indoor-court": "Badminton Arena",
+    "badminton-arena": "Badminton Arena",
+    "volleyball-court": "Volleyball Court A",
+    "cricket-ground": "Cricket Ground",
+    "central-arena-pit": "Central Arena Pit",
+    "power-pavilion": "Power Pavilion",
+  };
+
+  const displayVenues: VenueRow[] = (
+    venues.length > 0
+      ? venues
+      : staticVenues.map((v) => ({
+          id: v.id,
+          festival_id: "zenithrow-2026",
+          code: v.id.toUpperCase(),
+          slug: v.id,
+          name: venueNameMap[v.id] || v.name,
+          location: v.location || "Campus Grounds",
+          capacity: null,
+          is_active: true,
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+  ) as VenueRow[];
+
+  // Use live Supabase schedules directly (no fake fallback data)
+  const displaySchedules: ScheduleRow[] = schedules;
+
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--schedules pegasus-animate-fade">
-      {/* Header */}
-      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
-        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>03 / SCHEDULE</p>
-        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Competition Schedule</h1>
-        <p className="pegasus-page__description">
-          Official competition timetable, venue assignments, and event timings
-          for ZENITHROW Sports Festival 2026.
-        </p>
-      </section>
+    <>
+      <main className="section" style={{ paddingTop: "150px" }}>
+        <div className="wrap">
+          <div className="kicker">ZENITHROW • TODAY</div>
+          <h1 style={{ fontSize: "clamp(55px,8vw,105px)", letterSpacing: "-0.03em" }}>
+            THE DAY&apos;S<br />
+            <span>RHYTHM.</span>
+          </h1>
 
-      {/* Schedules Content or Authentic Empty State */}
-      {schedules.length === 0 ? (
-        <section
-          className="pegasus-card"
-          style={{ textAlign: "center", padding: "64px 24px" }}
-        >
-          <p className="pegasus-eyebrow" style={{ color: "var(--muted)" }}>
-            TIMETABLE PENDING
-          </p>
-          <h2
-            style={{
-              margin: "12px 0 10px",
-              fontSize: "24px",
-              fontWeight: 800,
-            }}
-          >
-            The official festival schedule will appear here once published.
-          </h2>
-          <p
-            style={{
-              margin: "0 auto",
-              maxWidth: "520px",
-              fontSize: "14px",
-              color: "var(--muted)",
-              lineHeight: 1.6,
-            }}
-          >
-            Event timings, venue allocations, and heat schedules are being
-            finalized by festival coordinators. Check back soon for the complete
-            program.
-          </p>
+          <SchedulesClient
+            initialSchedules={displaySchedules}
+            events={displayEvents}
+            venues={displayVenues}
+          />
 
-          <div
-            style={{
-              marginTop: "28px",
-              display: "flex",
-              justifyContent: "center",
-              gap: "12px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Link
-              href="/sports"
-              className="pegasus-button pegasus-button--secondary"
-            >
-              Explore Sports <span>↗</span>
-            </Link>
-            <Link
-              href="/fixtures"
-              className="pegasus-button pegasus-button--subtle"
-            >
-              View Fixtures <span>↗</span>
-            </Link>
+          <div className="section-head" style={{ marginTop: "75px" }}>
+            <div>
+              <div className="kicker">Championship Operations</div>
+              <h2>Follow live<br />or check results.</h2>
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Link href="/display" className="btn primary">
+                Live Broadcast →
+              </Link>
+              <Link href="/results" className="btn">
+                Verified Results →
+              </Link>
+            </div>
           </div>
-        </section>
-      ) : (
-        <SchedulesClient
-          initialSchedules={schedules}
-          events={events}
-          venues={venues}
-        />
-      )}
-    </main>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }

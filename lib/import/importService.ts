@@ -21,7 +21,7 @@ import type {
 export async function executeFestivalImport(
   payload: ImportExecutionPayload,
 ): Promise<ImportResult> {
-  const { festivalId, students, events, registrations } = payload;
+  const { festivalId } = payload;
   const importedAt = new Date().toISOString();
 
   if (!festivalId) {

@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import type { PointClass } from "@/lib/types";
+import { createClient } from "../supabase/server.ts";
+import type { PointClass } from "../types/index.ts";
 
 /**
  * Shape of a row in public.events as defined by migration 20260920000100.

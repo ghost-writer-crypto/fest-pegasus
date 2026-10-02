@@ -392,7 +392,7 @@ export default function AdminPublishClient({
                     }}
                   >
                     <span>
-                      Audited by: <strong>Chief Scorer / Referee</strong>
+                      Audited by: <strong>Chief Scorer & Referee</strong>
                     </span>
                     <span>
                       Status: <strong>Ready for Public Display</strong>

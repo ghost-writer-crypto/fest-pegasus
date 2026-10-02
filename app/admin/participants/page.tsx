@@ -12,8 +12,8 @@ import {
 import AdminParticipantsClient from "@/components/admin/AdminParticipantsClient";
 
 export const metadata = {
-  title: "Participant Registry | Pegasus Admin",
-  description: "Official Pegasus athlete registry and management console",
+  title: "Participant Registry | ZENITHROW Admin",
+  description: "Official ZENITHROW athlete registry and management console",
 };
 
 export default async function AdminParticipantsPage() {

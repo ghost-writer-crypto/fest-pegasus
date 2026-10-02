@@ -8,10 +8,9 @@ import {
   calculateTeamPoints,
   calculateTeamPointsBreakdown,
   calculateAllTeamPoints,
-  getResultTeamId,
 } from "../lib/competition/pointsAggregation.ts";
 import { POINT_MATRIX } from "../lib/competition/scoring.ts";
-import type { Result, TeamPenalty } from "../lib/types/index.ts";
+import type { Result } from "../lib/types/index.ts";
 
 describe("PEGASUS Critical Fix #2: Team-Match Result -> Championship Points Pipeline", () => {
   const housePhoenixId = "11111111-0000-4000-a000-000000000001";

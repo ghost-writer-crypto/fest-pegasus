@@ -25,7 +25,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: "Competition Console | Pegasus Admin",
+  title: "Competition Console | ZENITHROW Admin",
   description: "Operational tournament bracket, heats, entrant roster, and matchup management",
 };
 

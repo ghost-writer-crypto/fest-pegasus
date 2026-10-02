@@ -5,6 +5,7 @@ import {
   createScheduleAction,
   updateScheduleAction,
   updateScheduleStatusAction,
+  deleteScheduleAction,
 } from "@/app/admin/actions";
 import {
   getScheduleStatusLabel,
@@ -41,6 +42,7 @@ export default function AdminScheduleClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("all");
   const [selectedVenue, setSelectedVenue] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState<ScheduleStatus | "all">("all");
 
@@ -55,19 +57,26 @@ export default function AdminScheduleClient({
   const [editingSchedule, setEditingSchedule] = useState<ScheduleRow | null>(null);
   const [statusDialogSchedule, setStatusDialogSchedule] = useState<ScheduleRow | null>(null);
   const [historySchedule, setHistorySchedule] = useState<ScheduleRow | null>(null);
+  const [deleteConfirmSchedule, setDeleteConfirmSchedule] = useState<ScheduleRow | null>(null);
+  const [deleteReason, setDeleteReason] = useState("");
 
   // Add form state
   const [addForm, setAddForm] = useState({
+    title: "",
+    category: "",
     eventId: "",
     venueId: "",
     startsAt: "",
     endsAt: "",
     status: "scheduled" as ScheduleStatus,
     notes: "",
+    ignoreConflict: false,
   });
 
   // Edit form state
   const [editForm, setEditForm] = useState({
+    title: "",
+    category: "",
     eventId: "",
     venueId: "",
     startsAt: "",
@@ -75,6 +84,7 @@ export default function AdminScheduleClient({
     status: "scheduled" as ScheduleStatus,
     notes: "",
     reason: "",
+    ignoreConflict: false,
   });
 
   // Status dialog state
@@ -122,6 +132,20 @@ export default function AdminScheduleClient({
     };
   }, [schedules]);
 
+  // Distinct categories
+  const distinctCategories = useMemo(() => {
+    const cats = new Set<string>();
+    for (const item of schedules) {
+      if (item.category) {
+        item.category.split(",").forEach((c) => {
+          const trimmed = c.trim();
+          if (trimmed) cats.add(trimmed);
+        });
+      }
+    }
+    return Array.from(cats).sort();
+  }, [schedules]);
+
   // Filtered schedules
   const filteredSchedules = useMemo(() => {
     return schedules.filter((item) => {
@@ -130,9 +154,17 @@ export default function AdminScheduleClient({
         const q = searchQuery.trim().toLowerCase();
         const eventName = item.event_id ? (eventMap.get(item.event_id)?.name || "").toLowerCase() : "";
         const venueName = item.venue_id ? (venueMap.get(item.venue_id)?.name || "").toLowerCase() : "";
+        const title = (item.title || "").toLowerCase();
+        const category = (item.category || "").toLowerCase();
         const notes = (item.notes || "").toLowerCase();
 
-        if (!eventName.includes(q) && !venueName.includes(q) && !notes.includes(q)) {
+        if (
+          !title.includes(q) &&
+          !eventName.includes(q) &&
+          !category.includes(q) &&
+          !venueName.includes(q) &&
+          !notes.includes(q)
+        ) {
           return false;
         }
       }
@@ -151,14 +183,21 @@ export default function AdminScheduleClient({
         }
       }
 
-      // 4. Event Filter
+      // 4. Category Filter
+      if (selectedCategory !== "all") {
+        if (!item.category || !item.category.toLowerCase().includes(selectedCategory.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // 5. Event Filter
       if (selectedEvent !== "all") {
         if (item.event_id !== selectedEvent) {
           return false;
         }
       }
 
-      // 5. Status Filter
+      // 6. Status Filter
       if (selectedStatus !== "all") {
         if (item.status !== selectedStatus) {
           return false;
@@ -167,12 +206,13 @@ export default function AdminScheduleClient({
 
       return true;
     });
-  }, [schedules, searchQuery, selectedDate, selectedVenue, selectedEvent, selectedStatus, eventMap, venueMap]);
+  }, [schedules, searchQuery, selectedDate, selectedVenue, selectedCategory, selectedEvent, selectedStatus, eventMap, venueMap]);
 
   const isFiltering =
     searchQuery.trim() !== "" ||
     selectedDate !== "all" ||
     selectedVenue !== "all" ||
+    selectedCategory !== "all" ||
     selectedEvent !== "all" ||
     selectedStatus !== "all";
 
@@ -180,6 +220,7 @@ export default function AdminScheduleClient({
     setSearchQuery("");
     setSelectedDate("all");
     setSelectedVenue("all");
+    setSelectedCategory("all");
     setSelectedEvent("all");
     setSelectedStatus("all");
   };
@@ -197,6 +238,8 @@ export default function AdminScheduleClient({
   const handleOpenEdit = (s: ScheduleRow) => {
     setEditingSchedule(s);
     setEditForm({
+      title: s.title || "",
+      category: s.category || "",
       eventId: s.event_id || "",
       venueId: s.venue_id || "",
       startsAt: formatForInput(s.starts_at),
@@ -204,6 +247,7 @@ export default function AdminScheduleClient({
       status: s.status,
       notes: s.notes || "",
       reason: "",
+      ignoreConflict: false,
     });
     setFeedback(null);
   };
@@ -270,8 +314,8 @@ export default function AdminScheduleClient({
   // Submit Add Schedule Slot
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addForm.eventId) {
-      setFeedback({ type: "error", message: "Event is required." });
+    if (!addForm.title && !addForm.eventId) {
+      setFeedback({ type: "error", message: "Either a Program Title or an Event selection is required." });
       return;
     }
     if (!addForm.startsAt) {
@@ -291,12 +335,15 @@ export default function AdminScheduleClient({
     startTransition(async () => {
       const res = await createScheduleAction({
         festivalId,
-        eventId: addForm.eventId,
+        title: addForm.title.trim() || null,
+        category: addForm.category.trim() || null,
+        eventId: addForm.eventId || null,
         venueId: addForm.venueId || null,
         startsAt: startsIso,
         endsAt: endsIso,
         status: addForm.status,
         notes: addForm.notes.trim() || null,
+        ignoreConflict: addForm.ignoreConflict,
       });
 
       if (res.success) {
@@ -307,7 +354,7 @@ export default function AdminScheduleClient({
         const newRow: ScheduleRow = {
           id: res.scheduleId || String(Date.now()),
           festival_id: festivalId,
-          event_id: addForm.eventId,
+          event_id: addForm.eventId || null,
           venue_id: addForm.venueId || null,
           competition_id: null,
           fixture_id: null,
@@ -315,6 +362,8 @@ export default function AdminScheduleClient({
           ends_at: endsIso,
           status: addForm.status,
           notes: addForm.notes.trim() || null,
+          title: addForm.title.trim() || null,
+          category: addForm.category.trim() || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -325,12 +374,15 @@ export default function AdminScheduleClient({
         );
         setIsAddModalOpen(false);
         setAddForm({
+          title: "",
+          category: "",
           eventId: "",
           venueId: "",
           startsAt: "",
           endsAt: "",
           status: "scheduled",
           notes: "",
+          ignoreConflict: false,
         });
       } else {
         setFeedback({
@@ -345,8 +397,8 @@ export default function AdminScheduleClient({
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingSchedule) return;
-    if (!editForm.eventId) {
-      setFeedback({ type: "error", message: "Event is required." });
+    if (!editForm.title && !editForm.eventId) {
+      setFeedback({ type: "error", message: "Either a Program Title or an Event selection is required." });
       return;
     }
     if (!editForm.startsAt) {
@@ -366,13 +418,16 @@ export default function AdminScheduleClient({
     startTransition(async () => {
       const res = await updateScheduleAction({
         scheduleId: editingSchedule.id,
-        eventId: editForm.eventId,
+        title: editForm.title.trim() || null,
+        category: editForm.category.trim() || null,
+        eventId: editForm.eventId || null,
         venueId: editForm.venueId || null,
         startsAt: startsIso,
         endsAt: endsIso,
         status: editForm.status,
         notes: editForm.notes.trim() || null,
-        reason: editForm.reason.trim() || "Administrative reschedule / update",
+        reason: editForm.reason.trim() || "Administrative reschedule & update",
+        ignoreConflict: editForm.ignoreConflict,
       });
 
       if (res.success) {
@@ -386,7 +441,9 @@ export default function AdminScheduleClient({
               s.id === editingSchedule.id
                 ? {
                     ...s,
-                    event_id: editForm.eventId,
+                    title: editForm.title.trim() || null,
+                    category: editForm.category.trim() || null,
+                    event_id: editForm.eventId || null,
                     venue_id: editForm.venueId || null,
                     starts_at: startsIso,
                     ends_at: endsIso,
@@ -408,11 +465,13 @@ export default function AdminScheduleClient({
               : editForm.venueId !== editingSchedule.venue_id
                 ? "venue_changed"
                 : "updated",
-            reason: editForm.reason.trim() || "Administrative reschedule / update",
+            reason: editForm.reason.trim() || "Administrative reschedule & update",
             before_state: editingSchedule,
             after_state: {
               ...editingSchedule,
-              event_id: editForm.eventId,
+              title: editForm.title.trim() || null,
+              category: editForm.category.trim() || null,
+              event_id: editForm.eventId || null,
               venue_id: editForm.venueId || null,
               starts_at: startsIso,
               ends_at: endsIso,
@@ -433,13 +492,43 @@ export default function AdminScheduleClient({
     });
   };
 
+  // Submit Delete Schedule Slot
+  const handleDeleteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deleteConfirmSchedule) return;
+    const targetId = deleteConfirmSchedule.id;
+
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await deleteScheduleAction(
+        targetId,
+        deleteReason.trim() || "Slot deleted by administrator",
+      );
+
+      if (res.success) {
+        setFeedback({
+          type: "success",
+          message: "Schedule slot deleted successfully.",
+        });
+        setSchedules((prev) => prev.filter((s) => s.id !== targetId));
+        setDeleteConfirmSchedule(null);
+        setDeleteReason("");
+      } else {
+        setFeedback({
+          type: "error",
+          message: res.error || "Failed to delete schedule slot.",
+        });
+      }
+    });
+  };
+
   return (
     <div className="pegasus-animate-fade" style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
       {/* Header with Add Slot Button */}
       <section style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
         <div>
           <p className="pegasus-eyebrow" style={{ margin: "0 0 6px" }}>
-            CONTROL ROOM • MASTER TIMETABLE
+            ZENITHROW 2026 • MASTER TIMETABLE
           </p>
           <h1
             style={{
@@ -544,7 +633,7 @@ export default function AdminScheduleClient({
           { label: "Live Now", value: telemetry.liveCount, color: "var(--accent)" },
           { label: "Scheduled", value: telemetry.scheduledCount },
           { label: "Finished", value: telemetry.finishedCount },
-          { label: "Delayed / Postponed", value: telemetry.delayedCount, color: telemetry.delayedCount > 0 ? "var(--warning, #f59e0b)" : "var(--muted)" },
+          { label: "Delayed • Postponed", value: telemetry.delayedCount, color: telemetry.delayedCount > 0 ? "var(--warning, #f59e0b)" : "var(--muted)" },
           { label: "Cancelled", value: telemetry.cancelledCount, color: telemetry.cancelledCount > 0 ? "var(--destructive, #ef4444)" : "var(--muted)" },
           { label: "Venues in Use", value: telemetry.venuesInUse },
         ].map((item) => (
@@ -654,6 +743,25 @@ export default function AdminScheduleClient({
             ))}
           </select>
         </div>
+
+        {distinctCategories.length > 0 && (
+          <div style={{ minWidth: "140px" }}>
+            <select
+              className="pegasus-admin-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              aria-label="Filter by Category"
+              style={{ width: "100%" }}
+            >
+              <option value="all">All Categories</option>
+              {distinctCategories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div style={{ minWidth: "150px" }}>
           <select
@@ -780,7 +888,8 @@ export default function AdminScheduleClient({
                 <thead>
                   <tr>
                     <th>Time & Date</th>
-                    <th>Event / Discipline</th>
+                    <th>Program • Event</th>
+                    <th>Category</th>
                     <th>Venue</th>
                     <th>Status</th>
                     <th>Notes</th>
@@ -834,14 +943,43 @@ export default function AdminScheduleClient({
                           </div>
                         </td>
 
-                        {/* Event */}
+                        {/* Program / Event */}
                         <td>
                           <strong style={{ fontSize: "14px", color: "var(--foreground)", display: "block" }}>
-                            {event?.name ?? "Event Slot"}
+                            {slot.title || event?.name || "Program Slot"}
                           </strong>
-                          <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-                            {event?.code ?? "—"} • {event?.competition_type ?? "Standard"}
-                          </span>
+                          {slot.title && event ? (
+                            <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                              Event: {event.name} ({event.code})
+                            </span>
+                          ) : event ? (
+                            <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                              {event.code} • {event.competition_type || "Standard"}
+                            </span>
+                          ) : null}
+                        </td>
+
+                        {/* Category */}
+                        <td>
+                          {slot.category ? (
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "2px 8px",
+                                borderRadius: "999px",
+                                background: "rgba(255, 255, 255, 0.08)",
+                                color: "var(--foreground)",
+                                border: "1px solid var(--border)",
+                                display: "inline-block",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {slot.category}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: "12px", color: "var(--muted)" }}>—</span>
+                          )}
                         </td>
 
                         {/* Venue */}
@@ -897,6 +1035,17 @@ export default function AdminScheduleClient({
                             >
                               Audit Log
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeleteConfirmSchedule(slot);
+                                setDeleteReason("");
+                              }}
+                              className="pegasus-button pegasus-button--destructive"
+                              style={{ fontSize: "11px", padding: "6px 10px", minHeight: "30px" }}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -941,17 +1090,39 @@ export default function AdminScheduleClient({
                     gap: "12px",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
                     <div>
                       <strong style={{ fontSize: "16px", display: "block" }}>
-                        {event?.name ?? "Event Slot"}
+                        {slot.title || event?.name || "Program Slot"}
                       </strong>
-                      <span style={{ fontSize: "12px", color: "var(--accent)", fontWeight: 700 }}>
-                        {timeStr}
-                      </span>
-                      <span style={{ fontSize: "11px", color: "var(--muted)", marginLeft: "6px" }}>
-                        ({dateStr})
-                      </span>
+                      {slot.title && event && (
+                        <span style={{ fontSize: "11px", color: "var(--muted)", display: "block" }}>
+                          Event: {event.name} ({event.code})
+                        </span>
+                      )}
+                      <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "12px", color: "var(--accent)", fontWeight: 700 }}>
+                          {timeStr}
+                        </span>
+                        <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                          ({dateStr})
+                        </span>
+                        {slot.category && (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "1px 6px",
+                              borderRadius: "999px",
+                              background: "rgba(255, 255, 255, 0.08)",
+                              color: "var(--foreground)",
+                              border: "1px solid var(--border)",
+                            }}
+                          >
+                            {slot.category}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <button
@@ -986,12 +1157,12 @@ export default function AdminScheduleClient({
                     )}
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "4px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginTop: "4px" }}>
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(slot)}
                       className="pegasus-button pegasus-button--secondary"
-                      style={{ minHeight: "40px", fontSize: "12px" }}
+                      style={{ minHeight: "36px", fontSize: "11px", padding: "0 6px" }}
                     >
                       Reschedule
                     </button>
@@ -999,9 +1170,20 @@ export default function AdminScheduleClient({
                       type="button"
                       onClick={() => setHistorySchedule(slot)}
                       className="pegasus-button pegasus-button--subtle"
-                      style={{ minHeight: "40px", fontSize: "12px" }}
+                      style={{ minHeight: "36px", fontSize: "11px", padding: "0 6px" }}
                     >
-                      Audit Log
+                      Audit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteConfirmSchedule(slot);
+                        setDeleteReason("");
+                      }}
+                      className="pegasus-button pegasus-button--destructive"
+                      style={{ minHeight: "36px", fontSize: "11px", padding: "0 6px" }}
+                    >
+                      Delete
                     </button>
                   </div>
                 </article>
@@ -1068,19 +1250,51 @@ export default function AdminScheduleClient({
             </div>
 
             <form onSubmit={handleCreateSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Event selection */}
+              {/* Program Title */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                  Event *
+                  Program Title • Activity Name
+                </label>
+                <input
+                  type="text"
+                  className="pegasus-admin-input"
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                  placeholder="e.g. MARCH PAST, CROSS BARRICK, BREAKFAST, INAUGURAL CEREMONY"
+                  value={addForm.title}
+                  onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                />
+                <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "4px" }}>
+                  Used for general programs, ceremonies, or as custom title override.
+                </span>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
+                  Category
+                </label>
+                <input
+                  type="text"
+                  className="pegasus-admin-input"
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                  placeholder="e.g. CEREMONY, ATHLETICS, GAMES, GENERAL, REFRESHMENTS"
+                  value={addForm.category}
+                  onChange={(e) => setAddForm({ ...addForm, category: e.target.value })}
+                />
+              </div>
+
+              {/* Event selection (Optional if title is provided) */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
+                  Linked Event (Optional)
                 </label>
                 <select
-                  required
                   className="pegasus-admin-select"
                   style={{ width: "100%" }}
                   value={addForm.eventId}
                   onChange={(e) => setAddForm({ ...addForm, eventId: e.target.value })}
                 >
-                  <option value="">Select Event</option>
+                  <option value="">No Linked Event (General Program • Ceremony)</option>
                   {events.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name} ({e.code})
@@ -1171,6 +1385,20 @@ export default function AdminScheduleClient({
                 />
               </div>
 
+              {/* Conflict override checkbox */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "2px" }}>
+                <input
+                  type="checkbox"
+                  id="addIgnoreConflict"
+                  checked={addForm.ignoreConflict}
+                  onChange={(e) => setAddForm({ ...addForm, ignoreConflict: e.target.checked })}
+                  style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                />
+                <label htmlFor="addIgnoreConflict" style={{ fontSize: "12px", color: "var(--muted)", cursor: "pointer" }}>
+                  Override venue • timing clash detection warning
+                </label>
+              </div>
+
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" }}>
                 <button
                   type="button"
@@ -1231,7 +1459,7 @@ export default function AdminScheduleClient({
               <div>
                 <p className="pegasus-eyebrow" style={{ margin: 0 }}>OPERATIONAL CONTROL</p>
                 <h3 style={{ margin: "4px 0 0", fontSize: "20px", fontWeight: 800 }}>
-                  Reschedule / Edit Slot
+                  Reschedule • Edit Slot
                 </h3>
               </div>
               <button
@@ -1277,18 +1505,51 @@ export default function AdminScheduleClient({
             </div>
 
             <form onSubmit={handleEditSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Event selection */}
+              {/* Program Title */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                  Event *
+                  Program Title • Activity Name
+                </label>
+                <input
+                  type="text"
+                  className="pegasus-admin-input"
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                  placeholder="e.g. MARCH PAST, CROSS BARRICK, BREAKFAST, INAUGURAL CEREMONY"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                />
+                <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "4px" }}>
+                  Used for general programs, ceremonies, or as custom title override.
+                </span>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
+                  Category
+                </label>
+                <input
+                  type="text"
+                  className="pegasus-admin-input"
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                  placeholder="e.g. CEREMONY, ATHLETICS, GAMES, GENERAL, REFRESHMENTS"
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                />
+              </div>
+
+              {/* Event selection (Optional if title is provided) */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
+                  Linked Event (Optional)
                 </label>
                 <select
-                  required
                   className="pegasus-admin-select"
                   style={{ width: "100%" }}
                   value={editForm.eventId}
                   onChange={(e) => setEditForm({ ...editForm, eventId: e.target.value })}
                 >
+                  <option value="">No Linked Event (General Program • Ceremony)</option>
                   {events.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name} ({e.code})
@@ -1371,7 +1632,7 @@ export default function AdminScheduleClient({
               {/* Reason for change */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--accent)" }}>
-                  Reason for Change / Reschedule (Recorded in Audit History)
+                  Reason for Change or Reschedule (Recorded in Audit History)
                 </label>
                 <input
                   type="text"
@@ -1394,6 +1655,20 @@ export default function AdminScheduleClient({
                   value={editForm.notes}
                   onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                 />
+              </div>
+
+              {/* Conflict override checkbox */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "2px" }}>
+                <input
+                  type="checkbox"
+                  id="editIgnoreConflict"
+                  checked={editForm.ignoreConflict}
+                  onChange={(e) => setEditForm({ ...editForm, ignoreConflict: e.target.checked })}
+                  style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                />
+                <label htmlFor="editIgnoreConflict" style={{ fontSize: "12px", color: "var(--muted)", cursor: "pointer" }}>
+                  Override venue • timing clash detection warning
+                </label>
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" }}>
@@ -1665,6 +1940,122 @@ export default function AdminScheduleClient({
                 Close Audit Log
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* DELETE CONFIRMATION MODAL                                    */}
+      {/* ============================================================ */}
+      {deleteConfirmSchedule && (
+        <div
+          className="pegasus-modal-backdrop"
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDeleteConfirmSchedule(null);
+          }}
+        >
+          <div
+            className="pegasus-card pegasus-animate-fade"
+            style={{
+              width: "100%",
+              maxWidth: "460px",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              background: "#121214",
+              border: "1px solid rgba(239, 68, 68, 0.4)",
+              borderRadius: "12px",
+            }}
+          >
+            <div>
+              <p className="pegasus-eyebrow" style={{ margin: 0, color: "var(--destructive, #ef4444)" }}>
+                DANGER ZONE • DELETION
+              </p>
+              <h3 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 800 }}>
+                Delete Schedule Slot?
+              </h3>
+              <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--muted)", lineHeight: 1.5 }}>
+                Are you sure you want to delete this schedule slot? This will remove it from the master timetable. An audit record will be logged.
+              </p>
+            </div>
+
+            <div
+              style={{
+                padding: "12px 14px",
+                background: "rgba(239, 68, 68, 0.08)",
+                border: "1px solid rgba(239, 68, 68, 0.2)",
+                borderRadius: "8px",
+                fontSize: "12px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+              }}
+            >
+              <div>
+                <strong style={{ color: "var(--muted)" }}>Slot: </strong>
+                <span style={{ color: "var(--foreground)", fontWeight: 700 }}>
+                  {deleteConfirmSchedule.title ||
+                    (deleteConfirmSchedule.event_id
+                      ? eventMap.get(deleteConfirmSchedule.event_id)?.name
+                      : "Program Slot")}
+                </span>
+              </div>
+              <div>
+                <strong style={{ color: "var(--muted)" }}>Time: </strong>
+                <span>{new Date(deleteConfirmSchedule.starts_at).toLocaleString()}</span>
+              </div>
+              {deleteConfirmSchedule.venue_id && (
+                <div>
+                  <strong style={{ color: "var(--muted)" }}>Venue: </strong>
+                  <span>{venueMap.get(deleteConfirmSchedule.venue_id)?.name}</span>
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleDeleteSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
+                  Reason for Deletion
+                </label>
+                <input
+                  type="text"
+                  className="pegasus-admin-input"
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                  placeholder="e.g. Committee cancellation, duplicate entry, schedule restructure"
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px" }}>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => setDeleteConfirmSchedule(null)}
+                  className="pegasus-button pegasus-button--subtle"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="pegasus-button pegasus-button--destructive"
+                >
+                  {isPending ? "Deleting..." : "Confirm Delete"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

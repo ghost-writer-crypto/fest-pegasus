@@ -6,16 +6,21 @@ import AdminSubstitutionsClient from "@/components/admin/AdminSubstitutionsClien
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Athlete Substitutions Desk | ZENITHROW Admin",
+  description: "Review, approve, and track athlete substitutions across all participating houses",
+};
+
 export default async function AdminSubstitutionsPage() {
   const festival = await getActiveFestival();
-  const festivalId = festival?.id || "pegasus-2026";
+  const festivalId = festival?.id || "";
 
   const substitutions = await getSubstitutionsByFestival(festivalId);
 
   return (
     <div className="pegasus-admin-content">
       <header style={{ marginBottom: "28px" }}>
-        <p className="pegasus-eyebrow">OPERATIONS • CALL ROOM & SCRATCHES</p>
+        <p className="pegasus-eyebrow">ZENITHROW 2026 • CALL ROOM & SCRATCHES</p>
         <h1 className="pegasus-page-title">Athlete Substitutions Desk</h1>
         <p className="pegasus-page__description">
           Review, approve, and track athlete substitutions across all participating houses.

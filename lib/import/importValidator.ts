@@ -5,7 +5,6 @@
 
 import {
   validateAndPrepareParticipant,
-  OFFICIAL_TEAM_CODES,
   OFFICIAL_DIVISION_CODES,
 } from "@/lib/repositories/participantRepository";
 import type {

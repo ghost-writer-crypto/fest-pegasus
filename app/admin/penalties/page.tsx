@@ -10,7 +10,7 @@ import type { TeamPenalty } from "@/lib/types";
 import AdminPenaltiesClient from "@/components/admin/AdminPenaltiesClient";
 
 export const metadata = {
-  title: "Team Penalty Operations | Pegasus Admin",
+  title: "Team Penalty Operations | ZENITHROW Admin",
   description: "Manage official house sanctions and championship regulation deductions",
 };
 

@@ -266,9 +266,9 @@ export default function AdminResultsClient({
             <table className="pegasus-admin-table">
               <thead>
                 <tr>
-                  <th>Result ID / Status</th>
+                  <th>Result ID • Status</th>
                   <th>Event</th>
-                  <th>Competitor / Team</th>
+                  <th>Competitor • Team</th>
                   <th>Position</th>
                   <th>Mark</th>
                   <th>Points</th>

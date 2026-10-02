@@ -19,7 +19,7 @@ export default async function AdminAppealsPage() {
         <h1 className="pegasus-page-title">Appeals & Protests Desk</h1>
         <p className="pegasus-page__description">
           Review, investigate, and adjudicate official protests lodged by house captains in accordance
-          with Pegasus Codex 2026 rules (Fee: ₹70). Accepted decisions update the authoritative result
+          with ZENITHROW Codex 2026 rules (Fee: ₹70). Accepted decisions update the authoritative result
           and recalculate championship leaderboards dynamically.
         </p>
       </header>

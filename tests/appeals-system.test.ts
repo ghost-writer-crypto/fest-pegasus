@@ -2,7 +2,6 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   calculateAppealWindow,
-  canActorSubmitAppeal,
   canActorDecideAppeal,
   canTransitionAppealStatus,
   validateAppealSubmission,
@@ -15,7 +14,7 @@ import {
   calculateTeamPointsBreakdown,
   calculateAllTeamPoints,
 } from "../lib/competition/pointsAggregation.ts";
-import type { Result, TeamPenalty } from "../lib/types/index.ts";
+import type { Result } from "../lib/types/index.ts";
 
 describe("PEGASUS: Appeals & Disputes System", () => {
   const publishedTime = "2026-09-24T06:00:00.000Z";

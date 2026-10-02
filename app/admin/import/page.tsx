@@ -2,7 +2,7 @@ import { getActiveFestival } from "@/lib/repositories";
 import AdminImportClient from "@/components/admin/AdminImportClient";
 
 export const metadata = {
-  title: "Festival Data Import | Pegasus Admin",
+  title: "Festival Data Import | ZENITHROW Admin",
   description: "Bulk data ingestion engine for students, events, and registrations",
 };
 

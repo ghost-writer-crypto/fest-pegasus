@@ -4,7 +4,6 @@ import {
   isTugOfWarEvent,
   extractWeightFromMetadata,
   roundWeight,
-  calculateTugOfWarWeight,
   validateTugOfWarWeight,
   validateTugOfWarSubstitutionWeight,
   DEFAULT_TUG_OF_WAR_MAX_WEIGHT_KG,

@@ -1,14 +1,50 @@
 import Link from "next/link";
-import { events } from "@/data/events";
-import { sports } from "@/data/sports";
+import {
+  getActiveFestival,
+  getEventsByFestival,
+  getSportsByFestival,
+  type EventRow,
+  type SportRow,
+} from "@/lib/repositories";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminEventsPage() {
+export const metadata = {
+  title: "Event Matrix & Rules | ZENITHROW Admin",
+  description: "Official festival event point classifications, scoring engines, and rule matrices",
+};
+
+export default async function AdminEventsPage() {
+  const activeFestival = await getActiveFestival();
+
+  let events: EventRow[] = [];
+  let sports: SportRow[] = [];
+
+  if (activeFestival) {
+    [events, sports] = await Promise.all([
+      getEventsByFestival(activeFestival.id).catch((err) => {
+        console.error("[AdminEventsPage] Error fetching events from Supabase:", err);
+        return [];
+      }),
+      getSportsByFestival(activeFestival.id).catch((err) => {
+        console.error("[AdminEventsPage] Error fetching sports from Supabase:", err);
+        return [];
+      }),
+    ]);
+  }
+
+  const sportMap = new Map(sports.map((s) => [s.id, s]));
+
+  const classWCount = events.filter((e) => e.point_class === "W").length;
+  const classZCount = events.filter((e) => e.point_class === "Z").length;
+  const individualAthleticsCount = events.filter(
+    (e) => e.point_class === "W" || sportMap.get(e.sport_id)?.slug === "athletics",
+  ).length;
+
   return (
     <div className="pegasus-admin-content">
       <header style={{ marginBottom: "28px" }}>
-        <p className="pegasus-eyebrow">COMPETITION EVENTS • POINT MATRIX & RULES</p>
+        <p className="pegasus-eyebrow">ZENITHROW 2026 • POINT MATRIX & RULES</p>
         <h1 className="pegasus-page-title">Event Management & Matrix</h1>
         <p className="pegasus-page__description">
           Review competition events, point classifications (W, X, Y, Z), scoring engine mapping, and divisions.
@@ -34,18 +70,18 @@ export default function AdminEventsPage() {
         </div>
         <div className="pegasus-card" style={{ padding: "16px 20px" }}>
           <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Class W Events (5/3/1)
+            Class W Events (5 • 3 • 1)
           </span>
           <strong style={{ fontSize: "28px", fontWeight: 900, display: "block", marginTop: "4px" }}>
-            {events.filter((e) => e.pointClass === "W").length}
+            {classWCount}
           </strong>
         </div>
         <div className="pegasus-card" style={{ padding: "16px 20px" }}>
           <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
-            Class Z Events (10/7/5)
+            Class Z Events (10 • 7 • 5)
           </span>
           <strong style={{ fontSize: "28px", fontWeight: 900, display: "block", marginTop: "4px" }}>
-            {events.filter((e) => e.pointClass === "Z").length}
+            {classZCount}
           </strong>
         </div>
         <div className="pegasus-card" style={{ padding: "16px 20px" }}>
@@ -53,7 +89,7 @@ export default function AdminEventsPage() {
             Individual Athletics
           </span>
           <strong style={{ fontSize: "28px", fontWeight: 900, display: "block", marginTop: "4px" }}>
-            {events.filter((e) => e.type === "individual").length}
+            {individualAthleticsCount}
           </strong>
         </div>
       </div>
@@ -80,61 +116,78 @@ export default function AdminEventsPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((event) => (
-                <tr key={event.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "14px 20px", fontWeight: 800 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span>{event.name}</span>
-                      <span style={{ fontSize: "10px", fontFamily: "monospace", color: "var(--muted)", padding: "2px 6px", background: "rgba(255,255,255,0.04)", borderRadius: "2px" }}>
-                        {event.id}
-                      </span>
-                    </div>
-                  </td>
-                  <td style={{ padding: "14px 20px", color: "var(--muted)" }}>{event.sport}</td>
-                  <td style={{ padding: "14px 20px" }}>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        padding: "2px 8px",
-                        borderRadius: "2px",
-                        background: event.type === "team" ? "rgba(37,99,235,0.1)" : "rgba(16,185,129,0.1)",
-                        color: event.type === "team" ? "#60a5fa" : "#34d399",
-                      }}
-                    >
-                      {event.format} ({event.type})
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 20px" }}>
-                    <span
-                      style={{
-                        fontFamily: "monospace",
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        padding: "2px 8px",
-                        borderRadius: "2px",
-                        background: "rgba(242,184,75,0.15)",
-                        color: "#F2B84B",
-                      }}
-                    >
-                      Class {event.pointClass || "Standard"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 20px", fontFamily: "monospace", fontSize: "12px", color: "var(--muted)" }}>
-                    {event.scoringEngine}
-                  </td>
-                  <td style={{ padding: "14px 20px", textAlign: "right" }}>
-                    <Link
-                      href={`/judge/events/${event.id}`}
-                      className="pegasus-button pegasus-button--subtle"
-                      style={{ fontSize: "11px", padding: "4px 10px" }}
-                    >
-                      Judge Console ↗
-                    </Link>
+              {events.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ padding: "32px 20px", textAlign: "center", color: "var(--muted)" }}>
+                    No events configured in Supabase.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                events.map((event) => {
+                  const sport = sportMap.get(event.sport_id);
+                  const isIndividual = event.point_class === "W";
+                  const eventType = isIndividual ? "individual" : "team";
+                  const formatDisplay = event.competition_type || "standard";
+
+                  return (
+                    <tr key={event.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "14px 20px", fontWeight: 800 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span>{event.name}</span>
+                          <span style={{ fontSize: "10px", fontFamily: "monospace", color: "var(--muted)", padding: "2px 6px", background: "rgba(255,255,255,0.04)", borderRadius: "2px" }}>
+                            {event.code}
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "14px 20px", color: "var(--muted)" }}>
+                        {sport?.name || "General"}
+                      </td>
+                      <td style={{ padding: "14px 20px" }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            padding: "2px 8px",
+                            borderRadius: "2px",
+                            background: !isIndividual ? "rgba(37,99,235,0.1)" : "rgba(16,185,129,0.1)",
+                            color: !isIndividual ? "#60a5fa" : "#34d399",
+                          }}
+                        >
+                          {formatDisplay} ({eventType})
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 20px" }}>
+                        <span
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: "11px",
+                            fontWeight: 800,
+                            padding: "2px 8px",
+                            borderRadius: "2px",
+                            background: "rgba(242,184,75,0.15)",
+                            color: "#F2B84B",
+                          }}
+                        >
+                          Class {event.point_class || "Standard"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 20px", fontFamily: "monospace", fontSize: "12px", color: "var(--muted)" }}>
+                        {event.scoring_engine || "standard"}
+                      </td>
+                      <td style={{ padding: "14px 20px", textAlign: "right" }}>
+                        <Link
+                          href={`/judge/events/${event.id}`}
+                          className="pegasus-button pegasus-button--subtle"
+                          style={{ fontSize: "11px", padding: "4px 10px" }}
+                        >
+                          Judge Console ↗
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

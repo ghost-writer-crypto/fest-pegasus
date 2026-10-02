@@ -186,47 +186,47 @@ export default function HomePage() {
 
           <div className="grid grid4">
             <Link
-              href="/sports"
+              href="/sports/athletics"
               className="card sport"
               style={{
                 backgroundImage:
                   "url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">01 / Track</span>
+              <span className="tag">01 • Track</span>
               <h3>Athletics</h3>
             </Link>
             <Link
-              href="/sports"
+              href="/sports/football"
               className="card sport"
               style={{
                 backgroundImage:
                   "url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">02 / Field</span>
+              <span className="tag">02 • Field</span>
               <h3>Football</h3>
             </Link>
             <Link
-              href="/sports"
+              href="/sports/tug-of-war"
               className="card sport"
               style={{
                 backgroundImage:
-                  "url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=80')",
+                  "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">03 / Court</span>
-              <h3>Basketball</h3>
+              <span className="tag">03 • Arena</span>
+              <h3>Tug of War</h3>
             </Link>
             <Link
-              href="/sports"
+              href="/sports/volleyball"
               className="card sport"
               style={{
                 backgroundImage:
                   "url('https://images.unsplash.com/photo-1592656670411-0b1b3f8d0b88?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">04 / Court</span>
+              <span className="tag">04 • Court</span>
               <h3>Volleyball</h3>
             </Link>
           </div>
@@ -298,7 +298,7 @@ export default function HomePage() {
             />
             <div className="copy">
               <div>
-                <div className="kicker">HSU / ZENITHROW 2026</div>
+                <div className="kicker">HSU • ZENITHROW 2026</div>
                 <h2 className="editorial-title">Built for the moment.</h2>
               </div>
               <p className="sub">
