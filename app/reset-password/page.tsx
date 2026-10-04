@@ -1,6 +1,62 @@
+﻿"use client";
+
+import { useEffect, useState } from "react";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function prepareRecoverySession() {
+      const hash = window.location.hash;
+
+      if (!hash) {
+        setError("This recovery link is missing or invalid.");
+        return;
+      }
+
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const type = params.get("type");
+
+      if (type !== "recovery" || !accessToken || !refreshToken) {
+        setError("This recovery link is invalid or incomplete.");
+        return;
+      }
+
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (sessionError) {
+        console.error(
+          "[reset-password] Recovery session failed:",
+          sessionError,
+        );
+        setError(
+          "This recovery link is invalid or has expired. Please request a new one.",
+        );
+        return;
+      }
+
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+
+      setReady(true);
+    }
+
+    void prepareRecoverySession();
+  }, []);
+
   return (
     <div
       style={{
@@ -46,7 +102,33 @@ export default function ResetPasswordPage() {
             </p>
           </div>
 
-          <ResetPasswordForm />
+          {!ready && !error && (
+            <div className="pegasus-card" style={{ padding: 24 }}>
+              Verifying your recovery linkÃ¢â‚¬Â¦
+            </div>
+          )}
+
+          {error && (
+            <div className="pegasus-card" style={{ padding: 24 }}>
+              <strong>Recovery link unavailable.</strong>
+
+              <p style={{ marginTop: 10 }}>{error}</p>
+
+              <a
+                href="/forgot-password"
+                className="pegasus-button"
+                style={{
+                  display: "inline-flex",
+                  marginTop: 20,
+                  textDecoration: "none",
+                }}
+              >
+                Request New Link
+              </a>
+            </div>
+          )}
+
+          {ready && <ResetPasswordForm />}
         </div>
       </main>
 
@@ -63,3 +145,4 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+
