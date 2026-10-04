@@ -161,7 +161,7 @@ export default function ResetPasswordForm() {
           cursor: status === "loading" ? "wait" : "pointer",
         }}
       >
-        {status === "loading" ? "Updating…" : "Update Password"}
+        {status === "loading" ? "Updatingï¿½" : "Update Password"}
       </button>
     </form>
   );
