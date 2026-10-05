@@ -2,6 +2,7 @@ import Link from "next/link";
 import StaircaseIntro from "@/components/ui/StaircaseIntro";
 import HsuHeroSlider from "@/components/home/HsuHeroSlider";
 import HsuLiveTicker from "@/components/home/HsuLiveTicker";
+import Skiper103 from "@/components/ui/skiper-ui/skiper103";
 import Footer from "@/components/Footer";
 import { sports } from "@/data/sports";
 import { events } from "@/data/events";
@@ -284,6 +285,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 8.5 Tournament Regulations & Directives Accordion (Skiper103) */}
+      <Skiper103 />
 
       {/* 9. Split Feature Band Light */}
       <section className="editorial-band light">

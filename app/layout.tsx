@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,8 @@ export default function RootLayout({
         <ThemeProvider>
           <Navbar />
           {children}
+          {/* Floating Circular Bottom-Center View Transition Theme Toggle */}
+          <ThemeToggle floating variant="circle" showVariantSelector={true} />
         </ThemeProvider>
       </body>
     </html>

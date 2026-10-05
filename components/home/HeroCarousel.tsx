@@ -32,7 +32,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: "slide-logo",
     tag: "CEREMONIAL LAUNCH",
-    title: "Official Emblem Unveiled",
+    title: "Official Logo Unveiled",
     description: "Unveiled by Kerala Sports Minister Adv. O. J. Janeesh",
     ctaLabel: "HOUSE STANDINGS",
     ctaHref: "/leaderboard",

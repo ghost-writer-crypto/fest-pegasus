@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface SlideData {
@@ -20,7 +21,7 @@ const DEFAULT_HERO_SLIDES: SlideData[] = [
     kicker: "ZENITHROW 2026",
     titlePrimary: "THE",
     titleSecondary: "ARENA.",
-    lead: "The official Hamdan Annual Sports Carnival 2k26 arena — 4 Collegiate Houses, 100+ programmes, and 250+ student athletes competing in constant motion.",
+    lead: "The official Hamdan Annual Sports Carnival 2k26 arena — 4 Teams, 100+ programmes, and 250+ student athletes competing in constant motion.",
     image: "/images/hero/zenithrow-arena-aerial.png",
     ctaText: "Explore the arena →",
     ctaLink: "/sports",
@@ -40,6 +41,9 @@ const DEFAULT_HERO_SLIDES: SlideData[] = [
 export default function HsuHeroSlider() {
   const [slides, setSlides] = useState<SlideData[]>(DEFAULT_HERO_SLIDES);
   const [currentIdx, setCurrentIdx] = useState(0);
+
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   // Sync with published admin hero slides
   useEffect(() => {
@@ -98,6 +102,26 @@ export default function HsuHeroSlider() {
     setCurrentIdx((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    const diffY = touchStartY.current - e.changedTouches[0].clientY;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   useEffect(() => {
     if (slides.length <= 1) return;
     const timer = setInterval(() => {
@@ -110,14 +134,38 @@ export default function HsuHeroSlider() {
   const activeSlide = slides[currentIdx] || slides[0] || DEFAULT_HERO_SLIDES[0];
 
   return (
-    <section className="hero" aria-label="Featured Festival Highlights">
-      {/* Background with cross-fade */}
-      <div
-        className="hero-bg"
-        style={{
-          backgroundImage: `url('${activeSlide.image}')`,
-        }}
-      />
+    <section
+      className="hero"
+      aria-label="Featured Festival Highlights"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Positioned Background Image Layer (inset: 0, lower z-index) */}
+      <div className="hero-bg" aria-hidden="true">
+        {slides.map((slide, idx) => (
+          <div
+            key={slide.id || slide.image + idx}
+            className={`hero-slide-layer ${idx === currentIdx ? "hero-slide-layer--active" : ""}`}
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: idx === currentIdx ? 1 : 0,
+              transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              zIndex: idx === currentIdx ? 1 : 0,
+              pointerEvents: "none",
+            }}
+          >
+            <Image
+              src={slide.image}
+              alt={`${slide.titlePrimary} ${slide.titleSecondary}`}
+              fill
+              priority={idx === 0}
+              sizes="100vw"
+              className="hero-image"
+            />
+          </div>
+        ))}
+      </div>
 
       {/* Content Overlay */}
       <div className="wrap hero-content">

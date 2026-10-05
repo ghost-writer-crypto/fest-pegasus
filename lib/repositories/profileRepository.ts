@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { IdentityRole } from "@/lib/types";
+import { getSessionCookie } from "@/lib/auth/session";
 
 /**
  * Shape of a row in public.profiles matching migration 20260920000100.
@@ -59,8 +60,6 @@ export async function getProfileById(
     return null;
   }
 }
-
-import { getSessionCookie } from "@/lib/auth/session";
 
 /**
  * Server-side helper to resolve the currently authenticated session and its verified profile.
@@ -125,5 +124,3 @@ export async function getAuthenticatedProfile(): Promise<{
 
   return null;
 }
-
-

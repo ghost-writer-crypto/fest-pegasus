@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { SmoothInput } from "@/components/ui/skiper-ui/skiper106";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -35,7 +36,14 @@ export default function ForgotPasswordForm() {
 
   if (status === "success") {
     return (
-      <div className="pegasus-card" style={{ padding: 24 }}>
+      <div
+        className="pegasus-card"
+        style={{
+          padding: 24,
+          borderRadius: "var(--radius-lg, 24px)",
+          overflow: "hidden",
+        }}
+      >
         <strong>Check your email.</strong>
 
         <p style={{ marginTop: 10 }}>
@@ -47,7 +55,12 @@ export default function ForgotPasswordForm() {
           className="pegasus-button"
           style={{
             display: "inline-flex",
-            marginTop: 20,
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 44,
+            padding: "0 24px",
+            borderRadius: "var(--radius-full, 9999px)",
+              marginTop: 20,
             textDecoration: "none",
           }}
         >
@@ -71,7 +84,7 @@ export default function ForgotPasswordForm() {
         Registered Email
       </label>
 
-      <input
+      <SmoothInput
         id="email"
         name="email"
         type="email"
@@ -81,11 +94,13 @@ export default function ForgotPasswordForm() {
         onChange={(event) => setEmail(event.target.value)}
         placeholder="operator@example.com"
         disabled={status === "loading"}
+        caretColor="#E53935"
         style={{
           width: "100%",
-          padding: "14px 16px",
-          borderRadius: 10,
-          border: "1px solid var(--border, #ccc)",
+          minHeight: 44,
+          padding: "12px 16px",
+          borderRadius: "var(--radius-sm, 12px)",
+          border: "1px solid var(--border, rgba(255,255,255,0.08))",
           background: "var(--background)",
           color: "inherit",
           fontSize: 15,
@@ -98,6 +113,10 @@ export default function ForgotPasswordForm() {
           style={{
             marginTop: 10,
             fontSize: 13,
+            padding: "10px 14px",
+            borderRadius: "var(--radius-sm, 12px)",
+              background: "rgba(229, 57, 53, 0.08)",
+            border: "1px solid rgba(229, 57, 53, 0.2)",
           }}
         >
           {message}
@@ -110,6 +129,8 @@ export default function ForgotPasswordForm() {
         className="pegasus-button"
         style={{
           width: "100%",
+          minHeight: 44,
+          borderRadius: "var(--radius-full, 9999px)",
           marginTop: 16,
           cursor: status === "loading" ? "wait" : "pointer",
         }}

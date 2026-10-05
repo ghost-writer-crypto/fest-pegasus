@@ -1,79 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./StaircaseIntro.module.css";
+import React from "react";
+import Skiper10, { type Skiper10Props } from "@/components/ui/skiper-ui/skiper10";
 
-export default function StaircaseIntro() {
-  const [stageActive, setStageActive] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
-
-  useEffect(() => {
-    // Accessibility: instantly dismiss if user prefers reduced motion
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setIsDismissed(true);
-      return;
-    }
-
-    // Trigger sequential animations
-    const frameId = requestAnimationFrame(() => {
-      setStageActive(true);
-    });
-
-    // Step sequence finishes and begins container exit fade
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, 1500);
-
-    // Complete reveal and unmount from DOM permanently
-    const unmountTimer = setTimeout(() => {
-      setIsDismissed(true);
-    }, 1750);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      clearTimeout(exitTimer);
-      clearTimeout(unmountTimer);
-    };
-  }, []);
-
-  if (isDismissed) {
-    return null;
-  }
-
+export default function StaircaseIntro(props: Skiper10Props) {
   return (
-    <div
-      className={`${styles.introOverlay} ${isExiting ? styles.introOverlayExiting : ""} ${
-        stageActive ? styles.stageActive : ""
-      }`}
-      aria-hidden={isExiting}
-      role="presentation"
-    >
-      {/* Stepped Geometric Staircase Columns */}
-      <div className={styles.staircaseStage} aria-hidden="true">
-        <div className={`${styles.stairColumn} ${styles.col1}`} />
-        <div className={`${styles.stairColumn} ${styles.col2}`} />
-        <div className={`${styles.stairColumn} ${styles.col3}`} />
-        <div className={`${styles.stairColumn} ${styles.col4}`} />
-        <div className={`${styles.stairColumn} ${styles.col5}`} />
-        <div className={`${styles.stairColumn} ${styles.col6}`} />
-      </div>
-
-      {/* Restrained Brand Emblem */}
-      <div className={styles.introCenter} aria-hidden="true">
-        <div className={styles.emblemBadge}>
-          <span className={styles.emblemDot} />
-          <span className={styles.emblemText}>CHAMPIONSHIP 2026</span>
-        </div>
-        <div className={styles.brandTitleWrap}>
-          <span className={styles.brandTitle}>ZENITHROW</span>
-        </div>
-        <div className={styles.subRule}>
-          <span className={styles.subText}>PRECISION ATHLETICS</span>
-          <span className={styles.subSep}>•</span>
-          <span className={styles.subText}>KERALA CAMPUS MEET</span>
-        </div>
-      </div>
-    </div>
+    <Skiper10
+      columns={22}
+      duration={0.60}
+      staggerDelay={0.065}
+      ease={[0.76, 0, 0.24, 1]}
+      timingMode="synchronized"
+      brandTitle="ZENITHROw"
+      emblemText="HAMDAN SPORTS CHAMPIONSHIP 2026"
+      brandSubtitle="KICK THE DRUGS"
+      showCounter={false}
+      minDisplayTime={1400}
+      {...props}
+    />
   );
 }

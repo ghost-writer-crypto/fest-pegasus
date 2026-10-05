@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { SmoothInput } from "@/components/ui/skiper-ui/skiper106";
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -50,7 +51,14 @@ export default function ResetPasswordForm() {
 
   if (status === "success") {
     return (
-      <div className="pegasus-card" style={{ padding: 24 }}>
+      <div
+        className="pegasus-card"
+        style={{
+          padding: 24,
+          borderRadius: "var(--radius-lg, 24px)",
+          overflow: "hidden",
+        }}
+      >
         <strong>Password updated.</strong>
 
         <p style={{ marginTop: 10 }}>{message}</p>
@@ -60,7 +68,12 @@ export default function ResetPasswordForm() {
           className="pegasus-button"
           style={{
             display: "inline-flex",
-            marginTop: 20,
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 44,
+            padding: "0 24px",
+            borderRadius: "var(--radius-full, 9999px)",
+              marginTop: 20,
             textDecoration: "none",
           }}
         >
@@ -84,7 +97,7 @@ export default function ResetPasswordForm() {
         New Password
       </label>
 
-      <input
+      <SmoothInput
         id="password"
         name="password"
         type="password"
@@ -94,11 +107,13 @@ export default function ResetPasswordForm() {
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         disabled={status === "loading"}
+        caretColor="#E53935"
         style={{
           width: "100%",
-          padding: "14px 16px",
-          borderRadius: 10,
-          border: "1px solid var(--border, #ccc)",
+          minHeight: 44,
+          padding: "12px 16px",
+          borderRadius: "var(--radius-sm, 12px)",
+          border: "1px solid var(--border, rgba(255,255,255,0.08))",
           background: "var(--background)",
           color: "inherit",
           fontSize: 15,
@@ -118,7 +133,7 @@ export default function ResetPasswordForm() {
         Confirm New Password
       </label>
 
-      <input
+      <SmoothInput
         id="confirm-password"
         name="confirm-password"
         type="password"
@@ -128,11 +143,13 @@ export default function ResetPasswordForm() {
         value={confirmPassword}
         onChange={(event) => setConfirmPassword(event.target.value)}
         disabled={status === "loading"}
+        caretColor="#E53935"
         style={{
           width: "100%",
-          padding: "14px 16px",
-          borderRadius: 10,
-          border: "1px solid var(--border, #ccc)",
+          minHeight: 44,
+          padding: "12px 16px",
+          borderRadius: "var(--radius-sm, 12px)",
+          border: "1px solid var(--border, rgba(255,255,255,0.08))",
           background: "var(--background)",
           color: "inherit",
           fontSize: 15,
@@ -145,6 +162,10 @@ export default function ResetPasswordForm() {
           style={{
             marginTop: 12,
             fontSize: 13,
+            padding: "10px 14px",
+            borderRadius: "var(--radius-sm, 12px)",
+              background: "rgba(229, 57, 53, 0.08)",
+            border: "1px solid rgba(229, 57, 53, 0.2)",
           }}
         >
           {message}
@@ -157,6 +178,8 @@ export default function ResetPasswordForm() {
         className="pegasus-button"
         style={{
           width: "100%",
+          minHeight: 44,
+          borderRadius: "var(--radius-full, 9999px)",
           marginTop: 20,
           cursor: status === "loading" ? "wait" : "pointer",
         }}

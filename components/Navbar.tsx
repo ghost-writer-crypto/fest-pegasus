@@ -176,7 +176,25 @@ export default function Navbar() {
           onClick={() => setIsPortalOpen((prev) => !prev)}
           aria-expanded={isPortalOpen}
           aria-haspopup="true"
-          style={{ cursor: "pointer", border: 0 }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))",
+            minHeight: "44px",
+            borderRadius: "var(--radius-full, 9999px)",
+            padding: "0 20px",
+            fontSize: "13px",
+            fontWeight: 700,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = "scale(0.98)";
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = "none";
+          }}
         >
           My ZENITHROW
         </button>
@@ -184,27 +202,31 @@ export default function Navbar() {
         {/* Portal Dropdown Menu */}
         {isPortalOpen && (
           <div
+            className="pegasus-portal-menu"
             style={{
               position: "absolute",
               right: 0,
               top: "calc(100% + 14px)",
-              width: "320px",
-              background: "#111113",
-              border: "1px solid var(--hsu-line)",
-              borderRadius: "20px",
+              width: "330px",
+              background: "rgba(18, 18, 20, 0.88)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "var(--radius-lg, 24px)",
+                overflow: "hidden",
               padding: "16px",
-              boxShadow: "0 24px 60px rgba(0,0,0,0.85)",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06)",
               zIndex: 50,
               display: "flex",
               flexDirection: "column",
               gap: "8px",
             }}
           >
-            <div style={{ padding: "0 4px 8px", borderBottom: "1px solid var(--hsu-line)" }}>
-              <div className="kicker" style={{ fontSize: "9px" }}>
+            <div style={{ padding: "0 4px 10px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
+              <div className="kicker" style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--hsu-muted)" }}>
                 Festival Command & Desks
               </div>
-              <strong style={{ fontSize: "14px", color: "#fff" }}>
+              <strong style={{ fontSize: "14px", fontWeight: 700, color: "#fff", letterSpacing: "-0.01em" }}>
                 Operational Portals
               </strong>
             </div>
@@ -215,39 +237,43 @@ export default function Navbar() {
                 href={portal.href}
                 onClick={() => setIsPortalOpen(false)}
                 style={{
-                  padding: "10px 12px",
-                  borderRadius: "12px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid transparent",
+                  padding: "12px 14px",
+                  borderRadius: "var(--radius-sm, 12px)",
+                        background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
                   textDecoration: "none",
                   display: "block",
-                  transition: "background 0.15s ease, border-color 0.15s ease",
+                  transition: "background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#18181b";
-                  e.currentTarget.style.borderColor = "var(--hsu-line)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.16)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                  e.currentTarget.style.borderColor = "transparent";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)";
+                  e.currentTarget.style.transform = "none";
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <strong style={{ fontSize: "13px", color: "#fff" }}>{portal.title}</strong>
+                  <strong style={{ fontSize: "13px", fontWeight: 650, color: "#fff" }}>{portal.title}</strong>
                   <span
                     style={{
                       fontSize: "9px",
                       fontWeight: 800,
+                      letterSpacing: "0.06em",
                       color: "var(--hsu-red2)",
-                      background: "rgba(239,61,50,0.12)",
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                    }}
+                      background: "rgba(239, 61, 50, 0.12)",
+                      border: "1px solid rgba(239, 61, 50, 0.25)",
+                      padding: "3px 7px",
+                      borderRadius: "var(--radius-xs, 8px)",
+                              }}
                   >
                     {portal.tag}
                   </span>
                 </div>
-                <p style={{ margin: "3px 0 0", fontSize: "11px", color: "var(--hsu-muted)", lineHeight: 1.35 }}>
+                <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--hsu-muted)", lineHeight: 1.4 }}>
                   {portal.desc}
                 </p>
               </Link>
@@ -263,6 +289,14 @@ export default function Navbar() {
         onClick={() => setIsMobileOpen((prev) => !prev)}
         aria-label={isMobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileOpen}
+        style={{
+          minWidth: "44px",
+          minHeight: "44px",
+          borderRadius: "var(--radius-sm, 12px)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         {isMobileOpen ? "✕" : "☰"}
       </button>

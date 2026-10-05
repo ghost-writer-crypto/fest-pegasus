@@ -49,14 +49,16 @@ export default function ZenithrowAdminTheme() {
       /* Admin Sidebar */
       .pegasus-admin-sidebar {
         background: rgba(11, 12, 14, 0.95) !important;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
         border-right: 1px solid var(--ztr-border) !important;
       }
 
       .pegasus-admin-sidebar .pegasus-admin-nav-item {
-        border-radius: 8px;
-        transition: all 0.16s ease;
+        border-radius: var(--radius-sm, 12px);
+        corner-shape: squircle;
+        min-height: 44px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         color: var(--ztr-muted);
       }
 
@@ -75,23 +77,27 @@ export default function ZenithrowAdminTheme() {
       /* Admin Topbar */
       .pegasus-admin-topbar {
         background: rgba(11, 12, 14, 0.85) !important;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
         border-bottom: 1px solid var(--ztr-border) !important;
       }
 
       /* Admin Cards */
       .pegasus-card {
         background: rgba(18, 20, 24, 0.72) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid var(--ztr-border) !important;
-        border-radius: 12px;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        border-radius: var(--radius-lg, 24px) !important;
+        corner-shape: squircle;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
       }
 
       .pegasus-card:hover {
         border-color: var(--ztr-border-hover) !important;
+        transform: translateY(-2px);
       }
 
       /* Inputs and Selects */
@@ -100,7 +106,9 @@ export default function ZenithrowAdminTheme() {
         background: #121418 !important;
         border: 1px solid var(--ztr-border) !important;
         color: var(--ztr-fg) !important;
-        border-radius: 8px !important;
+        border-radius: var(--radius-sm, 12px) !important;
+        corner-shape: squircle;
+        min-height: 44px;
         transition: border-color 0.18s ease, box-shadow 0.18s ease;
       }
 
@@ -116,20 +124,22 @@ export default function ZenithrowAdminTheme() {
         background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%) !important;
         color: #ffffff !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
+        border-radius: var(--radius-full, 9999px) !important;
+        corner-shape: squircle;
+        min-height: 44px;
         font-weight: 700 !important;
         box-shadow: 0 2px 10px rgba(229, 57, 53, 0.28) !important;
-        transition: all 0.18s ease !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
       }
 
       .pegasus-button--primary:hover:not(:disabled) {
         background: linear-gradient(135deg, #ff5252 0%, #e53935 100%) !important;
         box-shadow: 0 4px 16px rgba(229, 57, 53, 0.42) !important;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
       }
 
       .pegasus-button--primary:active:not(:disabled) {
-        transform: translateY(0);
+        transform: scale(0.98);
       }
 
       /* Subtle Button */
@@ -137,13 +147,20 @@ export default function ZenithrowAdminTheme() {
         background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid var(--ztr-border) !important;
         color: var(--ztr-fg) !important;
-        border-radius: 8px !important;
-        transition: all 0.18s ease !important;
+        border-radius: var(--radius-full, 9999px) !important;
+        corner-shape: squircle;
+        min-height: 44px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
       }
 
       .pegasus-button--subtle:hover:not(:disabled) {
         background: rgba(255, 255, 255, 0.09) !important;
         border-color: var(--ztr-border-hover) !important;
+        transform: translateY(-2px);
+      }
+
+      .pegasus-button--subtle:active:not(:disabled) {
+        transform: scale(0.98);
       }
 
       /* Eyebrow kicker */

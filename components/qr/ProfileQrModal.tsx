@@ -61,9 +61,9 @@ export default function ProfileQrModal({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.82)",
-        backdropFilter: "blur(6px)",
-        WebkitBackdropFilter: "blur(6px)",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -82,15 +82,18 @@ export default function ProfileQrModal({
         style={{
           width: "100%",
           maxWidth: "380px",
-          background: "#121214",
-          border: "1px solid rgba(255, 255, 255, 0.12)",
-          borderRadius: "16px",
+          background: "rgba(18, 18, 20, 0.92)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "var(--radius-lg, 24px)",
+          overflow: "hidden",
           padding: "24px 20px 20px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08)",
           boxSizing: "border-box",
         }}
       >
@@ -103,8 +106,8 @@ export default function ProfileQrModal({
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
             padding: "3px 10px",
-            borderRadius: "999px",
-            marginBottom: "12px",
+            borderRadius: "var(--radius-xs, 8px)",
+              marginBottom: "12px",
           }}
         >
           <span
@@ -135,7 +138,7 @@ export default function ProfileQrModal({
           style={{
             margin: "0 0 4px",
             fontSize: "20px",
-            fontWeight: 850,
+            fontWeight: 700,
             letterSpacing: "-0.02em",
             color: "var(--foreground)",
           }}
@@ -148,7 +151,7 @@ export default function ProfileQrModal({
           style={{
             margin: "0 0 2px",
             fontSize: "13px",
-            fontWeight: 650,
+            fontWeight: 600,
             color: data.isPrivileged ? "var(--accent)" : "var(--foreground)",
           }}
         >
@@ -179,8 +182,9 @@ export default function ProfileQrModal({
           style={{
             background: "#ffffff",
             padding: "12px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+            borderRadius: "var(--radius-sm, 12px)",
+              overflow: "hidden",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -242,8 +246,15 @@ export default function ProfileQrModal({
             fontSize: "13px",
             fontWeight: 700,
             padding: "10px",
-            minHeight: "40px",
-            borderRadius: "8px",
+            minHeight: "44px",
+            borderRadius: "var(--radius-full, 9999px)",
+              transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = "scale(0.98)";
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = "none";
           }}
         >
           Close
