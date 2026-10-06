@@ -214,7 +214,7 @@ export default function HsuHeroSlider() {
         <button
           type="button"
           onClick={prevSlide}
-          className="circle"
+           
           aria-label="Previous slide"
         >
           ←
@@ -222,7 +222,7 @@ export default function HsuHeroSlider() {
         <button
           type="button"
           onClick={nextSlide}
-          className="circle"
+          
           aria-label="Next slide"
         >
           →

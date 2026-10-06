@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireRole } from "@/lib/auth/guards";
 import { events as staticEvents } from "@/data/events";
 import {
   judgeAssignments as staticJudgeAssignments,
@@ -20,6 +21,7 @@ import ShowQrButton from "@/components/qr/ShowQrButton";
 export const dynamic = "force-dynamic";
 
 export default async function JudgeControlPage() {
+  await requireRole(["judge", "admin"], "/judge");
   let dbEvents: EventRow[] = [];
   let festivalName = "Pegasus Sports Festival";
   let hasActiveFestival = false;

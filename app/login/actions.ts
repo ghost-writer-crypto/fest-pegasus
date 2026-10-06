@@ -103,7 +103,7 @@ export async function loginWithCredentialsAction(
           getDashboardForRole(profile.role),
         );
         redirect(destination);
-      } else if (isProduction) {
+      } else if (isProduction) { console.error("[LOGIN] Supabase signIn failed:", { message: error?.message, code: error?.code, status: error?.status });
         return {
           success: false,
           error: "Invalid email or password. Please check your credentials.",

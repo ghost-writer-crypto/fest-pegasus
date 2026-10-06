@@ -11,10 +11,12 @@ import {
   getAuthenticatedProfile,
 } from "@/lib/repositories";
 import TeamManagerClient from "@/components/team-manager/TeamManagerClient";
+import { requireRole } from "@/lib/auth/guards";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeamManagerDashboardPage() {
+  await requireRole(["team_manager", "admin"], "/team-manager");
   const festival = await getActiveFestival();
   const festivalId = festival?.id || "pegasus-2026";
 
