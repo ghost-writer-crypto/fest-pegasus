@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireRole } from "@/lib/auth/guards";
 import { notFound } from "next/navigation";
 import { events as staticEvents } from "@/data/events";
 import { participants as staticParticipants } from "@/data/participants";
@@ -44,6 +45,7 @@ type JudgeEventPageProps = {
 
 export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
   const { id } = await params;
+  await requireRole(["judge", "admin"], `/judge/events/${id}`);
 
   let festivalId = "";
   let dbEvent: EventRow | null = null;
