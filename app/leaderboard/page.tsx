@@ -158,47 +158,15 @@ export default async function LeaderboardPage() {
           maxWidth: "1200px",
           width: "100%",
           margin: "0 auto",
-          padding: "48px 24px 96px",
+          padding: "0 24px 96px",
         }}
       >
         {/* Header */}
-        <section style={{ marginBottom: "36px" }}>
-          <p
-            style={{
-              fontSize: "11px",
-              fontFamily: "var(--font-mono, monospace)",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.15em",
-              color: "#38bdf8",
-              marginBottom: "10px",
-            }}
-          >
-            01 • HOUSE CHAMPIONSHIP STANDINGS
-          </p>
-          <h1
-            style={{
-              margin: "0 0 12px 0",
-              fontSize: "clamp(2.4rem, 5vw, 3.6rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.03em",
-              textTransform: "uppercase",
-              color: "var(--foreground, #ffffff)",
-              lineHeight: 1.05,
-            }}
-          >
-            Championship Standings
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "15px",
-              color: "#94a3b8",
-              maxWidth: "680px",
-              lineHeight: 1.6,
-            }}
-          >
-            Official championship points and live team standings computed from certified event results and active regulation deductions for ZENITHROW 2026.
+        <section className="page-header">
+          <p className="page-kicker">House Championship Standings</p>
+          <h1 className="page-title">Championship standings.</h1>
+          <p className="page-desc">
+            Official points and live team standings computed from certified event results and active regulation deductions for ZENITHROW 2026.
           </p>
         </section>
 

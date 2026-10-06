@@ -70,17 +70,16 @@ export default function HomePage() {
       {/* 3. Live Telemetry Ticker */}
       <HsuLiveTicker />
 
-      {/* 4. The festival, at a glance (Stat Row) */}
+      {/* 4. Festival stats — single high-impact metric row */}
       <section className="section">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <div className="kicker">The festival, at a glance</div>
+              <div className="kicker">The festival</div>
               <h2>Everything<br />in one place.</h2>
             </div>
             <p className="sub">
-              A front-end built like a modern festival platform: visual enough to feel alive,
-              structured enough to find what you need in seconds.
+              Follow every discipline, fixture, result and house from one home built for the whole HSU community.
             </p>
           </div>
 
@@ -90,7 +89,7 @@ export default function HomePage() {
               <div className="label">Sports</div>
             </div>
             <div className="stat">
-              <div className="num" style={{ color: "var(--hsu-red)" }}>LIVE</div>
+              <div className="num" style={{ color: "var(--primary)" }}>LIVE</div>
               <div className="label">Status</div>
             </div>
             <div className="stat">
@@ -105,47 +104,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Editorial Band Light (Metric Strip) */}
-      <section className="editorial-band light">
-        <div className="wrap">
-          <div className="section-head">
-            <div>
-              <div className="kicker">The festival</div>
-              <h2>One campus.<br />Many ways to compete.</h2>
-            </div>
-            <p className="sub">
-              Follow every discipline, fixture, result and house from one visual home built
-              for the whole HSU community.
-            </p>
-          </div>
-
-          <div className="metric-strip">
-            <div className="metric">
-              <b>{String(sports.length).padStart(2, "0")}</b>
-              <small>Sports</small>
-            </div>
-            <div className="metric">
-              <b style={{ color: "var(--hsu-red)" }}>LIVE</b>
-              <small>Festival status</small>
-            </div>
-            <div className="metric">
-              <b>01</b>
-              <small>Championship</small>
-            </div>
-            <div className="metric">
-              <b>∞</b>
-              <small>Moments</small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Editorial Band Dark (Mega Links) */}
+      {/* 5. Editorial Band Dark — Mega navigation links */}
       <section className="editorial-band dark">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <div className="kicker">Explore</div>
               <h2>Everything<br />moves here.</h2>
             </div>
             <Link href="/schedules" className="btn primary">
@@ -172,12 +135,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. Enter the Arena (Sports Grid) */}
+      {/* 6. Enter the Arena — Sports photo grid */}
       <section className="section alt">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <div className="kicker">Enter the arena</div>
               <h2>Pick your<br />game.</h2>
             </div>
             <Link href="/sports" className="btn">
@@ -194,7 +156,7 @@ export default function HomePage() {
                   "url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">01 • Track</span>
+              <span className="tag">01 · Track</span>
               <h3>Athletics</h3>
             </Link>
             <Link
@@ -205,7 +167,7 @@ export default function HomePage() {
                   "url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">02 • Field</span>
+              <span className="tag">02 · Field</span>
               <h3>Football</h3>
             </Link>
             <Link
@@ -216,7 +178,7 @@ export default function HomePage() {
                   "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">03 • Arena</span>
+              <span className="tag">03 · Arena</span>
               <h3>Tug of War</h3>
             </Link>
             <Link
@@ -227,19 +189,18 @@ export default function HomePage() {
                   "url('https://images.unsplash.com/photo-1592656670411-0b1b3f8d0b88?auto=format&fit=crop&w=900&q=80')",
               }}
             >
-              <span className="tag">04 • Court</span>
+              <span className="tag">04 · Court</span>
               <h3>Volleyball</h3>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 8. Right Now: Live & Upcoming Table */}
+      {/* 7. Right Now — Live & upcoming table */}
       <section className="section">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <div className="kicker">Right now</div>
               <h2>Live & upcoming.</h2>
             </div>
             <Link href="/schedules" className="btn">
@@ -260,7 +221,7 @@ export default function HomePage() {
                 <span>09:30</span>
                 <span>
                   <b>100m Sprint</b>
-                  <small style={{ display: "block", color: "#777" }}>Athletics · Finals</small>
+                  <small style={{ display: "block", color: "var(--text-muted)" }}>Athletics · Finals</small>
                 </span>
                 <span>Main Track</span>
                 <span className="status live">Live</span>
@@ -271,7 +232,7 @@ export default function HomePage() {
                   <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{item.timeSlot}</span>
                   <span>
                     <b>{item.eventName}</b>
-                    <small style={{ display: "block", color: "#777" }}>
+                    <small style={{ display: "block", color: "var(--text-muted)" }}>
                       {item.sportName} · {item.category}
                     </small>
                   </span>
@@ -286,10 +247,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8.5 Tournament Regulations & Directives Accordion (Skiper103) */}
+      {/* 7.5 Tournament Regulations & Directives Accordion */}
       <Skiper103 />
 
-      {/* 9. Split Feature Band Light */}
+      {/* 8. Split Feature Band — editorial photo + copy */}
       <section className="editorial-band light">
         <div className="wrap">
           <div className="split-feature">
@@ -302,8 +263,8 @@ export default function HomePage() {
             />
             <div className="copy">
               <div>
-                <div className="kicker">HSU • ZENITHROW 2026</div>
-                <h2 className="editorial-title">Built for the moment.</h2>
+                <div className="kicker">HSU · ZENITHROW 2026</div>
+                <h2 className="editorial-title">Built for<br />the moment.</h2>
               </div>
               <p className="sub">
                 From the first whistle to the final table, the experience stays clear, fast and connected.
@@ -316,7 +277,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 10. Committee Shared Footer */}
+      {/* 9. Committee Shared Footer */}
       <Footer />
     </div>
   );
