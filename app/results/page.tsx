@@ -41,12 +41,11 @@ export default async function ResultsPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--results pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
-        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>02 / RESULTS</p>
-        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Official Results</h1>
-        <p className="pegasus-page__description">
-          Verified and officially published event outcomes, athlete rankings,
-          and championship points for ZENITHROW Sports Festival 2026.
+      <section className="page-header">
+        <p className="page-kicker">Results</p>
+        <h1 className="page-title">Official results.</h1>
+        <p className="page-desc">
+          Verified and officially published event outcomes, athlete rankings, and championship points for ZENITHROW Sports Festival 2026.
         </p>
       </section>
 
@@ -56,14 +55,15 @@ export default async function ResultsPage() {
           className="pegasus-card"
           style={{ textAlign: "center", padding: "64px 24px" }}
         >
-          <p className="pegasus-eyebrow" style={{ color: "var(--muted)" }}>
-            STANDINGS PENDING
+          <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted, #6e6e73)", marginBottom: "12px", fontWeight: 700 }}>
+            Standings pending
           </p>
           <h2
             style={{
-              margin: "12px 0 10px",
+              margin: "0 0 10px",
               fontSize: "24px",
               fontWeight: 800,
+              letterSpacing: "-0.03em",
             }}
           >
             No published results yet.

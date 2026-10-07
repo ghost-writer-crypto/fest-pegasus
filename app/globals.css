@@ -6649,6 +6649,104 @@ textarea:focus,
   }
 }
 
+/* — RESPONSIVE HERO CALIBRATION — */
+.hero {
+  min-height: 100svh !important;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-attachment: scroll !important;
+}
+
+.hero-slide-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-image {
+  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  object-position: center center;
+}
+
+.hero:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 7, 7, 0.45) 0%,
+    rgba(7, 7, 7, 0.12) 25%,
+    rgba(7, 7, 7, 0.55) 60%,
+    #070707 100%
+  );
+}
+
+@media (max-width: 1024px) {
+  .hero-image {
+    object-position: 65% center;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 100svh !important;
+    height: auto;
+  }
+  .hero:after {
+    background: linear-gradient(
+      180deg,
+      rgba(7, 7, 7, 0.72) 0%,
+      rgba(7, 7, 7, 0.22) 28%,
+      rgba(7, 7, 7, 0.65) 65%,
+      #070707 100%
+    );
+  }
+  .hero-image {
+    object-position: 70% center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    min-height: 100svh !important;
+    height: auto;
+  }
+  .hero:after {
+    background: linear-gradient(
+      180deg,
+      rgba(7, 7, 7, 0.82) 0%,
+      rgba(7, 7, 7, 0.28) 25%,
+      rgba(7, 7, 7, 0.78) 60%,
+      #070707 100%
+    );
+  }
+  .hero-image {
+    object-position: 75% center !important;
+    transform: none !important;
+  }
+}
+
+/* Global overflow containment — no horizontal scroll */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 /* — PREFERS-REDUCED-MOTION — */
 @media (prefers-reduced-motion: reduce) {
   .mega-link,
@@ -6656,7 +6754,8 @@ textarea:focus,
   .btn,
   .filter,
   .pill,
-  .navlinks a {
+  .navlinks a,
+  .hero-image {
     transition: none !important;
     transform: none !important;
   }

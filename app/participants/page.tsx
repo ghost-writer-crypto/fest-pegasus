@@ -7,6 +7,7 @@ import {
   type TeamRow,
 } from "@/lib/repositories";
 import ParticipantDirectoryClient from "./ParticipantDirectoryClient";
+import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +30,13 @@ export default async function ParticipantsPage() {
   }
 
   return (
+    <>
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--participants pegasus-animate-fade">
       {/* Header */}
-      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
-        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>11 / DIRECTORY</p>
-        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Athlete Directory</h1>
-        <p className="pegasus-page__description">
+      <section className="page-header">
+        <p className="page-kicker">Athlete directory</p>
+        <h1 className="page-title">Athlete directory.</h1>
+        <p className="page-desc">
           Search confirmed competitors across houses and academic divisions in the official ZENITHROW 2026 registry.
         </p>
       </section>
@@ -50,26 +52,15 @@ export default async function ParticipantsPage() {
             margin: "40px auto",
           }}
         >
-          <div
-            style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "50%",
-              background: "rgba(215, 255, 63, 0.1)",
-              color: "var(--accent)",
-              display: "grid",
-              placeItems: "center",
-              margin: "0 auto 20px",
-              fontSize: "24px",
-            }}
-          >
-            👥
-          </div>
+          <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted, #6e6e73)", marginBottom: "16px", fontWeight: 700 }}>
+            Directory pending
+          </p>
 
           <h2
             style={{
               fontSize: "20px",
               fontWeight: 800,
+              letterSpacing: "-0.03em",
               color: "var(--foreground)",
               marginBottom: "8px",
             }}
@@ -125,5 +116,7 @@ export default async function ParticipantsPage() {
         />
       )}
     </main>
+    <Footer />
+    </>
   );
 }

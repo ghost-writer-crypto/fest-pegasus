@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
@@ -60,23 +60,23 @@ export default function ResetPasswordPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "var(--background)",
+        minHeight: "100svh",
+        background: "var(--background, #0a0a0c)",
         display: "flex",
         flexDirection: "column",
       }}
     >
       <header
         style={{
-          padding: "24px 32px",
+          padding: "24px clamp(20px, 4vw, 36px)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          borderBottom: "1px solid var(--border, rgba(255, 255, 255, 0.07))",
         }}
       >
-        <a href="/" className="pegasus-brand">
-          <span className="pegasus-brand__mark">Z</span>
-          <span className="pegasus-brand__name">ZENITHROW</span>
+        <a href="/" className="brand" style={{ textDecoration: "none" }}>
+          <span>ZENITHROW</span>
         </a>
       </header>
 
@@ -86,44 +86,90 @@ export default function ResetPasswordPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "40px 20px",
+          padding: "48px 24px",
         }}
       >
-        <div style={{ width: "100%", maxWidth: 460 }}>
-          <div style={{ marginBottom: 28 }}>
-            <span>SECURE RECOVERY // AUTHORIZED USERS</span>
+        <div style={{ width: "100%", maxWidth: 420 }}>
+          <div style={{ marginBottom: 32 }}>
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.18em",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "var(--primary, #e53935)",
+                display: "block",
+                marginBottom: "8px",
+              }}
+            >
+              Account security
+            </span>
 
-            <h1 style={{ marginTop: 12 }}>
+            <h1
+              style={{
+                fontSize: "clamp(1.75rem, 3.5vw, 2.25rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.1,
+                margin: "0 0 10px",
+              }}
+            >
               Set a new password
             </h1>
 
-            <p style={{ marginTop: 12 }}>
-              Choose a new password for your ZENITHROW operator account.
+            <p
+              style={{
+                fontSize: "14px",
+                color: "var(--text-secondary, #8e8e93)",
+                lineHeight: 1.55,
+                margin: 0,
+              }}
+            >
+              Choose a strong new password for your operator account.
             </p>
           </div>
 
           {!ready && !error && (
-            <div className="pegasus-card" style={{ padding: 24 }}>
-              Verifying your recovery linkÃ¢â‚¬Â¦
+            <div
+              style={{
+                padding: "24px",
+                borderRadius: "var(--radius-md, 16px)",
+                background: "var(--surface-1, #141416)",
+                border: "1px solid var(--border, rgba(255, 255, 255, 0.07))",
+                fontSize: "14px",
+                color: "var(--text-secondary, #8e8e93)",
+              }}
+            >
+              Verifying your recovery link...
             </div>
           )}
 
           {error && (
-            <div className="pegasus-card" style={{ padding: 24 }}>
-              <strong>Recovery link unavailable.</strong>
+            <div
+              style={{
+                padding: "24px",
+                borderRadius: "var(--radius-md, 16px)",
+                background: "var(--surface-1, #141416)",
+                border: "1px solid var(--border, rgba(255, 255, 255, 0.07))",
+              }}
+            >
+              <strong style={{ fontSize: "15px", display: "block", marginBottom: "8px" }}>
+                Recovery link unavailable
+              </strong>
 
-              <p style={{ marginTop: 10 }}>{error}</p>
+              <p style={{ margin: "0 0 16px", fontSize: "14px", color: "var(--text-secondary, #8e8e93)", lineHeight: 1.55 }}>
+                {error}
+              </p>
 
               <a
                 href="/forgot-password"
-                className="pegasus-button"
+                className="btn primary"
                 style={{
                   display: "inline-flex",
-                  marginTop: 20,
                   textDecoration: "none",
                 }}
               >
-                Request New Link
+                Request new link
               </a>
             </div>
           )}
@@ -136,11 +182,14 @@ export default function ResetPasswordPage() {
         style={{
           padding: "24px 32px",
           textAlign: "center",
-          fontSize: 12,
-          opacity: 0.6,
+          fontSize: 11,
+          letterSpacing: "0.08em",
+          color: "var(--text-muted, #6e6e73)",
+          textTransform: "uppercase",
+          borderTop: "1px solid var(--border, rgba(255, 255, 255, 0.07))",
         }}
       >
-        ZENITHROW 2026 // AUTHORIZED OPERATOR TERMINAL
+        ZENITHROW 2026 · Operator portal
       </footer>
     </div>
   );

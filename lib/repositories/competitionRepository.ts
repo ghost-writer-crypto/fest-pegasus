@@ -69,6 +69,7 @@ export async function getCompetitionsByFestival(
       `[competitionRepository.getCompetitionsByFestival] Failed to retrieve competitions for festival ${festivalId}:`,
       error,
     );
+
     throw new Error(
       `Failed to retrieve competitions: ${error.message} (${error.code})`,
     );
@@ -103,6 +104,7 @@ export async function getCompetitionById(
       `[competitionRepository.getCompetitionById] Failed to retrieve competition ${competitionId}:`,
       error,
     );
+
     throw new Error(
       `Failed to retrieve competition: ${error.message} (${error.code})`,
     );
@@ -139,6 +141,7 @@ export async function getCompetitionsByEvent(
       `[competitionRepository.getCompetitionsByEvent] Failed to retrieve competitions for event ${eventId}:`,
       error,
     );
+
     throw new Error(
       `Failed to retrieve competitions: ${error.message} (${error.code})`,
     );
@@ -175,6 +178,7 @@ export async function getCompetitionChangeEntries(
       `[competitionRepository.getCompetitionChangeEntries] Failed to fetch changes for ${competitionId}:`,
       error,
     );
+
     return [];
   }
 
@@ -191,16 +195,31 @@ export async function createCompetitionRecord(
   const supabase = await createClient();
 
   if (!input.festivalId?.trim()) {
-    return { success: false, error: "Festival ID is required." };
+    return {
+      success: false,
+      error: "Festival ID is required.",
+    };
   }
+
   if (!input.eventId?.trim()) {
-    return { success: false, error: "Event selection is required." };
+    return {
+      success: false,
+      error: "Event selection is required.",
+    };
   }
+
   if (!input.name?.trim()) {
-    return { success: false, error: "Competition name is required." };
+    return {
+      success: false,
+      error: "Competition name is required.",
+    };
   }
+
   if (!input.format) {
-    return { success: false, error: "Competition format is required." };
+    return {
+      success: false,
+      error: "Competition format is required.",
+    };
   }
 
   // 1. Verify Event belongs to Festival
@@ -210,10 +229,15 @@ export async function createCompetitionRecord(
     .eq("id", input.eventId.trim())
     .maybeSingle();
 
-  if (eventError || !eventData || eventData.festival_id !== input.festivalId.trim()) {
+  if (
+    eventError ||
+    !eventData ||
+    eventData.festival_id !== input.festivalId.trim()
+  ) {
     return {
       success: false,
-      error: "Selected event is invalid or does not belong to the active festival.",
+      error:
+        "Selected event is invalid or does not belong to the active festival.",
     };
   }
 
@@ -225,10 +249,15 @@ export async function createCompetitionRecord(
       .eq("id", input.divisionId.trim())
       .maybeSingle();
 
-    if (divError || !divData || divData.festival_id !== input.festivalId.trim()) {
+    if (
+      divError ||
+      !divData ||
+      divData.festival_id !== input.festivalId.trim()
+    ) {
       return {
         success: false,
-        error: "Selected division is invalid or does not belong to the active festival.",
+        error:
+          "Selected division is invalid or does not belong to the active festival.",
       };
     }
   }
@@ -249,10 +278,19 @@ export async function createCompetitionRecord(
     .single();
 
   if (insertError || !newComp) {
-    console.error("[competitionRepository.createCompetitionRecord] Insert error:", insertError);
+    console.error(
+      "[competitionRepository.createCompetitionRecord] Insert error:",
+      insertError?.message,
+      insertError?.code,
+      insertError?.details,
+      insertError?.hint,
+    );
+
     return {
       success: false,
-      error: `Failed to create competition: ${insertError?.message || "Unknown error"}`,
+      error: `Failed to create competition: ${
+        insertError?.message || "Unknown error"
+      }`,
     };
   }
 
@@ -266,7 +304,10 @@ export async function createCompetitionRecord(
     after_state: newComp,
   });
 
-  return { success: true, data: newComp as CompetitionRow };
+  return {
+    success: true,
+    data: newComp as CompetitionRow,
+  };
 }
 
 /**
@@ -279,18 +320,32 @@ export async function updateCompetitionRecord(
   const supabase = await createClient();
 
   if (!input.competitionId?.trim()) {
-    return { success: false, error: "Competition ID is required." };
+    return {
+      success: false,
+      error: "Competition ID is required.",
+    };
   }
+
   if (!input.name?.trim()) {
-    return { success: false, error: "Competition name is required." };
+    return {
+      success: false,
+      error: "Competition name is required.",
+    };
   }
 
   const existing = await getCompetitionById(input.competitionId.trim());
+
   if (!existing) {
-    return { success: false, error: "Competition not found." };
+    return {
+      success: false,
+      error: "Competition not found.",
+    };
   }
 
-  if (existing.status === "completed" || existing.status === "cancelled") {
+  if (
+    existing.status === "completed" ||
+    existing.status === "cancelled"
+  ) {
     return {
       success: false,
       error: `Cannot modify a competition that is ${existing.status}.`,
@@ -310,10 +365,16 @@ export async function updateCompetitionRecord(
     .single();
 
   if (updateError || !updated) {
-    console.error("[competitionRepository.updateCompetitionRecord] Update error:", updateError);
+    console.error(
+      "[competitionRepository.updateCompetitionRecord] Update error:",
+      updateError,
+    );
+
     return {
       success: false,
-      error: `Failed to update competition: ${updateError?.message || "Unknown error"}`,
+      error: `Failed to update competition: ${
+        updateError?.message || "Unknown error"
+      }`,
     };
   }
 
@@ -327,7 +388,10 @@ export async function updateCompetitionRecord(
     after_state: updated,
   });
 
-  return { success: true, data: updated as CompetitionRow };
+  return {
+    success: true,
+    data: updated as CompetitionRow,
+  };
 }
 
 /**
@@ -342,8 +406,12 @@ export async function updateCompetitionStatusRecord(
   const supabase = await createClient();
 
   const existing = await getCompetitionById(competitionId.trim());
+
   if (!existing) {
-    return { success: false, error: "Competition not found." };
+    return {
+      success: false,
+      error: "Competition not found.",
+    };
   }
 
   const current = existing.status;
@@ -352,8 +420,8 @@ export async function updateCompetitionStatusRecord(
   // draft -> ready, cancelled
   // ready -> draft, live, cancelled
   // live -> completed, cancelled
-  // scheduled -> ready, live, cancelled
-  // completed -> terminal (no change unless cancelled with explicit reason)
+  // scheduled -> ready, live, cancelled, draft
+  // completed -> terminal
   // cancelled -> terminal
   const validTransitions: Record<string, string[]> = {
     draft: ["ready", "cancelled"],
@@ -366,6 +434,7 @@ export async function updateCompetitionStatusRecord(
   };
 
   const allowed = validTransitions[current] || [];
+
   if (!allowed.includes(newStatus)) {
     return {
       success: false,
@@ -384,10 +453,16 @@ export async function updateCompetitionStatusRecord(
     .single();
 
   if (updateError || !updated) {
-    console.error("[competitionRepository.updateCompetitionStatusRecord] Status error:", updateError);
+    console.error(
+      "[competitionRepository.updateCompetitionStatusRecord] Status error:",
+      updateError,
+    );
+
     return {
       success: false,
-      error: `Failed to transition competition status: ${updateError?.message || "Unknown error"}`,
+      error: `Failed to transition competition status: ${
+        updateError?.message || "Unknown error"
+      }`,
     };
   }
 
@@ -396,11 +471,16 @@ export async function updateCompetitionStatusRecord(
     competition_id: updated.id,
     actor_id: actorId,
     action: "status_changed",
-    reason: reason?.trim() || `Status transitioned from ${current} to ${newStatus}`,
+    reason:
+      reason?.trim() ||
+      `Status transitioned from ${current} to ${newStatus}`,
     before_state: existing,
     after_state: updated,
   });
 
-  return { success: true, data: updated as CompetitionRow };
+  return {
+    success: true,
+    data: updated as CompetitionRow,
+  };
 }
 

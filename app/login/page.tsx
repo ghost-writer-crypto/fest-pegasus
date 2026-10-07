@@ -22,13 +22,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const isLoggedOut = Boolean(params.logged_out);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--background)", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100svh", background: "var(--background)", display: "flex", flexDirection: "column" }}>
       {/* Top Header */}
       <header
         style={{
           borderBottom: "1px solid var(--border)",
-          background: "var(--surface)",
-          padding: "16px 24px",
+          padding: "14px 24px",
         }}
       >
         <div
@@ -48,9 +47,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Link
             href="/"
             className="pegasus-button pegasus-button--subtle"
-            style={{ fontSize: "11px", padding: "6px 12px", minHeight: "32px" }}
+            style={{ fontSize: "12px", padding: "6px 14px", minHeight: "34px" }}
           >
-            Public Site ↗
+            Public site ↗
           </Link>
         </div>
       </header>
@@ -66,35 +65,24 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           justifyContent: "center",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "32px", maxWidth: "600px" }}>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--primary)",
-              display: "inline-block",
-              marginBottom: "8px",
-            }}
-          >
-            RESTRICTED ACCESS // OFFICIALS ONLY
-          </span>
+        <div style={{ textAlign: "center", marginBottom: "32px", maxWidth: "480px" }}>
+          <p className="page-kicker" style={{ marginBottom: "12px" }}>
+            Officials only
+          </p>
           <h1
             style={{
-              fontSize: "clamp(28px, 4vw, 36px)",
+              fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
               fontWeight: 900,
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.04em",
               color: "var(--text-primary)",
-              fontFamily: "var(--font-heading)",
-              margin: 0,
+              margin: "0 0 10px",
+              lineHeight: 1.1,
             }}
           >
-            Operational Command Center
+            Operator portal.
           </h1>
-          <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: "8px 0 0", lineHeight: 1.5, fontFamily: "var(--font-sans)" }}>
-            Access authorized terminals for Tournament Control, Referee Field Desk, and House Command.
+          <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: 0, lineHeight: 1.6 }}>
+            Access authorized terminals for Tournament Control, Referee Desk, and House Command.
           </p>
         </div>
 
@@ -104,24 +92,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           isLoggedOut={isLoggedOut}
           isDevelopment={process.env.NODE_ENV !== "production"}
         />
-
       </main>
 
       {/* Footer */}
       <footer
         style={{
           borderTop: "1px solid var(--border)",
-          background: "var(--surface)",
-          padding: "16px 24px",
+          padding: "14px 24px",
           textAlign: "center",
           fontSize: "11px",
           color: "var(--text-muted)",
-          fontFamily: "var(--font-mono)",
+          letterSpacing: "0.08em",
         }}
       >
-        ZENITHROW 2026 // AUTHORIZED OPERATOR TERMINAL // ISO 27001 SECURED
+        ZENITHROW 2026 · Authorized Operator Terminal
       </footer>
     </div>
   );
 }
-

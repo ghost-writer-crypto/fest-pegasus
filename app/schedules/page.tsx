@@ -139,12 +139,12 @@ export default async function SchedulesPage() {
 
   return (
     <>
-      <main className="section" style={{ paddingTop: "150px" }}>
+      <main className="section" style={{ paddingTop: "clamp(96px, 14vw, 160px)" }}>
         <div className="wrap">
-          <div className="kicker">ZENITHROW • TODAY</div>
-          <h1 style={{ fontSize: "clamp(55px,8vw,105px)", letterSpacing: "-0.03em" }}>
-            THE DAY&apos;S<br />
-            <span>RHYTHM.</span>
+          <div className="kicker">ZENITHROW · Today</div>
+          <h1 style={{ fontSize: "clamp(3.5rem, 8vw, 6.5rem)", letterSpacing: "-0.04em", lineHeight: 0.92, marginBottom: "48px" }}>
+            The day&apos;s<br />
+            <span>rhythm.</span>
           </h1>
 
           <SchedulesClient
@@ -155,15 +155,14 @@ export default async function SchedulesPage() {
 
           <div className="section-head" style={{ marginTop: "75px" }}>
             <div>
-              <div className="kicker">Championship Operations</div>
               <h2>Follow live<br />or check results.</h2>
             </div>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <Link href="/display" className="btn primary">
-                Live Broadcast →
+                Live broadcast →
               </Link>
               <Link href="/results" className="btn">
-                Verified Results →
+                Verified results →
               </Link>
             </div>
           </div>

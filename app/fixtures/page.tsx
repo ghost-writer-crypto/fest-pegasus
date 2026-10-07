@@ -13,6 +13,7 @@ import {
   type VenueRow,
 } from "@/lib/repositories";
 import FixturesClient from "./FixturesClient";
+import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 
@@ -44,16 +45,17 @@ export default async function FixturesPage() {
   }
 
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--fixtures pegasus-animate-fade">
-      {/* Header */}
-      <section className="pegasus-page__header" style={{ marginBottom: "32px" }}>
-        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>10 / FIXTURES</p>
-        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Tournament Fixtures</h1>
-        <p className="pegasus-page__description">
-          Official team tournament fixtures, knockout matchups, and arena
-          schedules across ZENITHROW Sports Festival 2026.
-        </p>
-      </section>
+    <>
+      <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--fixtures pegasus-animate-fade">
+        {/* Header */}
+        <section className="page-header" style={{ marginBottom: "32px" }}>
+          <p className="page-kicker">10 / Fixtures</p>
+          <h1 className="page-title">Tournament fixtures</h1>
+          <p className="page-desc">
+            Official team tournament fixtures, knockout matchups, and arena
+            schedules across ZENITHROW Sports Festival 2026.
+          </p>
+        </section>
 
       {/* Fixtures Content or Authentic Empty State */}
       {fixtures.length === 0 ? (
@@ -119,5 +121,7 @@ export default async function FixturesPage() {
         />
       )}
     </main>
+    <Footer />
+  </>
   );
 }

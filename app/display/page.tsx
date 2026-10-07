@@ -176,17 +176,32 @@ export default async function DisplayPage() {
 
   return (
     <>
-      <main className="section" style={{ paddingTop: "150px" }}>
+      <main className="section" style={{ paddingTop: "clamp(96px, 12vw, 150px)" }}>
         <div className="wrap">
-          <div className="kicker">ZENITHROW / Live</div>
-          <h1 style={{ fontSize: "clamp(55px,8vw,105px)" }}>
-            THE ACTION<br />
-            <span>NOW.</span>
-          </h1>
+          <div className="page-header" style={{ marginBottom: "32px", borderBottom: "none", padding: "0 0 20px" }}>
+            <span className="page-kicker">03 / Live arena</span>
+            <h1 className="page-title">Live arena</h1>
+            <p className="page-desc">
+              Real-time heat results, active field attempts, and continuous court telemetry across all festival grounds.
+            </p>
+          </div>
 
-          <div className="notice" style={{ marginBottom: "28px" }}>
-            <b>LIVE NOW</b> · Data updates automatically from your existing backend.
-            This frontend is designed to surface state without changing your API.
+          <div
+            className="notice"
+            style={{
+              marginBottom: "28px",
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid var(--border, rgba(255, 255, 255, 0.08))",
+              borderRadius: "var(--radius-sm, 12px)",
+              padding: "12px 18px",
+              fontSize: "13px",
+              color: "var(--text-secondary, #8e8e93)",
+            }}
+          >
+            <strong style={{ color: "var(--primary, #e53935)", letterSpacing: "0.06em", textTransform: "uppercase", fontSize: "11px", marginRight: "8px" }}>
+              Live Telemetry
+            </strong>
+            Data updates continuously as verified by arena marshals.
           </div>
 
           <LiveDisplayClient

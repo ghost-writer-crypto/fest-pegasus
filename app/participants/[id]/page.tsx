@@ -17,6 +17,7 @@ import { CODEX_DIVISIONS } from "@/lib/competition/divisions";
 import { formatPerformance } from "@/lib/results/resultStatus";
 import type { Performance } from "@/lib/types";
 import ShowQrButton from "@/components/qr/ShowQrButton";
+import Footer from "@/components/Footer";
 
 type ParticipantPageProps = {
   params: Promise<{ id: string }>;
@@ -151,11 +152,12 @@ export default async function ParticipantPage({ params }: ParticipantPageProps) 
   const eventMap = new Map<string, EventRow | null>(eventEntries);
 
   return (
-    <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--participants pegasus-animate-fade">
-      {/* Back Navigation */}
-      <Link href="/participants" className="pegasus-back">
-        ← All participants
-      </Link>
+    <>
+      <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--participants pegasus-animate-fade">
+        {/* Back Navigation */}
+        <Link href="/participants" className="pegasus-back">
+          ← All participants
+        </Link>
 
       {/* Athlete Profile Header */}
       <section className="pegasus-profile">
@@ -412,5 +414,7 @@ export default async function ParticipantPage({ params }: ParticipantPageProps) 
         )}
       </section>
     </main>
+    <Footer />
+  </>
   );
 }

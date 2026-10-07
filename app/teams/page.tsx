@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { leaderboard } from "@/data/leaderboard";
 import { participants } from "@/data/participants";
+import Footer from "@/components/Footer";
 
 export default function TeamsPage() {
   return (
-    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 24px 80px" }}>
+    <>
+    <main className="pegasus-page pegasus-animate-fade" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px 80px" }}>
       {/* Page Header */}
-      <section className="pegasus-page__header" style={{ marginBottom: "36px" }}>
-        <p className="zenith-kicker" style={{ marginBottom: "8px" }}>06 / HOUSES</p>
-        <h1 className="pegasus-page-title" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, textTransform: "uppercase" }}>Official Houses</h1>
-        <p className="pegasus-page__description">
-          Official competition houses, team identities, registered athlete rosters,
-          and division allocations for ZENITHROW Sports Festival 2026.
+      <section className="page-header">
+        <p className="page-kicker">Houses</p>
+        <h1 className="page-title">Official houses.</h1>
+        <p className="page-desc">
+          Official competition houses, team identities, registered athlete rosters, and division allocations for ZENITHROW Sports Festival 2026.
         </p>
       </section>
 
@@ -148,5 +149,7 @@ export default function TeamsPage() {
         })}
       </section>
     </main>
+    <Footer />
+    </>
   );
 }

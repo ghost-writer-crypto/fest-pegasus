@@ -160,7 +160,7 @@ export default function HsuHeroSlider() {
               alt={`${slide.titlePrimary} ${slide.titleSecondary}`}
               fill
               priority={idx === 0}
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, 100vw"
               className="hero-image"
             />
           </div>
@@ -185,7 +185,7 @@ export default function HsuHeroSlider() {
           <Link href={activeSlide.ctaLink || "/sports"} className="btn primary">
             {activeSlide.ctaText || "Explore the arena →"}
           </Link>
-          <Link href="/display" className="btn ghost">
+          <Link href="/live" className="btn ghost">
             Watch live
           </Link>
         </div>

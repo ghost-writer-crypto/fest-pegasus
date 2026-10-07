@@ -13,7 +13,7 @@ const NAV_LINKS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Sports", href: "/sports" },
   { label: "Schedule", href: "/schedules" },
-  { label: "Live", href: "/display" },
+  { label: "Live", href: "/live" },
   { label: "Results", href: "/results" },
   { label: "Leaderboard", href: "/leaderboard" },
   { label: "Teams", href: "/teams" },
@@ -109,7 +109,7 @@ export default function Navbar() {
     <nav className="nav" aria-label="Main Navigation">
       {/* Brand */}
       <Link href="/" className="brand" aria-label="Hamdan Students Union Home">
-        HSU<span style={{ color: "var(--hsu-red)", marginLeft: "1px" }}>.</span>
+        HSU<span style={{ color: "var(--primary)", marginLeft: "1px" }}>.</span>
       </Link>
 
       {/* Navlinks */}
@@ -144,7 +144,7 @@ export default function Navbar() {
               gap: "8px",
             }}
           >
-            <div style={{ fontSize: "10px", color: "var(--hsu-red2)", fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+            <div style={{ fontSize: "10px", color: "var(--primary)", fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase" }}>
               Operational Portals
             </div>
             {PORTAL_LINKS.map((portal) => (
@@ -263,12 +263,12 @@ export default function Navbar() {
                       fontSize: "9px",
                       fontWeight: 800,
                       letterSpacing: "0.06em",
-                      color: "var(--hsu-red2)",
+                      color: "var(--primary)",
                       background: "rgba(239, 61, 50, 0.12)",
                       border: "1px solid rgba(239, 61, 50, 0.25)",
                       padding: "3px 7px",
                       borderRadius: "var(--radius-xs, 8px)",
-                              }}
+                    }}
                   >
                     {portal.tag}
                   </span>
