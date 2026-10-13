@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { leaderboard as staticLeaderboard } from "@/data/leaderboard";
 import {
   getActiveFestival,
   getTeamsByFestival,
@@ -16,6 +15,7 @@ import LeaderboardClient, {
   LeaderboardDisplayTeam,
 } from "@/components/leaderboard/LeaderboardClient";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
   title: "Championship Standings • ZENITHROW Sports Festival 2026",
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 type DynamicLeaderboardResult = {
   standings: LeaderboardDisplayTeam[];
   integrityError?: string;
+  hasError?: boolean;
 };
 
 async function getDynamicLeaderboard(): Promise<DynamicLeaderboardResult> {
@@ -33,11 +34,7 @@ async function getDynamicLeaderboard(): Promise<DynamicLeaderboardResult> {
     const festival = await getActiveFestival();
     if (!festival) {
       return {
-        standings: staticLeaderboard.map((t) => ({
-          ...t,
-          grossPoints: t.points,
-          penaltyDeductions: 0,
-        })),
+        standings: [],
       };
     }
 
@@ -50,11 +47,7 @@ async function getDynamicLeaderboard(): Promise<DynamicLeaderboardResult> {
 
     if (!teams || teams.length === 0) {
       return {
-        standings: staticLeaderboard.map((t) => ({
-          ...t,
-          grossPoints: t.points,
-          penaltyDeductions: 0,
-        })),
+        standings: [],
       };
     }
 
@@ -135,18 +128,15 @@ async function getDynamicLeaderboard(): Promise<DynamicLeaderboardResult> {
         : "An unknown data resolution error occurred.";
 
     return {
-      standings: staticLeaderboard.map((t) => ({
-        ...t,
-        grossPoints: t.points,
-        penaltyDeductions: 0,
-      })),
+      standings: [],
       integrityError,
+      hasError: true,
     };
   }
 }
 
 export default async function LeaderboardPage() {
-  const { standings, integrityError } = await getDynamicLeaderboard();
+  const { standings, integrityError, hasError } = await getDynamicLeaderboard();
 
   const totalPoints = standings.reduce((acc, t) => acc + t.points, 0);
 
@@ -162,20 +152,23 @@ export default async function LeaderboardPage() {
         }}
       >
         {/* Header */}
-        <section className="page-header">
+        <Reveal as="section" className="page-header">
           <p className="page-kicker">House Championship Standings</p>
           <h1 className="page-title">Championship standings.</h1>
           <p className="page-desc">
             Official points and live team standings computed from certified event results and active regulation deductions for ZENITHROW 2026.
           </p>
-        </section>
+        </Reveal>
 
         {/* Dynamic Client with Podium, Standings Matrix & Codex */}
-        <LeaderboardClient
-          standings={standings}
-          totalPoints={totalPoints}
-          integrityError={integrityError}
-        />
+        <Reveal>
+          <LeaderboardClient
+            standings={standings}
+            totalPoints={totalPoints}
+            integrityError={integrityError}
+            hasError={hasError}
+          />
+        </Reveal>
       </main>
       <Footer />
     </div>

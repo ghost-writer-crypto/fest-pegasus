@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   CompetitionFormat,
   FixtureStatus,
@@ -195,7 +196,7 @@ export async function createFixtureRecord(
   input: CreateFixtureInput,
   actorId: string,
 ): Promise<{ success: boolean; data?: FixtureRow; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   if (!input.competitionId?.trim()) {
     return { success: false, error: "Competition ID is required." };
@@ -273,7 +274,7 @@ export async function updateFixtureRecord(
   input: UpdateFixtureInput,
   actorId: string,
 ): Promise<{ success: boolean; data?: FixtureRow; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   if (!input.fixtureId?.trim()) {
     return { success: false, error: "Fixture ID is required." };
@@ -337,7 +338,7 @@ export async function updateFixtureStatusRecord(
   actorId: string,
   reason?: string,
 ): Promise<{ success: boolean; data?: FixtureRow; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const existing = await getFixtureById(fixtureId.trim());
   if (!existing) {
@@ -386,7 +387,7 @@ export async function updateFixtureScoreRecord(
   scoreAway: number | null,
   actorId: string,
 ): Promise<{ success: boolean; data?: FixtureRow; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const existing = await getFixtureById(fixtureId.trim());
   if (!existing) {
@@ -444,7 +445,7 @@ export async function generateKnockoutFixturesRecord(
   actorId: string,
   roundName = "Quarter Finals",
 ): Promise<{ success: boolean; count?: number; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   if (!teamIds || teamIds.length < 2) {
     return {

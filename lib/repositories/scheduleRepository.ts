@@ -1,4 +1,5 @@
 import { createClient } from "../supabase/server.ts";
+import { createAdminClient } from "../supabase/admin.ts";
 import type { ScheduleStatus } from "../types/index.ts";
 
 /**
@@ -422,7 +423,7 @@ export async function createScheduleRecord(
     return { success: false, error: "A valid start time is required." };
   }
 
-  const supabase = client ?? (await createClient());
+  const supabase = client ?? (await createAdminClient());
 
   // 1. Check for conflicts
   if (!input.ignoreConflict) {
@@ -519,7 +520,7 @@ export async function updateScheduleRecord(
     return { success: false, error: "Schedule ID is required." };
   }
 
-  const supabase = client ?? (await createClient());
+  const supabase = client ?? (await createAdminClient());
 
   // 1. Fetch current schedule state
   const { data: current, error: fetchError } = await supabase
@@ -640,7 +641,7 @@ export async function deleteScheduleRecord(
     return { success: false, error: "Schedule ID is required." };
   }
 
-  const supabase = client ?? (await createClient());
+  const supabase = client ?? (await createAdminClient());
 
   // 1. Fetch current schedule state
   const { data: current, error: fetchError } = await supabase

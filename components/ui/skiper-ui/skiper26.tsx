@@ -211,7 +211,8 @@ export const Skiper26: React.FC<Skiper26Props> = ({
     return (
       <div
         className={cn(
-          "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05]",
+          "inline-flex h-8 sm:h-9 items-center justify-center rounded-full border border-white/15 bg-[#0A0E17]/80 backdrop-blur-xl",
+          showVariantSelector ? "w-[108px]" : "w-8 sm:w-9",
           className
         )}
       />
@@ -234,7 +235,14 @@ export const Skiper26: React.FC<Skiper26Props> = ({
         className
       )}
     >
-      <div className="relative flex items-center gap-2 p-1.5 rounded-full bg-[#0A0E17]/85 backdrop-blur-2xl border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.25)] hover:border-white/35 transition-all">
+      <div
+        className={cn(
+          "relative flex items-center gap-1.5 rounded-full bg-[#0A0E17]/85 backdrop-blur-2xl border border-white/20 transition-all",
+          floating
+            ? "p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.25)] hover:border-white/35"
+            : "p-1 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] hover:border-white/30"
+        )}
+      >
         {/* Primary Animated Circular Toggle Button */}
         <motion.button
           type="button"
@@ -243,7 +251,10 @@ export const Skiper26: React.FC<Skiper26Props> = ({
           title={`Switch to ${isDark ? "light" : "dark"} mode (Transition: ${variant})`}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          className="relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-white/15 via-white/[0.06] to-transparent border border-white/20 text-white shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.35)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer transition-all"
+          className={cn(
+            "relative flex items-center justify-center rounded-full bg-gradient-to-br from-white/15 via-white/[0.06] to-transparent border border-white/20 text-white shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.35)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer transition-all",
+            floating ? "h-11 w-11 sm:h-12 sm:w-12" : "h-8 w-8 sm:h-9 sm:w-9"
+          )}
         >
         <AnimatePresence mode="wait" initial={false}>
           {isDark ? (
@@ -254,7 +265,7 @@ export const Skiper26: React.FC<Skiper26Props> = ({
               exit={{ rotate: 90, scale: 0.6, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
-              <Sun className="h-4 w-4 text-[#F59E0B]" />
+              <Sun className={floating ? "h-4 w-4 text-[#F59E0B]" : "h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#F59E0B]"} />
             </motion.div>
           ) : (
             <motion.div
@@ -264,7 +275,7 @@ export const Skiper26: React.FC<Skiper26Props> = ({
               exit={{ rotate: -90, scale: 0.6, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
-              <Moon className="h-4 w-4 text-[#38BDF8]" />
+              <Moon className={floating ? "h-4 w-4 text-[#38BDF8]" : "h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#38BDF8]"} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -278,7 +289,10 @@ export const Skiper26: React.FC<Skiper26Props> = ({
             onClick={() => setMenuOpen((prev) => !prev)}
             aria-expanded={menuOpen}
             aria-label="Select transition variant"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-medium text-white/80 cursor-pointer backdrop-blur-md transition-colors"
+            className={cn(
+              "flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-mono font-medium text-white/80 cursor-pointer backdrop-blur-md transition-colors",
+              floating ? "px-2.5 py-1.5 rounded-lg" : "px-2 py-1 sm:px-2.5 sm:py-1.5"
+            )}
           >
             <Sparkles className="h-3 w-3 text-[#E53935]" />
             <span className="capitalize">{variant}</span>
@@ -292,7 +306,7 @@ export const Skiper26: React.FC<Skiper26Props> = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-36 py-1.5 rounded-xl border border-white/15 bg-[#0C1017]/95 backdrop-blur-2xl shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 top-full mt-2 w-36 py-1.5 rounded-xl border border-white/15 bg-[#0C1017]/95 backdrop-blur-2xl shadow-2xl z-[100] overflow-hidden"
               >
                 {VARIANTS.map((item) => (
                   <button

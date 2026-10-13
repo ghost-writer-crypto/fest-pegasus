@@ -24,12 +24,14 @@ interface LeaderboardClientProps {
   standings: LeaderboardDisplayTeam[];
   totalPoints: number;
   integrityError?: string;
+  hasError?: boolean;
 }
 
 export default function LeaderboardClient({
   standings,
   totalPoints,
   integrityError,
+  hasError,
 }: LeaderboardClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState<"net" | "gross" | "penalties">("net");
@@ -69,8 +71,45 @@ export default function LeaderboardClient({
 
   return (
     <div>
-      {/* 1. Data Integrity Notice (if any) */}
-      {integrityError && (
+      {/* 1. Error or Data Integrity Notice */}
+      {hasError ? (
+        <aside
+          style={{
+            margin: "0 0 28px 0",
+            borderLeft: "4px solid #ef4444",
+            background: "rgba(239, 68, 68, 0.06)",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+          }}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <AlertCircle size={18} style={{ color: "#ef4444" }} />
+            <strong
+              style={{
+                fontSize: "12px",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "var(--foreground)",
+              }}
+            >
+              Standings Query Error
+            </strong>
+          </div>
+          <p
+            style={{
+              margin: "6px 0 0 0",
+              fontSize: "13px",
+              color: "var(--muted)",
+              lineHeight: 1.5,
+            }}
+          >
+            {integrityError || "Unable to retrieve verified championship standings from the database. No sample data has been substituted."}
+          </p>
+        </aside>
+      ) : integrityError ? (
         <aside
           style={{
             margin: "0 0 28px 0",
@@ -104,10 +143,10 @@ export default function LeaderboardClient({
               lineHeight: 1.5,
             }}
           >
-            {integrityError}. Preserving verified fallback standings for regulatory audit safety.
+            {integrityError}
           </p>
         </aside>
-      )}
+      ) : null}
 
       {/* 2. Operational Telemetry Strip */}
       <div className={styles.telemetryGrid}>
@@ -185,10 +224,10 @@ export default function LeaderboardClient({
               lineHeight: 1.3,
             }}
           >
-            {leader ? leader.name : "House 01"}
+            {leader ? leader.name : "—"}
           </strong>
           <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-            {leader ? `${leader.points} Net PTS accrued` : "Championship Lead"}
+            {leader ? `${leader.points} Net PTS accrued` : "No active standings"}
           </span>
         </div>
 
@@ -235,16 +274,13 @@ export default function LeaderboardClient({
       {/* 3. Flagship Olympic Podium Showcase */}
       {standings.length >= 3 && (
         <section className={styles.podiumSection}>
-          <div style={{ marginBottom: "14px" }}>
+          <div style={{ marginBottom: "16px" }}>
             <span
               className="zenith-kicker"
               style={{ fontSize: "10px", display: "block", marginBottom: "4px" }}
             >
-              01 • CHAMPIONSHIP PODIUM
+              • CHAMPIONSHIP PODIUM
             </span>
-            <h2 style={{ fontSize: "20px", fontWeight: 900, letterSpacing: "-0.02em", margin: 0 }}>
-              The House Shield Leaders
-            </h2>
           </div>
 
           <div className={styles.podiumGrid}>
@@ -264,7 +300,7 @@ export default function LeaderboardClient({
                       border: "1px solid rgba(148, 163, 184, 0.3)",
                     }}
                   >
-                    🥈 RANK 02 • SILVER
+                    🥈 RANK 02
                   </span>
                   <span style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "monospace" }}>
                     -{leader.points - second.points} PTS
@@ -308,17 +344,7 @@ export default function LeaderboardClient({
                       gap: "6px",
                     }}
                   >
-                    👑 RANK 01 • SHIELD LEADER
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      color: "#f59e0b",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    PACEMAKER
+                    👑 RANK 01
                   </span>
                 </div>
 
@@ -356,7 +382,7 @@ export default function LeaderboardClient({
                       border: "1px solid rgba(217, 119, 6, 0.3)",
                     }}
                   >
-                    🥉 RANK 03 • BRONZE
+                    🥉 RANK 03
                   </span>
                   <span style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "monospace" }}>
                     -{leader.points - third.points} PTS
@@ -488,16 +514,20 @@ export default function LeaderboardClient({
             }}
           >
             <p style={{ margin: 0, fontSize: "14px", color: "var(--muted)" }}>
-              No collegiate house found matching &quot;{searchQuery}&quot;.
+              {searchQuery
+                ? `No collegiate house found matching "${searchQuery}".`
+                : "No registered collegiate houses or championship standings available yet."}
             </p>
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="btn"
-              style={{ marginTop: "12px", fontSize: "12px" }}
-            >
-              Clear Search
-            </button>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="btn"
+                style={{ marginTop: "12px", fontSize: "12px" }}
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         ) : (
           filteredTeams.map((team) => {
@@ -575,7 +605,7 @@ export default function LeaderboardClient({
                           border: "1px solid rgba(245, 158, 11, 0.3)",
                         }}
                       >
-                        ★ SHIELD PACESETTER
+                        ★ CURRENT LEADER
                       </span>
                     )}
                   </div>
@@ -664,119 +694,7 @@ export default function LeaderboardClient({
         )}
       </div>
 
-      {/* 6. Championship Codex Point Matrix Explainer Deck */}
-      <section style={{ marginTop: "54px" }}>
-        <div style={{ marginBottom: "16px" }}>
-          <span
-            className="zenith-kicker"
-            style={{ fontSize: "10px", display: "block", marginBottom: "4px" }}
-          >
-            02 • CODEX REGULATION MATRIX
-          </span>
-          <h2 style={{ fontSize: "20px", fontWeight: 900, letterSpacing: "-0.02em", margin: 0 }}>
-            Championship Point Allocations
-          </h2>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--muted)" }}>
-            Standard points contributed directly to the house shield upon Chief Scorer certification.
-          </p>
-        </div>
-
-        <div className={styles.matrixGrid}>
-          <div className={styles.matrixCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 800, color: "#f59e0b", letterSpacing: "0.06em" }}>
-                CLASS W
-              </span>
-              <span style={{ fontSize: "10px", padding: "2px 6px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", borderRadius: "4px", fontWeight: 800 }}>
-                TIER 1
-              </span>
-            </div>
-            <strong style={{ fontSize: "15px", display: "block", color: "var(--foreground)" }}>
-              High Stakes Championship
-            </strong>
-            <p style={{ fontSize: "12px", color: "var(--muted)", margin: "4px 0 12px", lineHeight: 1.4 }}>
-              Tug of War 600kg, 100m Sprint Grand Final, Football Championship Knockout.
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "monospace", color: "var(--foreground)", borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: "8px" }}>
-              <span>🥇 10 PTS</span>
-              <span>🥈 7 PTS</span>
-              <span>🥉 5 PTS</span>
-              <span>4th: 3 PTS</span>
-            </div>
-          </div>
-
-          <div className={styles.matrixCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 800, color: "#38bdf8", letterSpacing: "0.06em" }}>
-                CLASS X
-              </span>
-              <span style={{ fontSize: "10px", padding: "2px 6px", background: "rgba(56, 189, 248, 0.15)", color: "#38bdf8", borderRadius: "4px", fontWeight: 800 }}>
-                TIER 2
-              </span>
-            </div>
-            <strong style={{ fontSize: "15px", display: "block", color: "var(--foreground)" }}>
-              Major Bracket Heats
-            </strong>
-            <p style={{ fontSize: "12px", color: "var(--muted)", margin: "4px 0 12px", lineHeight: 1.4 }}>
-              Volleyball Tournament, Badminton Men&apos;s & Women&apos;s Singles, 4x100m Relay.
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "monospace", color: "var(--foreground)", borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: "8px" }}>
-              <span>🥇 7 PTS</span>
-              <span>🥈 5 PTS</span>
-              <span>🥉 3 PTS</span>
-              <span>4th: 1 PT</span>
-            </div>
-          </div>
-
-          <div className={styles.matrixCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 800, color: "#a855f7", letterSpacing: "0.06em" }}>
-                CLASS Y
-              </span>
-              <span style={{ fontSize: "10px", padding: "2px 6px", background: "rgba(168, 85, 247, 0.15)", color: "#a855f7", borderRadius: "4px", fontWeight: 800 }}>
-                TIER 3
-              </span>
-            </div>
-            <strong style={{ fontSize: "15px", display: "block", color: "var(--foreground)" }}>
-              Field & Precision Events
-            </strong>
-            <p style={{ fontSize: "12px", color: "var(--muted)", margin: "4px 0 12px", lineHeight: 1.4 }}>
-              Long Jump, High Jump, Shot Put, Archery & Target Precision disciplines.
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "monospace", color: "var(--foreground)", borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: "8px" }}>
-              <span>🥇 5 PTS</span>
-              <span>🥈 3 PTS</span>
-              <span>🥉 2 PTS</span>
-              <span>4th: 1 PT</span>
-            </div>
-          </div>
-
-          <div className={styles.matrixCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 800, color: "#10b981", letterSpacing: "0.06em" }}>
-                CLASS Z
-              </span>
-              <span style={{ fontSize: "10px", padding: "2px 6px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", borderRadius: "4px", fontWeight: 800 }}>
-                TIER 4
-              </span>
-            </div>
-            <strong style={{ fontSize: "15px", display: "block", color: "var(--foreground)" }}>
-              Consolation & Traditions
-            </strong>
-            <p style={{ fontSize: "12px", color: "var(--muted)", margin: "4px 0 12px", lineHeight: 1.4 }}>
-              Plate fixtures, consolation finals, and official campus tradition challenges.
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontFamily: "monospace", color: "var(--foreground)", borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: "8px" }}>
-              <span>🥇 3 PTS</span>
-              <span>🥈 2 PTS</span>
-              <span>🥉 1 PT</span>
-              <span>4th: 0 PTS</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Action Navigation Footer Banner */}
+      {/* 6. Action Navigation Footer Banner */}
       <section
         style={{
           marginTop: "48px",
@@ -796,13 +714,13 @@ export default function LeaderboardClient({
             className="zenith-kicker"
             style={{ fontSize: "10px", display: "block", marginBottom: "4px" }}
           >
-            03 • TOURNAMENT ROSTERS
+            02 • TOURNAMENT ROSTERS
           </span>
           <h3 style={{ fontSize: "20px", fontWeight: 900, margin: 0, color: "var(--foreground)" }}>
             Inspect Registered Athletes & Squads
           </h3>
           <p style={{ fontSize: "13px", color: "var(--muted)", margin: "4px 0 0", maxWidth: "520px" }}>
-            Explore athlete rosters, team managers, and verified participant draw lists across all four collegiate houses.
+            Explore athlete rosters, team managers, and verified participant draw lists across all four collegiate teams.
           </p>
         </div>
 
@@ -811,7 +729,7 @@ export default function LeaderboardClient({
             View All Teams →
           </Link>
           <Link href="/results" className="btn">
-            Verified Results Ledger →
+            Verified Results →
           </Link>
         </div>
       </section>

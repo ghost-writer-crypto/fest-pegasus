@@ -74,7 +74,7 @@ export const OFFICIAL_OCTOBER_2026_SCHEDULE: OfficialScheduleEntry[] = [
     category: "PRE-SENIOR",
     venueKey: "ground",
     venueName: "Ground",
-    notes: "Original committee schedule specifies 8:20 AM - 7:00 AM (literal timing preserved without modification; end time unset due to constraint)",
+    notes: "8:20 AM - 7:00 AM IST",
   },
   {
     date: "2026-10-03",

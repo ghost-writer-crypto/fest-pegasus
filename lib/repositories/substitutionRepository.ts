@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   RegistrationSubstitutionRow,
   CreateSubstitutionInput,
@@ -179,7 +180,7 @@ export async function createSubstitutionRecord(
     return { success: false, error: "Replacement must be a different athlete than original participant." };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Validate Original Participant & Active Registration
   const { data: origPart, error: origPartErr } = await supabase
@@ -339,7 +340,7 @@ export async function reviewSubstitutionRecord(
     return { success: false, error: "Invalid review status." };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Fetch substitution row
   const { data: sub, error: subErr } = await supabase

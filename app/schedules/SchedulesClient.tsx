@@ -171,6 +171,10 @@ export default function SchedulesClient({
             border: "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "14px",
             backdropFilter: "blur(12px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "2px",
           }}
         >
           <span
@@ -188,9 +192,6 @@ export default function SchedulesClient({
           <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "var(--foreground)" }}>
             {telemetry.total}
           </strong>
-          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
-            Official Festival Heats
-          </span>
         </div>
 
         <div
@@ -200,6 +201,10 @@ export default function SchedulesClient({
             border: telemetry.live > 0 ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "14px",
             backdropFilter: "blur(12px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "2px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -228,9 +233,6 @@ export default function SchedulesClient({
           <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: telemetry.live > 0 ? "#ef4444" : "var(--foreground)" }}>
             {telemetry.live}
           </strong>
-          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
-            Electronic timing active
-          </span>
         </div>
 
         <div
@@ -240,6 +242,10 @@ export default function SchedulesClient({
             border: "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "14px",
             backdropFilter: "blur(12px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "2px",
           }}
         >
           <span
@@ -257,9 +263,6 @@ export default function SchedulesClient({
           <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "#f59e0b" }}>
             {telemetry.scheduled}
           </strong>
-          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
-            Next on track & courts
-          </span>
         </div>
 
         <div
@@ -269,6 +272,10 @@ export default function SchedulesClient({
             border: "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "14px",
             backdropFilter: "blur(12px)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "2px",
           }}
         >
           <span
@@ -286,9 +293,6 @@ export default function SchedulesClient({
           <strong style={{ fontSize: "28px", fontWeight: 900, lineHeight: 1.2, color: "#10b981" }}>
             {telemetry.finished}
           </strong>
-          <span style={{ fontSize: "11px", color: "var(--muted)", display: "block", marginTop: "2px" }}>
-            Verified on ledger
-          </span>
         </div>
       </div>
 
@@ -714,7 +718,7 @@ export default function SchedulesClient({
                           border: "1px solid rgba(242, 184, 75, 0.3)",
                         }}
                       >
-                        Tier 1 Point Matrix
+                        Tier 1 Event
                       </span>
                     )}
                   </div>

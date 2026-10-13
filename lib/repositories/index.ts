@@ -20,7 +20,13 @@ export type {
   UpdateParticipantInput,
 } from "./participantRepository";
 export type { TeamRow } from "./teamRepository";
-export type { ResultRow, UpsertResultInput, ResultAuditRow } from "./resultRepository";
+export type {
+  ResultRow,
+  UpsertResultInput,
+  ResultAuditRow,
+  CorrectResultInput,
+  CreateAdminResultInput,
+} from "./resultRepository";
 export type {
   ScheduleRow,
   ScheduleChangeRow,
@@ -172,6 +178,8 @@ export {
   verifyResultRecord,
   publishResultRecord,
   unlockResultForCorrectionRecord,
+  correctResultRecord,
+  createAdminResultRecord,
   getRecentResultAuditEntries,
 } from "./resultRepository";
 

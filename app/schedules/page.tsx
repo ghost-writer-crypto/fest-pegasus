@@ -13,6 +13,7 @@ import { events as staticEvents } from "@/data/events";
 import { venues as staticVenues } from "@/data/venues";
 import SchedulesClient from "./SchedulesClient";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -48,61 +49,61 @@ export default async function SchedulesPage() {
     events.length > 0
       ? events
       : [
-          ...staticEvents.map((e) => ({
-            id: e.id,
-            festival_id: "zenithrow-2026",
-            division_id: null,
-            code: e.id.toUpperCase(),
-            name: e.name,
-            sport_id: null,
-            codex_event_id: e.id,
-            point_class: "X" as const,
-            scoring_engine: "rank_points",
-            competition_type: e.sport || "Athletics",
-            event_type: (e.type || "individual") as "individual" | "team",
-            scoring_schema: {},
-            status: "scheduled",
-            metadata: {},
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })),
-          {
-            id: "tug-of-war-600kg",
-            festival_id: "zenithrow-2026",
-            division_id: null,
-            code: "TUG-600KG",
-            name: "Tug of War 600kg",
-            sport_id: null,
-            codex_event_id: "tug-of-war",
-            point_class: "W" as const,
-            scoring_engine: "bracket_points",
-            competition_type: "Tug of War",
-            event_type: "team" as const,
-            scoring_schema: {},
-            status: "scheduled",
-            metadata: {},
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: "badminton-open",
-            festival_id: "zenithrow-2026",
-            division_id: null,
-            code: "BADMINTON-OPEN",
-            name: "Badminton Open",
-            sport_id: null,
-            codex_event_id: "badminton",
-            point_class: "X" as const,
-            scoring_engine: "bracket_points",
-            competition_type: "Badminton",
-            event_type: "individual" as const,
-            scoring_schema: {},
-            status: "scheduled",
-            metadata: {},
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ]
+        ...staticEvents.map((e) => ({
+          id: e.id,
+          festival_id: "zenithrow-2026",
+          division_id: null,
+          code: e.id.toUpperCase(),
+          name: e.name,
+          sport_id: null,
+          codex_event_id: e.id,
+          point_class: "X" as const,
+          scoring_engine: "rank_points",
+          competition_type: e.sport || "Athletics",
+          event_type: (e.type || "individual") as "individual" | "team",
+          scoring_schema: {},
+          status: "scheduled",
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })),
+        {
+          id: "tug-of-war-600kg",
+          festival_id: "zenithrow-2026",
+          division_id: null,
+          code: "TUG-600KG",
+          name: "Tug of War 600kg",
+          sport_id: null,
+          codex_event_id: "tug-of-war",
+          point_class: "W" as const,
+          scoring_engine: "bracket_points",
+          competition_type: "Tug of War",
+          event_type: "team" as const,
+          scoring_schema: {},
+          status: "scheduled",
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "badminton-open",
+          festival_id: "zenithrow-2026",
+          division_id: null,
+          code: "BADMINTON-OPEN",
+          name: "Badminton Open",
+          sport_id: null,
+          codex_event_id: "badminton",
+          point_class: "X" as const,
+          scoring_engine: "bracket_points",
+          competition_type: "Badminton",
+          event_type: "individual" as const,
+          scoring_schema: {},
+          status: "scheduled",
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]
   ) as EventRow[];
 
   const venueNameMap: Record<string, string> = {
@@ -120,52 +121,56 @@ export default async function SchedulesPage() {
     venues.length > 0
       ? venues
       : staticVenues.map((v) => ({
-          id: v.id,
-          festival_id: "zenithrow-2026",
-          code: v.id.toUpperCase(),
-          slug: v.id,
-          name: venueNameMap[v.id] || v.name,
-          location: v.location || "Campus Grounds",
-          capacity: null,
-          is_active: true,
-          metadata: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }))
+        id: v.id,
+        festival_id: "zenithrow-2026",
+        code: v.id.toUpperCase(),
+        slug: v.id,
+        name: venueNameMap[v.id] || v.name,
+        location: v.location || "Campus Grounds",
+        capacity: null,
+        is_active: true,
+        metadata: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }))
   ) as VenueRow[];
 
-  // Use live Supabase schedules directly (no fake fallback data)
+  // Use live Supabase schedules directly, preserving original notes verbatim
   const displaySchedules: ScheduleRow[] = schedules;
 
   return (
     <>
       <main className="section" style={{ paddingTop: "clamp(96px, 14vw, 160px)" }}>
         <div className="wrap">
-          <div className="kicker">ZENITHROW · Today</div>
-          <h1 style={{ fontSize: "clamp(3.5rem, 8vw, 6.5rem)", letterSpacing: "-0.04em", lineHeight: 0.92, marginBottom: "48px" }}>
-            The day&apos;s<br />
-            <span>rhythm.</span>
-          </h1>
+          <Reveal>
+            <div className="kicker">ZENITHROW · Today</div>
+            <h1 style={{ fontSize: "clamp(3.5rem, 8vw, 6.5rem)", letterSpacing: "-0.04em", lineHeight: 0.92, marginBottom: "48px" }}>
+              The day&apos;s<br />
+              <span>rhythm.</span>
+            </h1>
 
-          <SchedulesClient
-            initialSchedules={displaySchedules}
-            events={displayEvents}
-            venues={displayVenues}
-          />
+            <SchedulesClient
+              initialSchedules={displaySchedules}
+              events={displayEvents}
+              venues={displayVenues}
+            />
+          </Reveal>
 
-          <div className="section-head" style={{ marginTop: "75px" }}>
-            <div>
-              <h2>Follow live<br />or check results.</h2>
+          <Reveal>
+            <div className="section-head" style={{ marginTop: "75px" }}>
+              <div>
+                <h2>Follow live<br />or check results.</h2>
+              </div>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <Link href="/live" className="btn primary">
+                  Live broadcast →
+                </Link>
+                <Link href="/results" className="btn">
+                  Verified results →
+                </Link>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Link href="/display" className="btn primary">
-                Live broadcast →
-              </Link>
-              <Link href="/results" className="btn">
-                Verified results →
-              </Link>
-            </div>
-          </div>
+          </Reveal>
         </div>
       </main>
       <Footer />

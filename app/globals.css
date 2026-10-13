@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
- :root {
+:root {
   /* =========================================
      ZENITHROW COLOUR SYSTEM — LIGHT MODE (DEFAULT)
      Primary Accent: Red #E53935 (Signal / Live / Action)
@@ -72,12 +72,18 @@
   --status-disqualified-bg: #FEE2E2;
 
   /* CONTINUOUS CORNERS (the Apple squircle) — Canonical Radius Tokens */
-  --radius-xs: 8px; /* small chips, tags */
-  --radius-sm: 12px; /* inputs, selects */
-  --radius-md: 16px; /* buttons, tabs */
-  --radius-lg: 24px; /* cards, portal tiles, modals */
-  --radius-xl: 32px; /* hero panels, large containers */
-  --radius-full: 9999px; /* pills, avatars, toggles, icon buttons */
+  --radius-xs: 8px;
+  /* small chips, tags */
+  --radius-sm: 12px;
+  /* inputs, selects */
+  --radius-md: 16px;
+  /* buttons, tabs */
+  --radius-lg: 24px;
+  /* cards, portal tiles, modals */
+  --radius-xl: 32px;
+  /* hero panels, large containers */
+  --radius-full: 9999px;
+  /* pills, avatars, toggles, icon buttons */
 
   /* Concentric Aliases */
   --radius-micro: var(--radius-xs);
@@ -252,7 +258,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
   letter-spacing: -0.02em;
   font-weight: 650;
@@ -979,9 +990,7 @@ button {
 
   min-height: calc(100vh - 72px);
 
-  padding: 100px
-    max(24px, calc((100vw - var(--container)) / 2))
-    72px;
+  padding: 100px max(24px, calc((100vw - var(--container)) / 2)) 72px;
 
   display: flex;
   align-items: center;
@@ -1180,16 +1189,12 @@ button {
   border-radius: 50%;
 
   background:
-    radial-gradient(
-      circle at center,
+    radial-gradient(circle at center,
       rgba(198, 245, 0, 0.12),
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at center,
+      transparent 42%),
+    radial-gradient(circle at center,
       rgba(17, 18, 15, 0.02),
-      transparent 65%
-    );
+      transparent 65%);
 
   animation: pegasus-orb-float 8s ease-in-out infinite;
 }
@@ -1231,7 +1236,7 @@ button {
   transform: rotate(-32deg) scaleY(0.42);
 }
 
-.pegasus-hero__orb > span {
+.pegasus-hero__orb>span {
   position: absolute;
 
   top: 50%;
@@ -1645,6 +1650,7 @@ button {
 ========================================= */
 
 @keyframes pegasus-pulse {
+
   0%,
   100% {
     opacity: 0.5;
@@ -1658,6 +1664,7 @@ button {
 }
 
 @keyframes pegasus-orb-float {
+
   0%,
   100% {
     transform: translateY(-50%) rotate(0deg);
@@ -1814,6 +1821,7 @@ button {
     flex-direction: column;
   }
 }
+
 /* =========================================
    PAGE SYSTEM
 ========================================= */
@@ -2278,7 +2286,7 @@ button {
   font-weight: 500;
 }
 
-.pegasus-participant-card__meta span + span::before {
+.pegasus-participant-card__meta span+span::before {
   content: "•";
   margin-right: 10px;
   color: var(--border-strong);
@@ -2408,7 +2416,7 @@ button {
   margin-top: 4px;
 }
 
-.pegasus-profile__meta span + span::before {
+.pegasus-profile__meta span+span::before {
   content: "•";
   margin-right: 14px;
   color: var(--border-strong);
@@ -2813,6 +2821,7 @@ button {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -2823,6 +2832,7 @@ button {
     opacity: 0;
     transform: translateY(14px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2830,11 +2840,13 @@ button {
 }
 
 @keyframes pegasus-status-pulse {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.75;
   }
+
   50% {
     transform: scale(1.35);
     opacity: 1;
@@ -3199,6 +3211,7 @@ select:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -3610,6 +3623,7 @@ select:focus-visible {
 }
 
 @media (max-width: 900px) {
+
   .portal,
   .pegasus-admin-shell {
     grid-template-columns: 1fr;
@@ -3697,10 +3711,12 @@ select:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .side,
   .pegasus-admin-sidebar {
     transition: none !important;
   }
+
   .pegasus-admin-drawer-backdrop {
     transition: none !important;
   }
@@ -4064,6 +4080,13 @@ select:focus-visible {
   padding: 12px 14px;
 }
 
+@media (max-width: 440px) {
+  .pegasus-team-card__stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 .pegasus-team-stat-label {
   display: block;
   font-size: 10px;
@@ -4167,161 +4190,117 @@ select:focus-visible {
 /* Base Atmosphere (Default for inner public pages) */
 .pegasus-atmosphere::before {
   background-image:
-    radial-gradient(
-      ellipse 900px 420px at 50% -70px,
+    radial-gradient(ellipse 900px 420px at 50% -70px,
       rgba(198, 245, 0, 0.06),
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 650px at 85% -30px,
+      transparent 70%),
+    radial-gradient(circle 650px at 85% -30px,
       rgba(17, 18, 15, 0.015),
-      transparent 60%
-    );
+      transparent 60%);
 }
 
 /* --- HOME: Strongest Atmospheric Presence --- */
 .pegasus-atmosphere--home::before {
   background-image:
-    radial-gradient(
-      ellipse 1100px 550px at 50% -80px,
+    radial-gradient(ellipse 1100px 550px at 50% -80px,
       rgba(198, 245, 0, 0.09),
-      transparent 72%
-    ),
-    radial-gradient(
-      circle 800px at 85% -40px,
+      transparent 72%),
+    radial-gradient(circle 800px at 85% -40px,
       rgba(17, 18, 15, 0.02),
-      transparent 60%
-    );
+      transparent 60%);
 }
 
 .pegasus-atmosphere--home::after {
   background-image:
-    linear-gradient(
-      to right,
+    linear-gradient(to right,
       rgba(17, 18, 15, 0.028) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
+      transparent 1px),
+    linear-gradient(to bottom,
       rgba(17, 18, 15, 0.028) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 72px 72px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 55% at 50% 180px,
-    black 15%,
-    transparent 85%
-  );
-  mask-image: radial-gradient(
-    ellipse 80% 55% at 50% 180px,
-    black 15%,
-    transparent 85%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 180px,
+      black 15%,
+      transparent 85%);
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 180px,
+      black 15%,
+      transparent 85%);
 }
 
 /* --- LEADERBOARD: Moderate Atmosphere (Competition in Focus) --- */
 .pegasus-atmosphere--leaderboard::before {
   background-image:
-    radial-gradient(
-      ellipse 850px 420px at 50% -60px,
+    radial-gradient(ellipse 850px 420px at 50% -60px,
       rgba(198, 245, 0, 0.06),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--leaderboard::after {
   background-image:
-    linear-gradient(
-      to right,
+    linear-gradient(to right,
       rgba(17, 18, 15, 0.02) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 120px 100%;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 600px
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 600px
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 600px);
+  mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 600px);
 }
 
 /* --- SPORTS: Moderate Atmosphere (Disciplines & Fields) --- */
 .pegasus-atmosphere--sports::before {
   background-image:
-    radial-gradient(
-      circle 750px at 25% -40px,
+    radial-gradient(circle 750px at 25% -40px,
       rgba(198, 245, 0, 0.05),
-      transparent 65%
-    );
+      transparent 65%);
 }
 
 .pegasus-atmosphere--sports::after {
   background-image:
-    linear-gradient(
-      to right,
+    linear-gradient(to right,
       rgba(17, 18, 15, 0.022) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
+      transparent 1px),
+    linear-gradient(to bottom,
       rgba(17, 18, 15, 0.022) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 80px 80px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 75% 55% at 50% 140px,
-    black 15%,
-    transparent 80%
-  );
-  mask-image: radial-gradient(
-    ellipse 75% 55% at 50% 140px,
-    black 15%,
-    transparent 80%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 75% 55% at 50% 140px,
+      black 15%,
+      transparent 80%);
+  mask-image: radial-gradient(ellipse 75% 55% at 50% 140px,
+      black 15%,
+      transparent 80%);
 }
 
 /* --- RESULTS: Moderate/Subtle Atmosphere (Verified Outcomes) --- */
 .pegasus-atmosphere--results::before {
   background-image:
-    radial-gradient(
-      ellipse 700px 340px at 50% -40px,
+    radial-gradient(ellipse 700px 340px at 50% -40px,
       rgba(198, 245, 0, 0.04),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--results::after {
   background-image:
-    linear-gradient(
-      to bottom,
+    linear-gradient(to bottom,
       rgba(17, 18, 15, 0.02) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 100% 64px;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 450px
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 450px
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 450px);
+  mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 450px);
 }
 
 /* --- PARTICIPANTS: Subtle Atmosphere (Focus on Athletes) --- */
 .pegasus-atmosphere--participants::before {
   background-image:
-    radial-gradient(
-      ellipse 650px 300px at 50% -40px,
+    radial-gradient(ellipse 650px 300px at 50% -40px,
       rgba(198, 245, 0, 0.04),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--participants::after {
@@ -4332,47 +4311,35 @@ select:focus-visible {
 .pegasus-atmosphere--schedules::before,
 .pegasus-atmosphere--fixtures::before {
   background-image:
-    radial-gradient(
-      ellipse 800px 380px at 50% -40px,
+    radial-gradient(ellipse 800px 380px at 50% -40px,
       rgba(198, 245, 0, 0.05),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--schedules::after,
 .pegasus-atmosphere--fixtures::after {
   background-image:
-    linear-gradient(
-      to right,
+    linear-gradient(to right,
       rgba(17, 18, 15, 0.02) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
+      transparent 1px),
+    linear-gradient(to bottom,
       rgba(17, 18, 15, 0.02) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 88px 88px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 75% 55% at 50% 120px,
-    black 10%,
-    transparent 85%
-  );
-  mask-image: radial-gradient(
-    ellipse 75% 55% at 50% 120px,
-    black 10%,
-    transparent 85%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 75% 55% at 50% 120px,
+      black 10%,
+      transparent 85%);
+  mask-image: radial-gradient(ellipse 75% 55% at 50% 120px,
+      black 10%,
+      transparent 85%);
 }
 
 /* --- MY RESULT: Clear Lookup (Atmosphere Secondary) --- */
 .pegasus-atmosphere--my-result::before {
   background-image:
-    radial-gradient(
-      ellipse 520px 240px at 50% -30px,
+    radial-gradient(ellipse 520px 240px at 50% -30px,
       rgba(198, 245, 0, 0.04),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--my-result::after {
@@ -4382,31 +4349,23 @@ select:focus-visible {
 /* --- TEAMS: House Rosters & Standings --- */
 .pegasus-atmosphere--teams::before {
   background-image:
-    radial-gradient(
-      ellipse 750px 360px at 50% -40px,
+    radial-gradient(ellipse 750px 360px at 50% -40px,
       rgba(198, 245, 0, 0.05),
-      transparent 70%
-    );
+      transparent 70%);
 }
 
 .pegasus-atmosphere--teams::after {
   background-image:
-    linear-gradient(
-      to right,
+    linear-gradient(to right,
       rgba(17, 18, 15, 0.02) 1px,
-      transparent 1px
-    );
+      transparent 1px);
   background-size: 100px 100%;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 500px
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    transparent 500px
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 500px);
+  mask-image: linear-gradient(to bottom,
+      black 0%,
+      transparent 500px);
 }
 
 /* --- STRICT ISOLATION: Admin, Judge, Team Manager & Display never inherit atmosphere --- */
@@ -4424,6 +4383,7 @@ select:focus-visible {
 
 /* --- REDUCED MOTION --- */
 @media (prefers-reduced-motion: reduce) {
+
   .pegasus-atmosphere::before,
   .pegasus-atmosphere::after {
     animation: none !important;
@@ -4524,9 +4484,11 @@ select:focus-visible {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -4632,6 +4594,7 @@ select:focus-visible {
     padding-left: 12px !important;
     padding-right: 12px !important;
   }
+
   .zenith-leaderboard-card {
     grid-template-columns: 48px 1fr auto;
     gap: 12px;
@@ -4648,24 +4611,58 @@ select:focus-visible {
   margin: auto;
 }
 
-/* Nav */
-.hsu-nav,
+/* Top Sticky Navbar */
+.ZENITHROW-nav,
 .nav {
   position: fixed;
-  z-index: 30;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(1180px, calc(100% - 28px));
-  padding: 10px 12px 10px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(10, 10, 10, 0.76);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 999px;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 16px 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  box-shadow: none;
+  transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-backdrop-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav.scrolled {
+  background: rgba(10, 10, 14, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  padding: 10px 0;
+}
+
+[data-theme="light"] .nav.scrolled {
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.nav-container {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .brand {
@@ -4774,7 +4771,7 @@ select:focus-visible {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(7,7,7,0.45) 0%, rgba(7,7,7,0.08) 25%, rgba(7,7,7,0.35) 60%, #070707 100%);
+  background: linear-gradient(180deg, rgba(7, 7, 7, 0.45) 0%, rgba(7, 7, 7, 0.08) 25%, rgba(7, 7, 7, 0.35) 60%, #070707 100%);
 }
 
 .hero-content {
@@ -5058,8 +5055,13 @@ select:focus-visible {
 }
 
 @keyframes ticker-slide {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .ticker span {
@@ -5340,7 +5342,7 @@ select:focus-visible {
   background: linear-gradient(180deg, transparent 25%, rgba(0, 0, 0, 0.9) 100%);
 }
 
-.card.sport > * {
+.card.sport>* {
   position: relative;
   z-index: 2;
 }
@@ -5500,6 +5502,25 @@ select:focus-visible {
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .tr {
+    grid-template-columns: 65px 1fr auto;
+    padding: 14px 12px;
+    gap: 8px;
+  }
+  .hide-sm {
+    display: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .tr {
+    grid-template-columns: 55px 1fr auto;
+    padding: 12px 8px;
+    gap: 6px;
+  }
+}
+
 .tr:last-child {
   border: 0;
 }
@@ -5605,53 +5626,55 @@ select:focus-visible {
   .navlinks {
     display: none;
   }
+
   .mobile-toggle {
-    display: block;
-    margin-left: auto;
+    display: inline-flex;
+    margin-left: 0;
     background: none;
     border: 0;
     color: #fff;
     font-size: 22px;
     cursor: pointer;
   }
-  .nav {
-    border-radius: 18px;
-  }
+
   .navlinks.open {
     display: flex;
     position: absolute;
-    top: 58px;
-    left: 0;
-    right: 0;
+    top: calc(100% + 8px);
+    left: 16px;
+    right: 16px;
     background: rgba(15, 15, 15, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 18px;
     padding: 16px;
     flex-direction: column;
     align-items: stretch;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
   }
+
   .navlinks.open a {
     padding: 10px 12px;
   }
+
   .hero {
     min-height: 100vh;
     min-height: 100dvh;
     min-height: 100svh;
     height: auto;
   }
+
   .hero:after {
-    background: linear-gradient(
-      180deg,
-      rgba(7, 7, 7, 0.72) 0%,
-      rgba(7, 7, 7, 0.2) 28%,
-      rgba(7, 7, 7, 0.55) 65%,
-      #070707 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(7, 7, 7, 0.72) 0%,
+        rgba(7, 7, 7, 0.2) 28%,
+        rgba(7, 7, 7, 0.55) 65%,
+        #070707 100%);
   }
+
   .hero-image {
     object-position: 70% center;
   }
+
   .hero-content {
     position: relative;
     z-index: 2;
@@ -5663,46 +5686,58 @@ select:focus-visible {
     width: 100%;
     max-width: 100%;
   }
+
   .hero-title {
     font-size: clamp(2.5rem, 8vw, 4.75rem);
     line-height: 0.88;
     letter-spacing: -0.04em;
     margin: 18px 0 20px;
   }
+
   .hero-controls {
     right: max(20px, env(safe-area-inset-right, 20px));
     bottom: max(28px, env(safe-area-inset-bottom, 28px));
   }
+
   .grid4,
   .grid3 {
     grid-template-columns: 1fr 1fr;
   }
+
   .statrow {
     grid-template-columns: 1fr 1fr;
   }
+
   .stat:nth-child(2) {
     border-right: 0;
   }
+
   .stat:nth-child(-n+2) {
     border-bottom: 1px solid var(--hsu-line);
   }
+
   .split-feature {
     grid-template-columns: 1fr;
   }
+
   .split-feature .media {
     min-height: 360px;
   }
+
   .metric-strip {
     grid-template-columns: 1fr 1fr;
   }
+
   .metric-strip .metric:nth-child(2) {
     border-right: 0;
     border-bottom: 1px solid currentColor;
   }
+
   .metric-strip .metric:nth-child(1),
   .metric-strip .metric:nth-child(2) {
     border-bottom: 1px solid currentColor;
   }
+
   .footergrid {
     grid-template-columns: 1fr 1fr;
   }
@@ -5712,35 +5747,42 @@ select:focus-visible {
   .wrap {
     width: min(1240px, calc(100% - 24px));
   }
-  .nav {
-    top: 10px;
-    width: calc(100% - 18px);
+
+  .nav-container {
+    width: calc(100% - 20px);
   }
+
+  .portal-container {
+    display: none;
+  }
+
   .hero {
     min-height: 100vh;
     min-height: 100dvh;
     min-height: 100svh;
     height: auto;
   }
+
   .hero:after {
-    background: linear-gradient(
-      180deg,
-      rgba(7, 7, 7, 0.8) 0%,
-      rgba(7, 7, 7, 0.25) 25%,
-      rgba(7, 7, 7, 0.6) 60%,
-      #070707 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(7, 7, 7, 0.8) 0%,
+        rgba(7, 7, 7, 0.25) 25%,
+        rgba(7, 7, 7, 0.6) 60%,
+        #070707 100%);
   }
+
   .hero-image {
     object-position: 70% center;
     transform: none !important;
   }
+
   .hero-content {
     padding-top: max(110px, calc(72px + env(safe-area-inset-top, 0px)));
     padding-bottom: max(32px, calc(20px + env(safe-area-inset-bottom, 0px)));
     padding-left: max(20px, env(safe-area-inset-left, 20px));
     padding-right: max(20px, env(safe-area-inset-right, 20px));
   }
+
   .hero-title {
     font-size: clamp(2rem, 8.5vw, 3.25rem);
     line-height: 0.95;
@@ -5748,11 +5790,13 @@ select:focus-visible {
     margin: 14px 0 16px;
     word-break: break-word;
   }
+
   .lead {
     font-size: 15px;
     line-height: 1.55;
     max-width: 100%;
   }
+
   .hero .actions {
     display: flex;
     flex-direction: column;
@@ -5760,6 +5804,7 @@ select:focus-visible {
     gap: 10px;
     margin-top: 20px;
   }
+
   .hero .actions .btn {
     width: 100%;
     min-height: 48px;
@@ -5770,36 +5815,46 @@ select:focus-visible {
     justify-content: center;
     text-align: center;
   }
+
   .hero-controls {
     display: none;
   }
+
   .slidebar {
     margin-top: 22px;
   }
+
   .section {
     padding: 70px 0;
   }
+
   .grid4,
   .grid3 {
     grid-template-columns: 1fr;
   }
+
   .statrow {
     grid-template-columns: 1fr 1fr;
   }
+
   .metric b {
     font-size: 34px;
   }
+
   .editorial-band {
     padding: 76px 0;
   }
+
   .split-feature .copy {
     padding: 28px;
   }
+
   .tr {
     grid-template-columns: 48px 1.4fr 70px;
     padding: 13px 14px;
     gap: 8px;
   }
+
   .tr .hide-sm {
     display: none;
   }
@@ -5811,23 +5866,28 @@ select:focus-visible {
     min-height: 100dvh;
     min-height: 100svh;
   }
+
   .hero-content {
     padding-top: max(80px, calc(50px + env(safe-area-inset-top, 0px)));
     padding-bottom: max(24px, calc(16px + env(safe-area-inset-bottom, 0px)));
   }
+
   .hero-title {
     font-size: clamp(1.75rem, 5.5vw, 2.75rem);
     line-height: 0.95;
     margin: 10px 0 12px;
   }
+
   .lead {
     font-size: 14px;
     line-height: 1.45;
   }
+
   .hero .actions {
     flex-direction: row;
     gap: 12px;
   }
+
   .hero .actions .btn {
     width: auto;
     flex: 1;
@@ -5836,6 +5896,7 @@ select:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .hero-image,
   .hero-bg,
   .hero-slide-layer {
@@ -5880,8 +5941,8 @@ select:focus-visible {
 .zenith-table-wrap,
 .modal,
 .pegasus-modal,
-.pegasus-modal-backdrop > div,
-[role="dialog"] > div,
+.pegasus-modal-backdrop>div,
+[role="dialog"]>div,
 .searchCard,
 .credentialBadge,
 .split-feature .media,
@@ -5960,9 +6021,9 @@ textarea:focus,
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
-.pegasus-modal-backdrop > div,
+.pegasus-modal-backdrop>div,
 .pegasus-modal,
-[role="dialog"] > div {
+[role="dialog"]>div {
   border-radius: var(--radius-lg) !important;
   corner-shape: squircle !important;
   overflow: hidden !important;
@@ -6209,7 +6270,7 @@ textarea:focus,
   text-decoration: none;
   color: #f5f5f7;
   transition: padding-left 240ms cubic-bezier(0.16, 1, 0.3, 1),
-              color 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    color 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mega-link:hover {
@@ -6239,8 +6300,8 @@ textarea:focus,
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 280ms ease,
-              box-shadow 280ms ease;
+    border-color 280ms ease,
+    box-shadow 280ms ease;
 }
 
 .card.sport:hover {
@@ -6360,17 +6421,6 @@ textarea:focus,
 }
 
 /* — NAVBAR REFINEMENT — */
-.nav {
-  top: 14px;
-  padding: 9px 10px 9px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(10, 10, 12, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-radius: var(--radius-full);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
-              inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
 
 .brand {
   font-weight: 900;
@@ -6425,8 +6475,8 @@ textarea:focus,
   letter-spacing: -0.01em;
   box-shadow: none;
   transition: background 220ms cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 220ms ease,
-              transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-color 220ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn:hover {
@@ -6531,7 +6581,7 @@ textarea:focus,
 /* — PAGE HEADERS (leaderboard, schedules, etc.) — */
 .page-header {
   padding: clamp(48px, 8vw, 96px) 0 clamp(40px, 6vw, 72px);
-  border-bottom: 1px solid var(--border, rgba(255,255,255,0.07));
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.07));
 }
 
 .page-kicker {
@@ -6619,6 +6669,7 @@ textarea:focus,
 }
 
 @media (max-width: 480px) {
+
   .grid4,
   .grid3 {
     grid-template-columns: 1fr;
@@ -6687,13 +6738,11 @@ textarea:focus,
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(7, 7, 7, 0.45) 0%,
-    rgba(7, 7, 7, 0.12) 25%,
-    rgba(7, 7, 7, 0.55) 60%,
-    #070707 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(7, 7, 7, 0.45) 0%,
+      rgba(7, 7, 7, 0.12) 25%,
+      rgba(7, 7, 7, 0.55) 60%,
+      #070707 100%);
 }
 
 @media (max-width: 1024px) {
@@ -6707,15 +6756,15 @@ textarea:focus,
     min-height: 100svh !important;
     height: auto;
   }
+
   .hero:after {
-    background: linear-gradient(
-      180deg,
-      rgba(7, 7, 7, 0.72) 0%,
-      rgba(7, 7, 7, 0.22) 28%,
-      rgba(7, 7, 7, 0.65) 65%,
-      #070707 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(7, 7, 7, 0.72) 0%,
+        rgba(7, 7, 7, 0.22) 28%,
+        rgba(7, 7, 7, 0.65) 65%,
+        #070707 100%);
   }
+
   .hero-image {
     object-position: 70% center !important;
   }
@@ -6726,15 +6775,15 @@ textarea:focus,
     min-height: 100svh !important;
     height: auto;
   }
+
   .hero:after {
-    background: linear-gradient(
-      180deg,
-      rgba(7, 7, 7, 0.82) 0%,
-      rgba(7, 7, 7, 0.28) 25%,
-      rgba(7, 7, 7, 0.78) 60%,
-      #070707 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(7, 7, 7, 0.82) 0%,
+        rgba(7, 7, 7, 0.28) 25%,
+        rgba(7, 7, 7, 0.78) 60%,
+        #070707 100%);
   }
+
   .hero-image {
     object-position: 75% center !important;
     transform: none !important;
@@ -6742,13 +6791,15 @@ textarea:focus,
 }
 
 /* Global overflow containment — no horizontal scroll */
-html, body {
+html,
+body {
   max-width: 100vw;
   overflow-x: hidden;
 }
 
 /* — PREFERS-REDUCED-MOTION — */
 @media (prefers-reduced-motion: reduce) {
+
   .mega-link,
   .card.sport,
   .btn,

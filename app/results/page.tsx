@@ -11,6 +11,7 @@ import {
   type ParticipantRow,
 } from "@/lib/repositories";
 import ResultsClient from "./ResultsClient";
+import Reveal from "@/components/Reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -41,16 +42,17 @@ export default async function ResultsPage() {
   return (
     <main className="pegasus-page pegasus-atmosphere pegasus-atmosphere--results pegasus-animate-fade">
       {/* Header */}
-      <section className="page-header">
+      <Reveal as="section" className="page-header">
         <p className="page-kicker">Results</p>
         <h1 className="page-title">Official results.</h1>
         <p className="page-desc">
           Verified and officially published event outcomes, athlete rankings, and championship points for ZENITHROW Sports Festival 2026.
         </p>
-      </section>
+      </Reveal>
 
       {/* Published Results or Authentic Empty State */}
-      {publishedResults.length === 0 ? (
+      <Reveal>
+        {publishedResults.length === 0 ? (
         <section
           className="pegasus-card"
           style={{ textAlign: "center", padding: "64px 24px" }}
@@ -112,6 +114,7 @@ export default async function ResultsPage() {
           participants={participants}
         />
       )}
+      </Reveal>
     </main>
   );
 }

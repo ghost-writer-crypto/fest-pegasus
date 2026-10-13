@@ -4,6 +4,7 @@ import HsuHeroSlider from "@/components/home/HsuHeroSlider";
 import HsuLiveTicker from "@/components/home/HsuLiveTicker";
 import Skiper103 from "@/components/ui/skiper-ui/skiper103";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/Reveal";
 import { sports } from "@/data/sports";
 import { events } from "@/data/events";
 import { competitions } from "@/data/competitions";
@@ -71,7 +72,7 @@ export default function HomePage() {
       <HsuLiveTicker />
 
       {/* 4. Festival stats — single high-impact metric row */}
-      <section className="section">
+      <Reveal as="section" className="section">
         <div className="wrap">
           <div className="section-head">
             <div>
@@ -102,10 +103,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* 5. Editorial Band Dark — Mega navigation links */}
-      <section className="editorial-band dark">
+      <Reveal as="section" className="editorial-band dark">
         <div className="wrap">
           <div className="section-head">
             <div>
@@ -133,10 +134,10 @@ export default function HomePage() {
             <span>House championship ↗</span>
           </Link>
         </div>
-      </section>
+      </Reveal>
 
       {/* 6. Enter the Arena — Sports photo grid */}
-      <section className="section alt">
+      <Reveal as="section" className="section alt">
         <div className="wrap">
           <div className="section-head">
             <div>
@@ -194,10 +195,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* 7. Right Now — Live & upcoming table */}
-      <section className="section">
+      <Reveal as="section" className="section">
         <div className="wrap">
           <div className="section-head">
             <div>
@@ -245,13 +246,13 @@ export default function HomePage() {
             )}
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* 7.5 Tournament Regulations & Directives Accordion */}
       <Skiper103 />
 
       {/* 8. Split Feature Band — editorial photo + copy */}
-      <section className="editorial-band light">
+      <Reveal as="section" className="editorial-band light">
         <div className="wrap">
           <div className="split-feature">
             <div
@@ -275,7 +276,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* 9. Committee Shared Footer */}
       <Footer />

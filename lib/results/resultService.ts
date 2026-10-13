@@ -1,5 +1,5 @@
 import type { Result } from "@/lib/types";
-import { validateResult } from "./resultValidation";
+import { validateResult } from "./resultValidation.ts";
 
 export type LifecycleTransitionResult = {
   success: boolean;

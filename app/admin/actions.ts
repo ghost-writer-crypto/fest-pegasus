@@ -8,6 +8,10 @@ import {
   verifyResultRecord,
   publishResultRecord,
   unlockResultForCorrectionRecord,
+  correctResultRecord,
+  createAdminResultRecord,
+  type CorrectResultInput,
+  type CreateAdminResultInput,
   createParticipantRecord,
   updateParticipantRecord,
   updateParticipantStatusRecord,
@@ -228,6 +232,87 @@ export async function unlockResultAction(
   revalidatePath("/admin/publish");
   revalidatePath("/admin/results");
   revalidatePath("/results");
+
+  return { success: true };
+}
+
+/**
+ * Server action to directly create and record a competition result as Administrator.
+ */
+export async function adminCreateResultAction(
+  input: Omit<CreateAdminResultInput, "actorUuid" | "actorName">,
+): Promise<AdminActionResult & { resultId?: string }> {
+  // 1. Authenticate and authorize admin server-side
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to record results.",
+    };
+  }
+
+  // 2. Perform insertion through repository
+  const res = await createAdminResultRecord({
+    ...input,
+    actorUuid: profile.userId,
+    actorName: profile.fullName,
+  });
+
+  if (!res.success || !res.result) {
+    return { success: false, error: res.error || "Failed to create result." };
+  }
+
+  // 3. Revalidate affected administrative and public surfaces
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/verification");
+  revalidatePath("/admin/publish");
+  revalidatePath("/results");
+  revalidatePath("/leaderboard");
+  revalidatePath("/teams");
+
+  return { success: true, resultId: res.result.id };
+}
+
+/**
+ * Server action to correct/amend an existing result as Administrator with full audit compliance.
+ */
+export async function adminCorrectResultAction(
+  input: Omit<CorrectResultInput, "actorUuid" | "actorName">,
+): Promise<AdminActionResult> {
+  if (!input.resultId || input.resultId.trim() === "") {
+    return { success: false, error: "Result ID is required." };
+  }
+  if (!input.reason || input.reason.trim() === "") {
+    return { success: false, error: "Correction reason is mandatory to edit/correct a result." };
+  }
+
+  // 1. Authenticate and authorize admin server-side
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to correct results.",
+    };
+  }
+
+  // 2. Perform correction through repository
+  const res = await correctResultRecord({
+    ...input,
+    actorUuid: profile.userId,
+    actorName: profile.fullName,
+  });
+
+  if (!res.success) {
+    return { success: false, error: res.error || "Failed to correct result." };
+  }
+
+  // 3. Revalidate affected administrative and public surfaces
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/verification");
+  revalidatePath("/admin/publish");
+  revalidatePath("/results");
+  revalidatePath("/leaderboard");
+  revalidatePath("/teams");
 
   return { success: true };
 }

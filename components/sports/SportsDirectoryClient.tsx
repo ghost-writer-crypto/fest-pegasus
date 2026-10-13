@@ -11,8 +11,6 @@ import {
   SlidersHorizontal,
   Calendar,
   Sparkles,
-  Users,
-  User,
   Activity,
 } from "lucide-react";
 import styles from "./sports.module.css";
@@ -30,8 +28,6 @@ export default function SportsDirectoryClient({
 }: SportsDirectoryClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedPointClass, setSelectedPointClass] = useState<string>("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcut: press '/' to focus search, 'Escape' to clear
@@ -90,16 +86,6 @@ export default function SportsDirectoryClient({
         return false;
       }
 
-      // Type filter (team vs individual)
-      if (selectedType !== "all" && sport.type !== selectedType) {
-        return false;
-      }
-
-      // Point class filter
-      if (selectedPointClass !== "all" && sport.pointClass !== selectedPointClass) {
-        return false;
-      }
-
       // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
@@ -121,19 +107,15 @@ export default function SportsDirectoryClient({
 
       return true;
     });
-  }, [sports, events, selectedCategory, selectedType, selectedPointClass, searchQuery]);
+  }, [sports, events, selectedCategory, searchQuery]);
 
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
-    selectedCategory !== "all" ||
-    selectedType !== "all" ||
-    selectedPointClass !== "all";
+    selectedCategory !== "all";
 
   const clearAllFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
-    setSelectedType("all");
-    setSelectedPointClass("all");
   };
 
   return (
@@ -149,11 +131,11 @@ export default function SportsDirectoryClient({
 
         <h1 className={styles.heroTitle}>
           DISCIPLINES<br />
-          <span className={styles.heroTitleOutline}>&amp; ARENAS.</span>
+          <span className={styles.heroTitleOutline}>& EVENTS.</span>
         </h1>
 
         <p className={styles.heroLead}>
-          Explore certified festival sports, medal events, division eligibility, official roster quotas, and championship point distributions across all collegiate houses.
+          Explore certified festival sports, medal events, division eligibility, official roster quotas, and tournament draws across all collegiate teams.
         </p>
 
         {/* Telemetry Metric Strip */}
@@ -167,8 +149,8 @@ export default function SportsDirectoryClient({
             <span className={styles.telemetryLabel}>Official Medal Draws</span>
           </div>
           <div className={styles.telemetryItem}>
-            <span className={styles.telemetryValue}>4</span>
-            <span className={styles.telemetryLabel}>Point Tiers (Z · Y · X · W)</span>
+            <span className={styles.telemetryValue}>{categories.length}</span>
+            <span className={styles.telemetryLabel}>Categories</span>
           </div>
           <div className={styles.telemetryItem}>
             <span className={styles.telemetryValue}>{venues.length}</span>
@@ -180,7 +162,7 @@ export default function SportsDirectoryClient({
         <div className={styles.controlsBox}>
           {/* Main search input */}
           <div className={styles.searchRow}>
-            <div className={styles.searchWrapper}>
+            <div className={styles.searchWrapper} style={{ width: "100%" }}>
               <Search size={18} className={styles.searchIcon} />
               <input
                 ref={searchInputRef}
@@ -201,41 +183,25 @@ export default function SportsDirectoryClient({
                 </button>
               )}
             </div>
-
-            {/* Quick Type Filter */}
-            <div className={styles.typeFilterRow}>
-              <button
-                type="button"
-                onClick={() => setSelectedType("all")}
-                className={`${styles.filterChip} ${selectedType === "all" ? styles.filterChipActive : ""}`}
-              >
-                All Formats
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedType("team")}
-                className={`${styles.filterChip} ${selectedType === "team" ? styles.filterChipActive : ""}`}
-              >
-                <Users size={13} />
-                Team Sports
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedType("individual")}
-                className={`${styles.filterChip} ${selectedType === "individual" ? styles.filterChipActive : ""}`}
-              >
-                <User size={13} />
-                Individual
-              </button>
-            </div>
           </div>
 
           {/* Category Pills Horizontal Scroll */}
-          <div className={styles.categoryScroll}>
+          <div
+            className={styles.categoryScroll}
+            style={{
+              display: "flex",
+              flexWrap: "nowrap",
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              paddingBottom: "4px",
+            }}
+          >
             <button
               type="button"
               onClick={() => setSelectedCategory("all")}
               className={`${styles.filterChip} ${selectedCategory === "all" ? styles.filterChipActive : ""}`}
+              style={{ flexShrink: 0, whiteSpace: "nowrap" }}
             >
               All Categories ({sports.length})
             </button>
@@ -247,6 +213,7 @@ export default function SportsDirectoryClient({
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
                   className={`${styles.filterChip} ${selectedCategory === cat ? styles.filterChipActive : ""}`}
+                  style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                 >
                   {cat} ({count})
                 </button>
@@ -254,55 +221,9 @@ export default function SportsDirectoryClient({
             })}
           </div>
 
-          {/* Point Tier Filter & Results Count Row */}
+          {/* Results Count & Reset Filter */}
           <div className={styles.resultsCountRow}>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--hsu-muted)" }}>
-                Codex Tier:
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedPointClass("all")}
-                className={`${styles.filterChip} ${selectedPointClass === "all" ? styles.filterChipActive : ""}`}
-                style={{ padding: "4px 10px", fontSize: "11px" }}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPointClass("Z")}
-                className={`${styles.filterChip} ${selectedPointClass === "Z" ? styles.filterChipActive : ""}`}
-                style={{ padding: "4px 10px", fontSize: "11px" }}
-              >
-                Tier Z (10 pts)
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPointClass("Y")}
-                className={`${styles.filterChip} ${selectedPointClass === "Y" ? styles.filterChipActive : ""}`}
-                style={{ padding: "4px 10px", fontSize: "11px" }}
-              >
-                Tier Y (7 pts)
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPointClass("X")}
-                className={`${styles.filterChip} ${selectedPointClass === "X" ? styles.filterChipActive : ""}`}
-                style={{ padding: "4px 10px", fontSize: "11px" }}
-              >
-                Tier X (5 pts)
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPointClass("W")}
-                className={`${styles.filterChip} ${selectedPointClass === "W" ? styles.filterChipActive : ""}`}
-                style={{ padding: "4px 10px", fontSize: "11px" }}
-              >
-                Tier W (5 pts)
-              </button>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%", justifyContent: "space-between" }}>
               <span>
                 Showing <strong style={{ color: "var(--text-primary)" }}>{filteredSports.length}</strong> of {sports.length} disciplines
               </span>
@@ -408,104 +329,7 @@ export default function SportsDirectoryClient({
           </div>
         )}
 
-        {/* 4. CODEX SCORING MATRIX DECK */}
-        <section className={styles.codexSection}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <div className="kicker">Official Adjudication Architecture</div>
-              <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", margin: "8px 0 0", letterSpacing: "-0.04em", fontWeight: 900 }}>
-                Championship Point Matrix
-              </h2>
-            </div>
-            <p style={{ maxWidth: "480px", fontSize: "14px", color: "var(--hsu-muted)", margin: 0, lineHeight: 1.5 }}>
-              Every point allocated at ZENITHROW is mathematically derived through four canonical tiers. All verified results instantly compound into the House Championship leaderboard.
-            </p>
-          </div>
-
-          <div className={styles.codexGrid}>
-            <div className={styles.codexTierCard} style={{ borderColor: "rgba(229, 57, 53, 0.4)" }}>
-              <div>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierLetter} style={{ color: "var(--hsu-red2)" }}>Z</span>
-                  <span className={styles.pointBadge} style={{ background: "rgba(229, 57, 53, 0.2)", color: "#ff6d63" }}>
-                    General Heavyweight
-                  </span>
-                </div>
-                <div className={styles.tierTitle}>Major Team &amp; Power Events</div>
-                <div className={styles.tierPointsRow}>
-                  <span className={styles.tierPill}>1st: 10 pts</span>
-                  <span className={styles.tierPill}>2nd: 7 pts</span>
-                  <span className={styles.tierPill}>3rd: 5 pts</span>
-                </div>
-              </div>
-              <div className={styles.tierExamples}>
-                Football, Cricket, Volleyball, Arm Wrestling, Push-Up &amp; Pull-Up.
-              </div>
-            </div>
-
-            <div className={styles.codexTierCard} style={{ borderColor: "rgba(242, 184, 75, 0.4)" }}>
-              <div>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierLetter} style={{ color: "#f2b84b" }}>Y</span>
-                  <span className={styles.pointBadge} style={{ background: "rgba(242, 184, 75, 0.15)", color: "#f2b84b" }}>
-                    Prestige Team &amp; Show
-                  </span>
-                </div>
-                <div className={styles.tierTitle}>House Clashes &amp; Pageantry</div>
-                <div className={styles.tierPointsRow}>
-                  <span className={styles.tierPill}>1st: 7 pts</span>
-                  <span className={styles.tierPill}>2nd: 5 pts</span>
-                  <span className={styles.tierPill}>3rd: 3 pts</span>
-                </div>
-              </div>
-              <div className={styles.tierExamples}>
-                Tug of War (600kg), Penalty Shootout, March Past, Zenithrow Branding, Commentary.
-              </div>
-            </div>
-
-            <div className={styles.codexTierCard} style={{ borderColor: "rgba(91, 155, 213, 0.4)" }}>
-              <div>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierLetter} style={{ color: "#7bb4eb" }}>X</span>
-                  <span className={styles.pointBadge} style={{ background: "rgba(91, 155, 213, 0.15)", color: "#7bb4eb" }}>
-                    Group Athletic Games
-                  </span>
-                </div>
-                <div className={styles.tierTitle}>Relays &amp; Field Games</div>
-                <div className={styles.tierPointsRow}>
-                  <span className={styles.tierPill}>1st: 5 pts</span>
-                  <span className={styles.tierPill}>2nd: 3 pts</span>
-                  <span className={styles.tierPill}>3rd: 1 pt</span>
-                </div>
-              </div>
-              <div className={styles.tierExamples}>
-                Relays (4x50m, 4x100m, 4x200m), Kho-Kho, Dodge Ball, Badminton Doubles, Three-Legged Race.
-              </div>
-            </div>
-
-            <div className={styles.codexTierCard} style={{ borderColor: "rgba(255, 255, 255, 0.2)" }}>
-              <div>
-                <div className={styles.tierHeader}>
-                  <span className={styles.tierLetter}>W</span>
-                  <span className={styles.pointBadge} style={{ background: "rgba(255, 255, 255, 0.1)", color: "#ddd" }}>
-                    Individual Honours
-                  </span>
-                </div>
-                <div className={styles.tierTitle}>Track &amp; Field, Skill &amp; Mind</div>
-                <div className={styles.tierPointsRow}>
-                  <span className={styles.tierPill}>1st: 5 pts</span>
-                  <span className={styles.tierPill}>2nd: 3 pts</span>
-                  <span className={styles.tierPill}>3rd: 1 pt</span>
-                </div>
-              </div>
-              <div className={styles.tierExamples}>
-                100m Dash, Long Jump, High Jump, Shot Put, Javelin, Archery, Badminton Singles.
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. CALL TO ACTION BAND */}
+        {/* 4. CALL TO ACTION BAND */}
         <section className={styles.ctaBand}>
           <div className={styles.ctaText}>
             <h3>Ready for the whistle.</h3>

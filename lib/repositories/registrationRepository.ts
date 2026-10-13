@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { RegistrationStatus } from "@/lib/types";
 import { validateRosterQuota } from "@/lib/competition/quotaEngine";
 import {
@@ -288,7 +289,7 @@ export async function createRegistrationRecord(
   if (!input.participantId) return { success: false, error: "Participant ID is required." };
   if (!input.eventId) return { success: false, error: "Event ID is required." };
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Check if athlete already has any registration in this event
   const { data: existing, error: existErr } = await supabase
@@ -497,7 +498,7 @@ export async function updateRegistrationStatusRecord(
     return { success: false, error: `Invalid registration status: ${status}` };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // If activating to approved or submitted from an inactive status (withdrawn or rejected),
   // verify prospective roster quota and weight before activation.
@@ -630,7 +631,7 @@ export async function withdrawRegistrationRecord(
   registrationId: string,
   reason?: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { data: existing } = await supabase
     .from("registrations")

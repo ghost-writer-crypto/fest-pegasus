@@ -1,10 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
-import type { ResultStatus, ResultDisposition, Result } from "@/lib/types";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { ResultStatus, ResultDisposition, Result } from "../types";
 import {
   verifyResult,
   publishResult,
   unlockResultForCorrection,
-} from "@/lib/results/resultService";
+  correctResult,
+  reverifyResult,
+  republishResult,
+} from "../results/resultService";
+import { getSafeEventPoints } from "../competition";
 
 /**
  * Shape of a row in public.results as defined by migration 20260920000100.
@@ -515,7 +520,7 @@ export async function submitResultsBatch(
     return { success: true, count: 0 };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Fetch existing results to guard immutability
   const { data: existingRecords, error: fetchError } = await supabase
@@ -782,7 +787,7 @@ export async function verifyResultRecord(
     };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Fetch the target result
   const { data: current, error: fetchError } = await supabase
@@ -802,7 +807,10 @@ export async function verifyResultRecord(
 
   // 2. Enforce domain transition rules via resultService
   const domainModel = toDomainResult(currentRow);
-  const transition = verifyResult(domainModel, verifiedByName);
+  const transition =
+    currentRow.status === "corrected"
+      ? reverifyResult(domainModel, verifiedByName)
+      : verifyResult(domainModel, verifiedByName);
   if (!transition.success) {
     return {
       success: false,
@@ -885,7 +893,7 @@ export async function publishResultRecord(
     };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Fetch the target result
   const { data: current, error: fetchError } = await supabase
@@ -997,7 +1005,7 @@ export async function unlockResultForCorrectionRecord(
     };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // 1. Fetch current result
   const { data: current, error: fetchError } = await supabase
@@ -1079,6 +1087,308 @@ export async function unlockResultForCorrectionRecord(
     success: true,
     result: updated as ResultRow,
   };
+}
+
+export type CorrectResultInput = {
+  resultId: string;
+  actorUuid: string;
+  actorName: string;
+  reason: string;
+  rank?: number | null;
+  points?: number | null;
+  performance?: Record<string, unknown>;
+  disposition?: ResultDisposition;
+  targetStatus?: "corrected" | "verified" | "published";
+};
+
+/**
+ * Admin action to directly correct/amend an existing result.
+ * Enforces domain transitions, preserves audit history, and updates database.
+ */
+export async function correctResultRecord(
+  input: CorrectResultInput,
+): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    return {
+      success: false,
+      error: "Supabase database environment is not configured.",
+    };
+  }
+
+  const { resultId, actorUuid, actorName, reason, targetStatus = "corrected" } = input;
+
+  if (!reason || reason.trim() === "") {
+    return {
+      success: false,
+      error: "Correction reason is mandatory to edit/correct a result.",
+    };
+  }
+
+  const supabase = await createAdminClient();
+
+  // 1. Fetch current result
+  const { data: current, error: fetchError } = await supabase
+    .from("results")
+    .select(OPERATIONAL_RESULT_COLUMNS)
+    .eq("id", resultId)
+    .maybeSingle();
+
+  if (fetchError || !current) {
+    return {
+      success: false,
+      error: `Result not found: ${fetchError?.message || resultId}`,
+    };
+  }
+
+  const currentRow = current as ResultRow;
+
+  // 2. Determine updated rank, disposition, performance, and points
+  const updatedRank = input.rank !== undefined ? input.rank : currentRow.rank;
+  const updatedDisp: ResultDisposition = input.disposition !== undefined ? input.disposition : currentRow.disposition;
+  const updatedPerf = input.performance !== undefined ? input.performance : currentRow.performance;
+
+  let calculatedPoints = currentRow.points;
+  if (input.points !== undefined && input.points !== null) {
+    calculatedPoints = input.points;
+  } else if (updatedRank !== null && updatedRank !== undefined && updatedDisp === "normal") {
+    calculatedPoints = getSafeEventPoints(currentRow.event_id, updatedRank) ?? currentRow.points;
+  } else if (updatedDisp !== "normal") {
+    calculatedPoints = 0; // DNF, DNS, DQ yield 0 points
+  }
+
+  // 3. Domain transitions
+  let domainModel = toDomainResult(currentRow);
+  const nowTimestamp = new Date().toISOString();
+
+  if (currentRow.status === "published" || currentRow.status === "verified") {
+    const unlockRes = unlockResultForCorrection(domainModel, actorName, reason);
+    if (!unlockRes.success) {
+      return { success: false, error: unlockRes.error };
+    }
+    domainModel = unlockRes.result!;
+  }
+
+  const correctRes = correctResult(
+    domainModel,
+    {
+      position: updatedRank !== null ? updatedRank : undefined,
+      points: calculatedPoints,
+      performance: updatedPerf as Record<string, unknown>,
+      disposition: updatedDisp,
+    },
+    actorName,
+  );
+  if (!correctRes.success) {
+    return { success: false, error: correctRes.error };
+  }
+  domainModel = correctRes.result!;
+
+  let finalStatus: ResultStatus = "corrected";
+  let finalVerifiedBy: string | null = currentRow.verified_by ?? null;
+  let finalPublishedAt: string | null = null;
+
+  if (targetStatus === "verified" || targetStatus === "published") {
+    const reverifyRes = reverifyResult(domainModel, actorName);
+    if (!reverifyRes.success) {
+      return { success: false, error: reverifyRes.error };
+    }
+    domainModel = reverifyRes.result!;
+    finalStatus = "verified";
+    finalVerifiedBy = actorUuid;
+
+    if (targetStatus === "published") {
+      const republishRes = republishResult(domainModel, nowTimestamp);
+      if (!republishRes.success) {
+        return { success: false, error: republishRes.error };
+      }
+      domainModel = republishRes.result!;
+      finalStatus = "published";
+      finalPublishedAt = nowTimestamp;
+    }
+  }
+
+  // 4. Update database row
+  const updatePayload: Record<string, unknown> = {
+    rank: updatedRank,
+    points: calculatedPoints,
+    performance: updatedPerf,
+    disposition: updatedDisp,
+    status: finalStatus,
+    updated_at: nowTimestamp,
+  };
+  if (finalVerifiedBy) {
+    updatePayload.verified_by = finalVerifiedBy;
+  }
+  if (finalPublishedAt) {
+    updatePayload.published_at = finalPublishedAt;
+    updatePayload.is_official = true;
+  } else if (targetStatus === "corrected") {
+    updatePayload.published_at = null;
+    updatePayload.is_official = false;
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("results")
+    .update(updatePayload)
+    .eq("id", resultId)
+    .select(OPERATIONAL_RESULT_COLUMNS)
+    .single();
+
+  if (updateError) {
+    console.error("[resultRepository.correctResultRecord] Update error:", updateError);
+    return { success: false, error: `Failed to update result: ${updateError.message}` };
+  }
+
+  // 5. Audit log
+  await supabase.from("result_audit_entries").insert({
+    result_id: resultId,
+    actor_id: actorUuid,
+    action: targetStatus === "published" ? "correct_and_publish" : targetStatus === "verified" ? "correct_and_verify" : "correct_result",
+    reason: `Admin ${actorName} corrected result: ${reason.trim()}`,
+    before_state: {
+      status: currentRow.status,
+      rank: currentRow.rank,
+      points: currentRow.points,
+      performance: currentRow.performance,
+      disposition: currentRow.disposition,
+    },
+    after_state: {
+      status: finalStatus,
+      rank: updatedRank,
+      points: calculatedPoints,
+      performance: updatedPerf,
+      disposition: updatedDisp,
+      corrected_by: actorUuid,
+      reason: reason.trim(),
+    },
+  });
+
+  return { success: true, result: updated as ResultRow };
+}
+
+export type CreateAdminResultInput = {
+  festivalId: string;
+  eventId: string;
+  competitionId?: string | null;
+  fixtureId?: string | null;
+  participantId?: string | null;
+  teamId?: string | null;
+  rank?: number | null;
+  points?: number | null;
+  performance?: Record<string, unknown>;
+  disposition?: ResultDisposition;
+  status?: ResultStatus;
+  notes?: string;
+  actorUuid: string;
+  actorName: string;
+};
+
+/**
+ * Allows an administrator to directly record and save a competition result.
+ */
+export async function createAdminResultRecord(
+  input: CreateAdminResultInput,
+): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    return {
+      success: false,
+      error: "Supabase database environment is not configured.",
+    };
+  }
+
+  if (!input.eventId) {
+    return { success: false, error: "Event ID is required." };
+  }
+  if (!input.participantId && !input.teamId) {
+    return { success: false, error: "Either a participant or a team must be selected." };
+  }
+
+  const supabase = await createAdminClient();
+
+  // Auto-resolve team_id if omitted
+  let resolvedTeamId = input.teamId || null;
+  if (!resolvedTeamId && input.participantId) {
+    const { data: part } = await supabase
+      .from("participants")
+      .select("team_id")
+      .eq("id", input.participantId)
+      .maybeSingle();
+    if (part?.team_id) {
+      resolvedTeamId = part.team_id;
+    }
+  }
+
+  const rank = input.rank ?? null;
+  const disp: ResultDisposition = input.disposition ?? "normal";
+  let points = 0;
+  if (input.points !== undefined && input.points !== null) {
+    points = input.points;
+  } else if (rank && disp === "normal") {
+    points = getSafeEventPoints(input.eventId, rank) ?? 0;
+  }
+
+  const status: ResultStatus = input.status ?? "submitted";
+  const nowTimestamp = new Date().toISOString();
+
+  const insertPayload: Record<string, unknown> = {
+    festival_id: input.festivalId,
+    event_id: input.eventId,
+    competition_id: input.competitionId || null,
+    fixture_id: input.fixtureId || null,
+    participant_id: input.participantId || null,
+    team_id: resolvedTeamId,
+    rank,
+    points,
+    performance: input.performance || {},
+    disposition: disp,
+    status,
+    is_official: status === "published",
+    created_at: nowTimestamp,
+    updated_at: nowTimestamp,
+    submitted_by: input.actorUuid,
+  };
+
+  if (status === "verified" || status === "published") {
+    insertPayload.verified_by = input.actorUuid;
+  }
+  if (status === "published") {
+    insertPayload.published_at = nowTimestamp;
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("results")
+    .insert(insertPayload)
+    .select(OPERATIONAL_RESULT_COLUMNS)
+    .single();
+
+  if (insertError) {
+    console.error("[resultRepository.createAdminResultRecord] Insert error:", insertError);
+    return { success: false, error: `Failed to create result: ${insertError.message}` };
+  }
+
+  // Audit log
+  await supabase.from("result_audit_entries").insert({
+    result_id: (inserted as ResultRow).id,
+    actor_id: input.actorUuid,
+    action: "admin_create_result",
+    reason: input.notes ? `Admin result created: ${input.notes.trim()}` : "Direct result recorded by Admin",
+    before_state: null,
+    after_state: {
+      status,
+      rank,
+      points,
+      created_by: input.actorUuid,
+      actor_name: input.actorName,
+    },
+  });
+
+  return { success: true, result: inserted as ResultRow };
 }
 
 /**

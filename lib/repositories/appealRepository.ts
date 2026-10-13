@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   AppealRow,
   AdminAppealRow,
@@ -268,63 +269,39 @@ export async function createAppealRecord(
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 
-  let targetResult: {
-    id: string;
-    status: string;
-    publishedAt: string | null;
-    teamId?: string | null;
-    participantId?: string | null;
-  } | null = null;
-
-  let existingAppealsForCheck: Array<{
-    result_id: string | null;
-    team_id: string;
-    status: any;
-  }> = [];
-
-  if (hasDb) {
-    const supabase = await createClient();
-
-    // 1. Fetch target authoritative result
-    const { data: resRow, error: resErr } = await supabase
-      .from("results")
-      .select("id, status, published_at, team_id, participant_id")
-      .eq("id", input.resultId)
-      .maybeSingle();
-
-    if (resErr || !resRow) {
-      return { success: false, error: "Authoritative result record not found." };
-    }
-
-    targetResult = {
-      id: resRow.id,
-      status: resRow.status,
-      publishedAt: resRow.published_at,
-      teamId: resRow.team_id,
-      participantId: resRow.participant_id,
-    };
-
-    // 2. Fetch existing appeals for duplicate prevention
-    const { data: existApps } = await supabase
-      .from("appeals")
-      .select("result_id, team_id, status")
-      .eq("result_id", input.resultId)
-      .eq("team_id", input.teamId);
-
-    existingAppealsForCheck = existApps ?? [];
-  } else {
-    // In-memory fallback
-    targetResult = {
-      id: input.resultId,
-      status: "published",
-      publishedAt: new Date().toISOString(),
-      teamId: input.teamId,
-      participantId: input.participantId,
-    };
-    existingAppealsForCheck = (inMemoryAppeals as any[]).filter(
-      (a) => a.result_id === input.resultId && a.team_id === input.teamId,
-    );
+  if (!hasDb) {
+    return { success: false, error: "Database configuration is missing." };
   }
+
+  const supabase = createAdminClient();
+
+  // 1. Fetch target authoritative result
+  const { data: resRow, error: resErr } = await supabase
+    .from("results")
+    .select("id, status, published_at, team_id, participant_id")
+    .eq("id", input.resultId)
+    .maybeSingle();
+
+  if (resErr || !resRow) {
+    return { success: false, error: "Authoritative result record not found." };
+  }
+
+  const targetResult = {
+    id: resRow.id,
+    status: resRow.status,
+    publishedAt: resRow.published_at,
+    teamId: resRow.team_id,
+    participantId: resRow.participant_id,
+  };
+
+  // 2. Fetch existing appeals for duplicate prevention
+  const { data: existApps } = await supabase
+    .from("appeals")
+    .select("result_id, team_id, status")
+    .eq("result_id", input.resultId)
+    .eq("team_id", input.teamId);
+
+  const existingAppealsForCheck = existApps ?? [];
 
   // 3. Domain Validation (Window, Permissions, Role, Duplicates)
   const validation = validateAppealSubmission({
@@ -368,23 +345,6 @@ export async function createAppealRecord(
     metadata: input.metadata ?? {},
   };
 
-  if (!hasDb) {
-    const memoryRow: AppealRow = {
-      id: `appeal-${Date.now()}`,
-      ...insertPayload,
-      reviewed_by: null,
-      reviewer_name: null,
-      reviewed_at: null,
-      decision_notes: null,
-      corrected_result_payload: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    (inMemoryAppeals as any[]).push(memoryRow);
-    return { success: true, data: memoryRow };
-  }
-
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from("appeals")
     .insert(insertPayload)
@@ -419,28 +379,21 @@ export async function reviewAppealRecord(
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 
-  let appeal: AppealRow | null = null;
-  let supabase: any = null;
-
-  if (hasDb) {
-    supabase = await createClient();
-    const { data: appRow, error: appErr } = await supabase
-      .from("appeals")
-      .select("*")
-      .eq("id", input.appealId)
-      .maybeSingle();
-
-    if (appErr || !appRow) {
-      return { success: false, error: "Appeal record not found." };
-    }
-    appeal = appRow as AppealRow;
-  } else {
-    appeal =
-      (inMemoryAppeals as any[]).find((a) => a.id === input.appealId) ?? null;
-    if (!appeal) {
-      return { success: false, error: "Appeal record not found." };
-    }
+  if (!hasDb) {
+    return { success: false, error: "Database configuration is missing." };
   }
+
+  const supabase = createAdminClient();
+  const { data: appRow, error: appErr } = await supabase
+    .from("appeals")
+    .select("*")
+    .eq("id", input.appealId)
+    .maybeSingle();
+
+  if (appErr || !appRow) {
+    return { success: false, error: "Appeal record not found." };
+  }
+  const appeal = appRow as AppealRow;
 
   // 1. Domain validation on decision and lifecycle state machine
   const decisionValidation = validateAppealDecision({
@@ -463,71 +416,69 @@ export async function reviewAppealRecord(
     input.correctedResult &&
     appeal.result_id
   ) {
-    if (hasDb) {
-      // Fetch authoritative result
-      const { data: currentRes, error: resErr } = await supabase
-        .from("results")
-        .select("*")
-        .eq("id", appeal.result_id)
-        .maybeSingle();
+    // Fetch authoritative result
+    const { data: currentRes, error: resErr } = await supabase
+      .from("results")
+      .select("*")
+      .eq("id", appeal.result_id)
+      .maybeSingle();
 
-      if (resErr || !currentRes) {
-        return {
-          success: false,
-          error: `Authoritative result '${appeal.result_id}' could not be located to apply appeal correction.`,
-        };
-      }
-
-      const beforeState = {
-        rank: currentRes.rank,
-        points: currentRes.points,
-        performance: currentRes.performance,
-        disposition: currentRes.disposition,
-        status: currentRes.status,
+    if (resErr || !currentRes) {
+      return {
+        success: false,
+        error: `Authoritative result '${appeal.result_id}' could not be located to apply appeal correction.`,
       };
-
-      const updateFields: Record<string, unknown> = {
-        status: "published",
-        is_official: true,
-        updated_at: timestamp,
-      };
-
-      if (input.correctedResult.rank !== undefined) {
-        updateFields.rank = input.correctedResult.rank;
-      }
-      if (input.correctedResult.points !== undefined) {
-        updateFields.points = input.correctedResult.points;
-      }
-      if (input.correctedResult.performance !== undefined) {
-        updateFields.performance = input.correctedResult.performance;
-      }
-      if (input.correctedResult.disposition !== undefined) {
-        updateFields.disposition = input.correctedResult.disposition;
-      }
-
-      // Update authoritative result
-      const { error: resUpdateErr } = await supabase
-        .from("results")
-        .update(updateFields)
-        .eq("id", appeal.result_id);
-
-      if (resUpdateErr) {
-        return {
-          success: false,
-          error: `Failed to update authoritative result from appeal decision: ${resUpdateErr.message}`,
-        };
-      }
-
-      // Log decision audit entry into public.result_audit_entries
-      await supabase.from("result_audit_entries").insert({
-        result_id: appeal.result_id,
-        actor_id: reviewer.userId,
-        action: `appeal_${input.status}`,
-        reason: `Appeal ${appeal.id} decided (${input.status}) by ${reviewer.fullName}: ${input.decisionNotes.trim()}`,
-        before_state: beforeState,
-        after_state: updateFields,
-      });
     }
+
+    const beforeState = {
+      rank: currentRes.rank,
+      points: currentRes.points,
+      performance: currentRes.performance,
+      disposition: currentRes.disposition,
+      status: currentRes.status,
+    };
+
+    const updateFields: Record<string, unknown> = {
+      status: "published",
+      is_official: true,
+      updated_at: timestamp,
+    };
+
+    if (input.correctedResult.rank !== undefined) {
+      updateFields.rank = input.correctedResult.rank;
+    }
+    if (input.correctedResult.points !== undefined) {
+      updateFields.points = input.correctedResult.points;
+    }
+    if (input.correctedResult.performance !== undefined) {
+      updateFields.performance = input.correctedResult.performance;
+    }
+    if (input.correctedResult.disposition !== undefined) {
+      updateFields.disposition = input.correctedResult.disposition;
+    }
+
+    // Update authoritative result
+    const { error: resUpdateErr } = await supabase
+      .from("results")
+      .update(updateFields)
+      .eq("id", appeal.result_id);
+
+    if (resUpdateErr) {
+      return {
+        success: false,
+        error: `Failed to update authoritative result from appeal decision: ${resUpdateErr.message}`,
+      };
+    }
+
+    // Log decision audit entry into public.result_audit_entries
+    await supabase.from("result_audit_entries").insert({
+      result_id: appeal.result_id,
+      actor_id: reviewer.userId,
+      action: `appeal_${input.status}`,
+      reason: `Appeal ${appeal.id} decided (${input.status}) by ${reviewer.fullName}: ${input.decisionNotes.trim()}`,
+      before_state: beforeState,
+      after_state: updateFields,
+    });
   }
 
   // 3. Update Appeal Status & Decision
@@ -541,11 +492,6 @@ export async function reviewAppealRecord(
     corrected_result_payload: (input.correctedResult as any) ?? null,
     updated_at: timestamp,
   };
-
-  if (!hasDb) {
-    Object.assign(appeal, updatePayload);
-    return { success: true, data: appeal };
-  }
 
   const { data: updatedAppeal, error: appUpdateErr } = await supabase
     .from("appeals")

@@ -50,7 +50,6 @@ export default function RootLayout({
           <Navbar />
           {children}
           {/* Floating Circular Bottom-Center View Transition Theme Toggle */}
-          <ThemeToggle floating variant="circle" showVariantSelector={true} />
         </ThemeProvider>
       </body>
     </html>

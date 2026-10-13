@@ -7,7 +7,7 @@ import {
   submitJudgeScoreSheet,
 } from "@/lib/judging";
 import {
-  getProfileById,
+  getAuthenticatedProfile,
   isJudgeAssignedToEventInDb,
 } from "@/lib/repositories";
 import type { ScoreSheetEntry } from "@/lib/results";
@@ -50,32 +50,9 @@ type VerifiedJudgeSession = {
 async function resolveServerVerifiedSession(
   clientStationLabel?: string,
 ): Promise<VerifiedJudgeSession> {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  ) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "Production Security Violation: Supabase credentials are missing. Production mutations fail closed.",
-      );
-    }
-    // Unconfigured development environment (e.g. local build/dev without Supabase credentials)
-    return {
-      isAuthenticated: false,
-      userId: null,
-      judgeName: clientStationLabel?.trim() || "TRANSITIONAL NON-PRODUCTION DESK",
-      role: "transitional_guest",
-      isTransitional: true,
-    };
-  }
+  const profile = await getAuthenticatedProfile();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  if (!profile) {
     // Non-production transitional mode: allow operational desk testing only in development
     if (process.env.NODE_ENV === "production") {
       throw new Error(
@@ -94,14 +71,6 @@ async function resolveServerVerifiedSession(
     };
   }
 
-  // Cryptographically verified user: resolve profile and role from database
-  const profile = await getProfileById(user.id);
-  if (!profile || !profile.is_active) {
-    throw new Error(
-      "Authorization Security Violation: Official user profile is inactive or not found.",
-    );
-  }
-
   if (profile.role !== "judge" && profile.role !== "admin") {
     throw new Error(
       `Security Boundary Violation: User role '${profile.role}' is not authorized to officiate or record scores.`,
@@ -110,9 +79,9 @@ async function resolveServerVerifiedSession(
 
   return {
     isAuthenticated: true,
-    userId: user.id,
-    judgeName: profile.full_name || user.email || "Official Referee",
-    role: profile.role,
+    userId: profile.userId,
+    judgeName: profile.fullName || "Official Referee",
+    role: profile.role as "judge" | "admin",
     isTransitional: false,
   };
 }

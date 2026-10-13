@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   CompetitionFormat,
   CompetitionStatus,
@@ -193,6 +194,7 @@ export async function createCompetitionRecord(
   actorId: string,
 ): Promise<{ success: boolean; data?: CompetitionRow; error?: string }> {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
   if (!input.festivalId?.trim()) {
     return {
@@ -262,8 +264,8 @@ export async function createCompetitionRecord(
     }
   }
 
-  // 3. Insert competition
-  const { data: newComp, error: insertError } = await supabase
+  // 3. Insert competition using privileged client
+  const { data: newComp, error: insertError } = await adminSupabase
     .from("competitions")
     .insert({
       festival_id: input.festivalId.trim(),
@@ -294,8 +296,8 @@ export async function createCompetitionRecord(
     };
   }
 
-  // 4. Log change audit
-  await supabase.from("competition_change_entries").insert({
+  // 4. Log change audit using privileged client
+  const { error: auditError } = await adminSupabase.from("competition_change_entries").insert({
     competition_id: newComp.id,
     actor_id: actorId,
     action: "competition_created",
@@ -303,6 +305,10 @@ export async function createCompetitionRecord(
     before_state: null,
     after_state: newComp,
   });
+
+  if (auditError) {
+    console.error("[competitionRepository.createCompetitionRecord] Audit log insert error:", auditError);
+  }
 
   return {
     success: true,

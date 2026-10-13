@@ -118,6 +118,20 @@
   }
 }
 
+@media (max-width: 440px) {
+  .standingRow {
+    grid-template-columns: 44px 1fr auto;
+    padding: 14px 10px;
+    gap: 10px;
+  }
+  .telemetryGrid {
+    grid-template-columns: 1fr;
+  }
+  .podiumCard {
+    padding: 18px 14px;
+  }
+}
+
 /* Point Matrix Explainer */
 .matrixGrid {
   display: grid;

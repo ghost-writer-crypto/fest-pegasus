@@ -139,6 +139,7 @@ export default function HsuHeroSlider() {
       aria-label="Featured Festival Highlights"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      style={{ minHeight: "100svh" }}
     >
       {/* Positioned Background Image Layer (inset: 0, lower z-index) */}
       <div className="hero-bg" aria-hidden="true">
@@ -160,7 +161,7 @@ export default function HsuHeroSlider() {
               alt={`${slide.titlePrimary} ${slide.titleSecondary}`}
               fill
               priority={idx === 0}
-              sizes="(max-width: 768px) 100vw, 100vw"
+              sizes="100vw"
               className="hero-image"
             />
           </div>

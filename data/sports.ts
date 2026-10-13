@@ -120,10 +120,10 @@ export const sports: Sport[] = [
   },
   {
     id: "traditional-games",
-    name: "Campus & Traditional",
+    name: "Games",
     slug: "traditional-games",
     type: "individual",
-    category: "Campus Traditions",
+    category: "Games",
     description: "Slow cycle balance, sack race, three-legged sprints, uriyadi and high-spirit campus challenges.",
     venueId: "festival-grounds",
     venueName: "Festival Quad Grounds",

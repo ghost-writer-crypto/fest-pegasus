@@ -43,7 +43,7 @@ export async function getTeamsByFestival(
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ) {
-    return FALLBACK_TEAMS.map((t) => ({ ...t, festival_id: festivalId }));
+    return [];
   }
 
   try {
@@ -61,15 +61,13 @@ export async function getTeamsByFestival(
         `[teamRepository.getTeamsByFestival] Failed to retrieve teams for festival ${festivalId}:`,
         error,
       );
-      return FALLBACK_TEAMS.map((t) => ({ ...t, festival_id: festivalId }));
+      throw new Error(`Failed to retrieve teams: ${error.message} (${error.code})`);
     }
 
-    return (data as TeamRow[]) && (data as TeamRow[]).length > 0
-      ? (data as TeamRow[])
-      : FALLBACK_TEAMS.map((t) => ({ ...t, festival_id: festivalId }));
+    return (data as TeamRow[]) ?? [];
   } catch (err) {
-    console.warn(`[teamRepository.getTeamsByFestival] Unexpected error, returning fallback teams:`, err);
-    return FALLBACK_TEAMS.map((t) => ({ ...t, festival_id: festivalId }));
+    console.error(`[teamRepository.getTeamsByFestival] Error retrieving teams:`, err);
+    throw err;
   }
 }
 
