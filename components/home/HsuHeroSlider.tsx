@@ -21,8 +21,8 @@ const DEFAULT_HERO_SLIDES: SlideData[] = [
     kicker: "ZENITHROW 2026",
     titlePrimary: "THE",
     titleSecondary: "ARENA.",
-    lead: "The official Hamdan Annual Sports Carnival 2k26 arena — 4 Teams, 100+ programmes, and 250+ student athletes competing in constant motion.",
-    image: "/images/hero/zenithrow-arena-aerial.png",
+    lead: "The official Hamdan Annual Sports Carnival 2k26 arena — 4 Championship Houses competing across 59 scheduled programmes in constant motion.",
+    image: "/images/hero/zenithrow-arena-aerial.jpg",
     ctaText: "Explore the arena →",
     ctaLink: "/sports",
   },
@@ -32,7 +32,7 @@ const DEFAULT_HERO_SLIDES: SlideData[] = [
     titlePrimary: "LOGO",
     titleSecondary: "UNVEILED.",
     lead: "The official emblem for ZENITHROW 2026 ceremonially unveiled by Kerala Sports Minister Adv. O. J. Janeesh with Hamdan Students Union leadership.",
-    image: "/images/hero/zenithrow-logo-unveiled.png",
+    image: "/images/hero/zenithrow-logo-unveiled.jpg",
     ctaText: "Championship Standings →",
     ctaLink: "/leaderboard",
   },
@@ -62,13 +62,13 @@ export default function HsuHeroSlider() {
                 s.image.includes("campus-aerial") ||
                 s.image.includes("track-stadium")
               ) {
-                return { ...s, image: "/images/hero/zenithrow-arena-aerial.png" };
+                return { ...s, image: "/images/hero/zenithrow-arena-aerial.jpg" };
               }
               if (
                 s.image.includes("football-arena") ||
                 s.image.includes("championship-trophy")
               ) {
-                return { ...s, image: "/images/hero/zenithrow-logo-unveiled.png" };
+                return { ...s, image: "/images/hero/zenithrow-logo-unveiled.jpg" };
               }
               return s;
             });
@@ -186,8 +186,8 @@ export default function HsuHeroSlider() {
           <Link href={activeSlide.ctaLink || "/sports"} className="btn primary">
             {activeSlide.ctaText || "Explore the arena →"}
           </Link>
-          <Link href="/live" className="btn ghost">
-            Watch live
+          <Link href="/schedules" className="btn ghost">
+            View schedule
           </Link>
         </div>
 

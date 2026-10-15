@@ -20,7 +20,13 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminResultsPage() {
+export default async function AdminResultsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ event?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const initialEventId = resolvedSearchParams?.event || "";
   let results: ResultRow[] = [];
   let events: EventRow[] = [];
   let participants: ParticipantRow[] = [];
@@ -64,6 +70,7 @@ export default async function AdminResultsPage() {
         teams={teams}
         competitions={competitions}
         festivalId={festivalId}
+        initialEventId={initialEventId}
       />
     </main>
   );

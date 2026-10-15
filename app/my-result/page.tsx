@@ -20,9 +20,7 @@ import { CODEX_DIVISIONS } from "@/lib/competition/divisions";
 import { formatPerformance } from "@/lib/results/resultStatus";
 import type { Performance } from "@/lib/types";
 import { leaderboard } from "@/data/leaderboard";
-import { participants as staticParticipants } from "@/data/participants";
 import { events as staticEvents } from "@/data/events";
-import { results as staticResults } from "@/data/results";
 import AchievementPosterModal from "@/components/achievements/AchievementPosterModal";
 import AthleteAccreditationBadge, {
   type HouseTheme,
@@ -42,6 +40,7 @@ import {
   Sparkles,
   Search,
   ShieldCheck,
+  Calendar,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -222,37 +221,7 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
           publishedResults = [];
         }
 
-        if (publishedResults.length === 0) {
-          const fallbackMatches = staticResults.filter(
-            (r) =>
-              r.participantId === participant?.id ||
-              r.participantId === participant?.public_id ||
-              r.participantId === participant?.chest_number
-          );
 
-          if (fallbackMatches.length > 0) {
-            publishedResults = fallbackMatches.map((r) => ({
-              id: r.id,
-              festival_id: "fest-2026",
-              event_id: r.eventId,
-              competition_id: r.competitionId || null,
-              fixture_id: r.fixtureId || null,
-              participant_id: r.participantId || null,
-              team_id: r.teamId || null,
-              rank: r.position || null,
-              points: Number(r.points || 0),
-              performance: (typeof r.performance === "string"
-                ? { raw: r.performance, mark: r.performance }
-                : (r.performance ?? {})) as Record<string, unknown>,
-              disposition: r.disposition || "normal",
-              status: "published",
-              is_official: true,
-              published_at: r.publishedAt || "2026-09-18T16:00:00Z",
-              created_at: r.createdAt || "2026-09-18T15:30:00Z",
-              updated_at: r.updatedAt || "2026-09-18T16:00:00Z",
-            }));
-          }
-        }
 
         // Fetch festival schedules for enrolled events
         try {
@@ -375,18 +344,12 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
     };
   });
 
-  // Enrolled events (excluding any basketball or chess strictly)
-  const staticMatch = staticParticipants.find(
-    (p) =>
-      p.id === participant?.id ||
-      p.publicId === participant?.public_id ||
-      p.chestNumber === participant?.chest_number
-  );
+  // Enrolled events (resolved from official participant registration record)
   const participantWithEvents = participant as
     | (ParticipantRow & { registeredEventIds?: string[] })
     | null;
   const registeredEventIds: string[] =
-    participantWithEvents?.registeredEventIds || staticMatch?.eventIds || [];
+    participantWithEvents?.registeredEventIds || [];
 
   type EnrolledEventItem = {
     id: string;
@@ -873,8 +836,7 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
             <p className={styles.emptyStateText}>
               We couldn&apos;t locate any registered athlete matching &ldquo;
               <strong>{trimmedQuery}</strong>&rdquo;. Please verify your assigned
-              chest number (e.g. <strong>1001</strong>, <strong>1002</strong>) or
-              official public accreditation code.
+              chest number or official public accreditation code.
             </p>
 
             <div className={styles.emptyStateActions}>
@@ -906,9 +868,9 @@ export default async function MyResultPage({ searchParams }: MyResultPageProps) 
             </p>
 
             <div className={styles.emptyStateActions}>
-              <Link href="/my-result?q=1001" className={styles.primaryAction}>
-                <Trophy size={14} />
-                <span>Demo Pass • #1001 (Gold Medalist)</span>
+              <Link href="/schedules" className={styles.primaryAction}>
+                <Calendar size={14} />
+                <span>Explore Official Timetable →</span>
               </Link>
               <Link href="/leaderboard" className={styles.secondaryAction}>
                 <span>View Championship Shield →</span>

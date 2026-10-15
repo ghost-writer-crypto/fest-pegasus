@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "../supabase/server.ts";
 
 /**
  * Shape of a row in public.festivals matching migration 20260920000100.
@@ -33,7 +33,8 @@ const FESTIVAL_COLUMNS =
 export async function getActiveFestival(): Promise<FestivalRow | null> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return null;
   }

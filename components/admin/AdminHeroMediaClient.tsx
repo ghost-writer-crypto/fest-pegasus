@@ -19,7 +19,7 @@ const INITIAL_SLIDES: HeroMediaSlide[] = [
     id: "slide-campus",
     tag: "SLIDE 01",
     title: "Campus Arena Complex (Aerial)",
-    image: "/images/hero/zenithrow-arena-aerial.png",
+    image: "/images/hero/zenithrow-arena-aerial.jpg",
     aspectRatio: "2.19:1",
     resolution: "2560 × 1170",
     status: "active",
@@ -28,7 +28,7 @@ const INITIAL_SLIDES: HeroMediaSlide[] = [
     id: "slide-turf",
     tag: "SLIDE 02",
     title: "Official Logo Unveiled by Sports Minister",
-    image: "/images/hero/zenithrow-logo-unveiled.png",
+    image: "/images/hero/zenithrow-logo-unveiled.jpg",
     aspectRatio: "2.19:1",
     resolution: "2560 × 1170",
     status: "active",
@@ -56,11 +56,11 @@ const INITIAL_SLIDES: HeroMediaSlide[] = [
 const PRESET_REAL_PHOTOS = [
   {
     name: "Campus Arena Aerial (Turf Banner)",
-    url: "/images/hero/zenithrow-arena-aerial.png",
+    url: "/images/hero/zenithrow-arena-aerial.jpg",
   },
   {
     name: "Minister Logo Unveiling Launch",
-    url: "/images/hero/zenithrow-logo-unveiled.png",
+    url: "/images/hero/zenithrow-logo-unveiled.jpg",
   },
   {
     name: "Arena Turf Under Lights",

@@ -2,11 +2,6 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/guards";
 import { notFound } from "next/navigation";
 import { events as staticEvents } from "@/data/events";
-import { participants as staticParticipants } from "@/data/participants";
-import { teams as staticTeams } from "@/data/teams";
-import { fixtures as staticFixtures } from "@/data/fixtures";
-import { venues as staticVenues } from "@/data/venues";
-import { results as staticResults } from "@/data/results";
 import {
   judgeAssignments,
   isJudgeAssignedToEvent,
@@ -98,10 +93,13 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
   const pointClass = dbEvent?.point_class || resolved?.classification || null;
 
   // Determine event type
-  const isTeam = staticEvent
-    ? staticEvent.type === "team"
-    : dbEvent?.competition_type === "knockout" ||
-      dbEvent?.competition_type === "match";
+  const isTeam =
+    staticEvent?.type === "team" ||
+    dbEvent?.competition_type === "knockout" ||
+    dbEvent?.competition_type === "match" ||
+    dbEvent?.scoring_engine === "standard_match" ||
+    dbEvent?.scoring_engine === "tug_of_war" ||
+    dbEvent?.scoring_engine === "bracket_points";
   const eventType: "individual" | "team" = isTeam ? "team" : "individual";
 
   // 1. Resolve server-side authenticated identity
@@ -153,34 +151,9 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
         existingStatus: existingResult?.status as ResultStatus,
       };
     });
-  } else if (staticEvent && staticEvent.type === "individual") {
-    const eventStaticParticipants = staticParticipants.filter((p) =>
-      p.eventIds.includes(staticEvent.id),
-    );
-
-    competitors = eventStaticParticipants.map((p, idx) => {
-      const team = staticTeams.find((t) => t.id === p.teamId);
-      const existingResult = staticResults.find(
-        (r) => r.participantId === p.id && r.eventId === staticEvent.id,
-      );
-
-      return {
-        id: p.id,
-        name: p.name,
-        chestNumber: String(p.chestNumber),
-        teamName: team?.name ?? "Independent",
-        teamId: p.teamId,
-        category: p.category,
-        existingResultId: existingResult?.id,
-        existingRank: existingResult?.position ?? idx + 1,
-        existingPerformance: formatPerformance(existingResult?.performance),
-        existingDisposition: (existingResult?.disposition as ResultDisposition) || "normal",
-        existingStatus: (existingResult?.status as ResultStatus) || "draft",
-      };
-    });
   }
 
-  // Build fixture items for team events
+  // Build fixture items for team events from official database
   let fixtures: FixtureItem[] = [];
   if (dbFixtures.length > 0) {
     fixtures = dbFixtures.map((f) => {
@@ -216,33 +189,6 @@ export default async function JudgeEventPage({ params }: JudgeEventPageProps) {
         existingResultId: fallbackResult?.id,
         existingStatus: (homeResult?.status || awayResult?.status || fallbackResult?.status || "draft") as ResultStatus,
       };
-    });
-  } else if (staticEvent && staticEvent.type === "team") {
-    const eventStaticFixtures = staticFixtures.filter(
-      (f) => f.eventId === staticEvent.id,
-    );
-
-    fixtures = eventStaticFixtures.map((f) => {
-      const teamA = staticTeams.find((t) => t.id === f.teamAId);
-      const teamB = staticTeams.find((t) => t.id === f.teamBId);
-      const venue = staticVenues.find((v) => v.id === f.venueId);
-
-      return {
-        id: f.id,
-        homeTeamId: f.teamAId ?? undefined,
-        awayTeamId: f.teamBId ?? undefined,
-        homeTeamName: teamA?.name ?? "Team A",
-        awayTeamName: teamB?.name ?? "Team B",
-        homeTeamCode: teamA?.code ?? "TMA",
-        awayTeamCode: teamB?.code ?? "TMB",
-        venueName: venue?.name,
-        round: f.round !== undefined ? String(f.round) : "Match",
-        status: f.status,
-        scoreHome: f.teamAScore !== undefined ? f.teamAScore : null,
-        scoreAway: f.teamBScore !== undefined ? f.teamBScore : null,
-        existingStatus: "draft" as ResultStatus,
-      };
-
     });
   }
 

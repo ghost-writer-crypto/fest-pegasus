@@ -13,34 +13,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
+  const theme: Theme = "dark";
 
   useEffect(() => {
-    // 1. Read stored preference or system preference
-    const storedTheme = localStorage.getItem("zenithrow_theme") as Theme | null;
-    if (storedTheme === "light" || storedTheme === "dark") {
-      setThemeState(storedTheme);
-      document.documentElement.setAttribute("data-theme", storedTheme);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initialTheme = prefersDark ? "dark" : "light";
-      setThemeState(initialTheme);
-      document.documentElement.setAttribute("data-theme", initialTheme);
-    }
-    setMounted(true);
+    document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    localStorage.setItem("zenithrow_theme", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-  };
-
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-  };
+  const setTheme = () => {};
+  const toggleTheme = () => {};
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>

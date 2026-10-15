@@ -3,45 +3,45 @@
 
 :root {
   /* =========================================
-     ZENITHROW COLOUR SYSTEM — LIGHT MODE (DEFAULT)
-     Primary Accent: Red #E53935 (Signal / Live / Action)
+     ZENITHROW COLOUR SYSTEM — UNIFIED DARK THEME
+     Primary Accent: Red #E53935 (Signal / Action)
      Secondary Accent: Blue #2563EB (Information / Navigation)
-     Foundation: White #FFFFFF / Cool Near-White #F8FAFC
-     Graphite Typography: #0F172A / Slate #334155
+     Foundation: Pitch Black #070707 / Obsidian #0E1013
+     Typography: #F8FAFC / Slate #94A3B8
   ========================================= */
 
   /* ZENITH EDGE Surface Levels */
-  --surface-0: #F8FAFC;
-  --surface-1: #FFFFFF;
-  --surface-2: #F1F5F9;
-  --surface-3: #E2E8F0;
-  --surface-4: #FFFFFF;
+  --surface-0: #070707;
+  --surface-1: #0E1013;
+  --surface-2: #15181C;
+  --surface-3: #1E2228;
+  --surface-4: #131518;
 
-  --background: #F8FAFC;
-  --surface: #FFFFFF;
-  --surface-raised: #F1F5F9;
-  --surface-sunken: #E2E8F0;
-  --surface-subtle: rgba(15, 23, 42, 0.03);
+  --background: #070707;
+  --surface: #0E1013;
+  --surface-raised: #15181C;
+  --surface-sunken: #070707;
+  --surface-subtle: rgba(255, 255, 255, 0.03);
 
   /* 1px Precision Lines */
-  --border: #E2E8F0;
-  --border-subtle: rgba(15, 23, 42, 0.06);
-  --border-hover: #CBD5E1;
-  --border-strong: #0F172A;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --border-strong: rgba(255, 255, 255, 0.28);
 
-  --text-primary: #0F172A;
-  --text-body: #334155;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
-  --text-inverse: #FFFFFF;
+  --text-primary: #F8FAFC;
+  --text-body: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverse: #070707;
 
-  --foreground: #0F172A;
-  --muted: #64748B;
-  --muted-strong: #334155;
+  --foreground: #F8FAFC;
+  --muted: #94A3B8;
+  --muted-strong: #E2E8F0;
 
   /* Accent & Signal Tokens */
   --primary: #E53935;
-  --primary-hover: #DC2626;
+  --primary-hover: #FF5252;
   --secondary: #2563EB;
   --secondary-hover: #1D4ED8;
   --accent: #E53935;
@@ -102,28 +102,28 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
   --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
 
-  /* Apple Frosted Glass Material & Surfaces — Light Mode */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-subtle: rgba(255, 255, 255, 0.48);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-border-subtle: rgba(0, 0, 0, 0.05);
-  --glass-border-highlight: rgba(255, 255, 255, 0.95);
+  /* Apple Frosted Glass Material & Surfaces — Dark visionOS Mode */
+  --glass-bg: rgba(18, 18, 22, 0.72);
+  --glass-bg-subtle: rgba(12, 12, 16, 0.52);
+  --glass-bg-elevated: rgba(24, 24, 30, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-subtle: rgba(255, 255, 255, 0.05);
+  --glass-border-highlight: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(20px) saturate(180%);
   --glass-blur-heavy: blur(20px) saturate(180%);
-  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --glass-shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
-  --glass-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.08);
-  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --glass-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.55);
+  --glass-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
+  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 
-  /* Soft Layered Shadows (Low opacity, large blur, no harsh drop shadows) */
-  --zenith-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --zenith-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-  --zenith-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+  /* Soft Layered Shadows */
+  --zenith-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --zenith-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --zenith-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.06);
-  --shadow-elevation: 0 16px 40px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-elevation: 0 16px 40px rgba(0, 0, 0, 0.5);
 
   /* Motion Tokens (Smooth 200-300ms ease-out / spring-like curves) */
   --motion-instant: 120ms;
@@ -133,7 +133,7 @@
   --ease-out-editorial: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-press: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 /* =========================================
@@ -5627,6 +5627,10 @@ select:focus-visible {
     display: none;
   }
 
+  .nav-admin-pill {
+    display: none !important;
+  }
+
   .mobile-toggle {
     display: inline-flex;
     margin-left: 0;
@@ -5750,6 +5754,17 @@ select:focus-visible {
 
   .nav-container {
     width: calc(100% - 20px);
+    gap: 8px;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .pill.nav-my-zenith {
+    padding: 0 12px;
+    font-size: 12px;
+    min-height: 36px;
   }
 
   .portal-container {
@@ -5857,6 +5872,27 @@ select:focus-visible {
 
   .tr .hide-sm {
     display: none;
+  }
+}
+
+@media (max-width: 350px) {
+  .nav-container {
+    width: calc(100% - 12px);
+    gap: 4px;
+  }
+
+  .nav-actions {
+    gap: 4px;
+  }
+
+  .brand {
+    font-size: 16px;
+  }
+
+  .pill.nav-my-zenith {
+    padding: 0 8px;
+    font-size: 11px;
+    min-height: 32px;
   }
 }
 

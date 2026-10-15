@@ -10,8 +10,11 @@ import {
   unlockResultForCorrectionRecord,
   correctResultRecord,
   createAdminResultRecord,
+  createFlexibleAdminResults,
+  isValidSportSlug,
   type CorrectResultInput,
   type CreateAdminResultInput,
+  type FlexibleResultSubmissionInput,
   createParticipantRecord,
   updateParticipantRecord,
   updateParticipantStatusRecord,
@@ -271,6 +274,45 @@ export async function adminCreateResultAction(
   revalidatePath("/teams");
 
   return { success: true, resultId: res.result.id };
+}
+
+/**
+ * Server action to record flexible, multi-format results (podiums, matchups, rankings, measurements)
+ * with complete audit logging and lifecycle adherence.
+ */
+export async function adminRecordFlexibleResultsAction(
+  input: Omit<FlexibleResultSubmissionInput, "actorUuid" | "actorName">,
+): Promise<AdminActionResult & { count?: number }> {
+  // 1. Authenticate and authorize admin server-side
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to record competition results.",
+    };
+  }
+
+  // 2. Perform insertion through repository
+  const res = await createFlexibleAdminResults({
+    ...input,
+    actorUuid: profile.userId,
+    actorName: profile.fullName,
+  });
+
+  if (!res.success || !res.results) {
+    return { success: false, error: res.error || "Failed to record flexible results." };
+  }
+
+  // 3. Revalidate affected administrative and public surfaces
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/sports");
+  revalidatePath("/admin/verification");
+  revalidatePath("/admin/publish");
+  revalidatePath("/results");
+  revalidatePath("/leaderboard");
+  revalidatePath("/teams");
+
+  return { success: true, count: res.results.length };
 }
 
 /**
@@ -673,6 +715,24 @@ export async function updateScheduleStatusAction(
   status: ScheduleStatus,
   reason?: string,
 ): Promise<AdminActionResult> {
+  const VALID_SCHEDULE_STATUSES = new Set<ScheduleStatus>([
+    "scheduled",
+    "live",
+    "finished",
+    "delayed",
+    "cancelled",
+    "postponed",
+    "venue_changed",
+  ]);
+
+  if (!scheduleId || scheduleId.trim() === "") {
+    return { success: false, error: "Schedule item ID is required." };
+  }
+
+  if (!VALID_SCHEDULE_STATUSES.has(status)) {
+    return { success: false, error: `Invalid schedule status '${status}'.` };
+  }
+
   // 1. Authenticate and authorize admin server-side
   const profile = await getAuthenticatedProfile();
   if (!profile || profile.role !== "admin" || !profile.isActive) {
@@ -683,13 +743,14 @@ export async function updateScheduleStatusAction(
   }
 
   // 2. Perform mutation
-  const res = await updateScheduleStatusRecord(scheduleId, status, profile.userId, reason);
+  const res = await updateScheduleStatusRecord(scheduleId.trim(), status, profile.userId, reason);
   if (!res.success) {
     return { success: false, error: res.error };
   }
 
   // 3. Revalidate
   revalidatePath("/admin/schedule");
+  revalidatePath("/admin/sports");
   revalidatePath("/admin/venues");
   revalidatePath("/admin");
   revalidatePath("/schedules");
@@ -1451,4 +1512,94 @@ export async function executeFestivalImportAction(
       error: err instanceof Error ? err.message : "Failed to execute festival data import.",
     };
   }
+}
+
+// ============================================================================
+// SPORT IMAGE MANAGEMENT ACTIONS
+// ============================================================================
+
+import {
+  uploadSportImage,
+  updateSportImageManifest,
+} from "@/lib/storage/sportImageStorage";
+
+/**
+ * Server action to upload an authorized sport image to the sport-images bucket.
+ * Strictly validates authentication (admin only), file type, and file size.
+ */
+export async function adminUploadSportImageAction(
+  formData: FormData
+): Promise<AdminActionResult & { url?: string }> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to upload sport images.",
+    };
+  }
+
+  const sportSlug = formData.get("sportSlug") as string;
+  const file = formData.get("file") as File;
+
+  if (!isValidSportSlug(sportSlug)) {
+    return { success: false, error: `Invalid or unrecognized sport identifier '${sportSlug}'.` };
+  }
+
+  if (!file || !(file instanceof File)) {
+    return { success: false, error: "A valid image file is required." };
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const res = await uploadSportImage(
+    sportSlug.trim(),
+    buffer,
+    file.type,
+    file.name
+  );
+
+  if (!res.success) {
+    return { success: false, error: res.error || "Failed to upload image." };
+  }
+
+  revalidatePath("/admin/sports");
+  revalidatePath("/sports");
+  revalidatePath(`/sports/${sportSlug}`);
+  revalidatePath("/");
+
+  return { success: true, url: res.url };
+}
+
+/**
+ * Server action to set an existing approved asset URL or remove a custom image for a sport.
+ */
+export async function adminSetSportImageAction(
+  sportSlug: string,
+  imageUrl: string | null
+): Promise<AdminActionResult> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile || profile.role !== "admin" || !profile.isActive) {
+    return {
+      success: false,
+      error: "Unauthorized: Active administrator privileges required to update sport images.",
+    };
+  }
+
+  if (!isValidSportSlug(sportSlug)) {
+    return { success: false, error: `Invalid or unrecognized sport identifier '${sportSlug}'.` };
+  }
+
+  const res = await updateSportImageManifest(sportSlug.trim(), imageUrl);
+
+  if (!res.success) {
+    return { success: false, error: res.error || "Failed to update sport image." };
+  }
+
+  revalidatePath("/admin/sports");
+  revalidatePath("/sports");
+  revalidatePath(`/sports/${sportSlug}`);
+  revalidatePath("/");
+
+  return { success: true };
 }

@@ -12,7 +12,7 @@ export const sports: Sport[] = [
     venueName: "Main Track & Field Arena",
     pointClass: "W",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "/images/hero/zenithrow-arena-aerial.jpg",
   },
   {
     id: "football",
@@ -25,7 +25,7 @@ export const sports: Sport[] = [
     venueName: "Main Football Arena",
     pointClass: "Z",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "/images/hero/zenithrow-arena-aerial.jpg",
   },
   {
     id: "cricket",
@@ -38,7 +38,6 @@ export const sports: Sport[] = [
     venueName: "Main Cricket Stadium",
     pointClass: "Z",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "tug-of-war",
@@ -51,7 +50,6 @@ export const sports: Sport[] = [
     venueName: "Central Arena Pit",
     pointClass: "Y",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "volleyball",
@@ -64,7 +62,6 @@ export const sports: Sport[] = [
     venueName: "Sports Complex Court A",
     pointClass: "Z",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1592656670411-0b1b3f8d0b88?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "badminton",
@@ -77,7 +74,6 @@ export const sports: Sport[] = [
     venueName: "Sports Complex Badminton Arena",
     pointClass: "W",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "power-strength",
@@ -90,7 +86,6 @@ export const sports: Sport[] = [
     venueName: "East Wing Power Pavilion",
     pointClass: "Z",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "field-games",
@@ -103,7 +98,6 @@ export const sports: Sport[] = [
     venueName: "Open Field Arena",
     pointClass: "X",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1519766304817-4f37bda74a29?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "precision-sports",
@@ -116,7 +110,6 @@ export const sports: Sport[] = [
     venueName: "Precision Range",
     pointClass: "W",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "traditional-games",
@@ -129,6 +122,5 @@ export const sports: Sport[] = [
     venueName: "Festival Quad Grounds",
     pointClass: "W",
     featured: false,
-    coverImage: "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=1200&q=80",
   },
 ];

@@ -113,7 +113,8 @@ export async function getParticipantsByFestival(
 ): Promise<ParticipantRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     initInMemoryStore();
     return Array.from(inMemoryParticipants.values()).filter(
@@ -151,7 +152,8 @@ export async function getParticipantsByFestivalAdmin(
 ): Promise<AdminParticipantRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     initInMemoryStore();
     return Array.from(inMemoryParticipants.values()).filter(
@@ -221,7 +223,8 @@ export async function getParticipantById(
 ): Promise<ParticipantRow | null> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -254,7 +257,8 @@ export async function getParticipantByIdAdmin(
 ): Promise<AdminParticipantRow | null> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -286,7 +290,8 @@ export async function getParticipantByPublicId(
 ): Promise<ParticipantRow | null> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -321,7 +326,8 @@ export async function getParticipantsByTeam(
 ): Promise<ParticipantRow[]> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -355,7 +361,8 @@ export async function getParticipantsByDivision(
 ): Promise<ParticipantRow[]> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -389,7 +396,8 @@ export async function getParticipantsByStatus(
 ): Promise<ParticipantRow[]> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -428,7 +436,8 @@ export async function getParticipantsByEvent(
 
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -482,7 +491,8 @@ export async function getParticipantByChestNumber(
 
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -593,7 +603,8 @@ export async function createParticipantRecord(
 
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -753,7 +764,8 @@ export async function updateParticipantRecord(
 
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -928,7 +940,8 @@ export async function getParticipantDependencies(
 
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   let regCount = 0;

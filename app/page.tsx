@@ -1,64 +1,107 @@
 import Link from "next/link";
 import StaircaseIntro from "@/components/ui/StaircaseIntro";
 import HsuHeroSlider from "@/components/home/HsuHeroSlider";
-import HsuLiveTicker from "@/components/home/HsuLiveTicker";
 import Skiper103 from "@/components/ui/skiper-ui/skiper103";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
-import { sports } from "@/data/sports";
-import { events } from "@/data/events";
-import { competitions } from "@/data/competitions";
-import { venues } from "@/data/venues";
-import { results } from "@/data/results";
+import { sports as staticSports } from "@/data/sports";
+import {
+  getActiveFestival,
+  getSchedulesByFestival,
+  getVenuesByFestival,
+  getEventsByFestival,
+  getSportsByFestival,
+  type ScheduleRow,
+  type VenueRow,
+  type EventRow,
+  type SportRow,
+} from "@/lib/repositories";
 
-export default function HomePage() {
-  // Format performance display safely
-  const formatPerformance = (perf?: (typeof results)[0]["performance"]): string => {
-    if (!perf) return "Official Finish";
-    if (typeof perf === "string") return perf;
-    if (perf.raw) return perf.raw;
-    if (perf.timeMs !== undefined) return `${(perf.timeMs / 1000).toFixed(2)}s`;
-    if (perf.distanceM !== undefined) return `${perf.distanceM}m`;
-    if (perf.heightM !== undefined) return `${perf.heightM}m`;
-    if (perf.score !== undefined) return `${perf.score} pts`;
-    return "Official Finish";
-  };
+export const dynamic = "force-dynamic";
 
-  // Real verified competition schedule/scoreboard
-  const scheduledProgrammes = competitions.slice(0, 5).map((comp) => {
-    const event = events.find((e) => e.id === comp.eventId);
-    const venue = venues.find((v) => v.id === comp.venueId) || {
-      name:
-        comp.venueId === "main-track"
-          ? "Main Track"
-          : comp.venueId === "long-jump-pit"
-          ? "Long Jump Pit"
-          : "Stadium",
-      location: "Main Campus",
-    };
-    const topResult = results.find(
-      (r) => r.competitionId === comp.id && r.position === 1
-    );
+export default async function HomePage() {
+  let schedules: ScheduleRow[] = [];
+  let venues: VenueRow[] = [];
+  let events: EventRow[] = [];
+  let dbSports: SportRow[] = [];
 
-    const timeString = comp.scheduledAt
-      ? new Date(comp.scheduledAt).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      : "10:00";
+  try {
+    const festival = await getActiveFestival();
+    if (festival) {
+      [schedules, venues, events, dbSports] = await Promise.all([
+        getSchedulesByFestival(festival.id),
+        getVenuesByFestival(festival.id),
+        getEventsByFestival(festival.id),
+        getSportsByFestival(festival.id),
+      ]);
+    }
+  } catch (error) {
+    console.error("[HomePage] Error retrieving live schedule data:", error);
+    schedules = [];
+    venues = [];
+    events = [];
+    dbSports = [];
+  }
+
+  const venueMap = new Map(venues.map((v) => [v.id, v.name]));
+  const eventMap = new Map(events.map((e) => [e.id, e]));
+
+  // Prioritize active and upcoming schedules: live first, then upcoming chronologically
+  const activeSchedules = schedules.filter((s) => s.status !== "cancelled");
+  const sortedUpcoming = [...activeSchedules].sort((a, b) => {
+    if (a.status === "live" && b.status !== "live") return -1;
+    if (b.status === "live" && a.status !== "live") return 1;
+    const timeA = a.starts_at ? new Date(a.starts_at).getTime() : Infinity;
+    const timeB = b.starts_at ? new Date(b.starts_at).getTime() : Infinity;
+    return timeA - timeB;
+  });
+
+  // Dynamically formatted upcoming programmes from official database schedules
+  const scheduledProgrammes = sortedUpcoming.slice(0, 6).map((sch) => {
+    const linkedEvent = sch.event_id ? eventMap.get(sch.event_id) : undefined;
+    const venueName = sch.venue_id
+      ? venueMap.get(sch.venue_id) || "Campus Arena"
+      : "Campus Arena";
+
+    let timeString = "TBA";
+    if (sch.starts_at) {
+      try {
+        const d = new Date(sch.starts_at);
+        if (!isNaN(d.getTime())) {
+          timeString = d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+        }
+      } catch {
+        timeString = "TBA";
+      }
+    }
+
+    const statusDisplay =
+      sch.status === "finished"
+        ? "Done"
+        : sch.status === "live"
+        ? "Live"
+        : sch.status === "delayed"
+        ? "Delayed"
+        : sch.status === "postponed"
+        ? "Postponed"
+        : "Scheduled";
 
     return {
-      id: comp.id,
-      eventName: event?.name || "Track & Field Event",
-      sportName: event?.sport || "Athletics",
-      category: event?.category || "Championship",
-      venueName: venue.name,
+      id: sch.id,
+      eventName: sch.title || linkedEvent?.name || "Official Programme",
+      sportName: linkedEvent?.competition_type || "Athletics",
+      category: sch.category || (linkedEvent?.point_class ? `Class ${linkedEvent.point_class}` : "Championship"),
+      venueName,
       timeSlot: timeString,
-      performance: formatPerformance(topResult?.performance),
-      status: comp.status === "live" ? "Live" : comp.status === "completed" ? "Done" : "Soon",
+      status: statusDisplay,
     };
   });
+
+  const sportsList = dbSports.length > 0 ? dbSports : staticSports;
 
   return (
     <div style={{ background: "var(--hsu-bg)", color: "var(--hsu-text)", minHeight: "100vh" }}>
@@ -68,10 +111,7 @@ export default function HomePage() {
       {/* 2. Committee Hero Carousel */}
       <HsuHeroSlider />
 
-      {/* 3. Live Telemetry Ticker */}
-      <HsuLiveTicker />
-
-      {/* 4. Festival stats — single high-impact metric row */}
+      {/* 3. Festival stats — single high-impact metric row */}
       <Reveal as="section" className="section">
         <div className="wrap">
           <div className="section-head">
@@ -86,26 +126,22 @@ export default function HomePage() {
 
           <div className="statrow">
             <div className="stat">
-              <div className="num">{String(sports.length).padStart(2, "0")}</div>
-              <div className="label">Sports</div>
+              <div className="num">{String(sportsList.length).padStart(2, "0")}</div>
+              <div className="label">Disciplines</div>
             </div>
             <div className="stat">
-              <div className="num" style={{ color: "var(--primary)" }}>LIVE</div>
-              <div className="label">Status</div>
+              <div className="num">04</div>
+              <div className="label">Championship Houses</div>
             </div>
             <div className="stat">
-              <div className="num">24/7</div>
-              <div className="label">Updates</div>
-            </div>
-            <div className="stat">
-              <div className="num">01</div>
-              <div className="label">Championship</div>
+              <div className="num">{String(schedules.length).padStart(2, "0")}</div>
+              <div className="label">Scheduled Programmes</div>
             </div>
           </div>
         </div>
       </Reveal>
 
-      {/* 5. Editorial Band Dark — Mega navigation links */}
+      {/* 4. Editorial Band Dark — Exploration navigation links */}
       <Reveal as="section" className="editorial-band dark">
         <div className="wrap">
           <div className="section-head">
@@ -121,10 +157,6 @@ export default function HomePage() {
             <strong>Sports</strong>
             <span>Explore disciplines ↗</span>
           </Link>
-          <Link href="/display" className="mega-link">
-            <strong>Live</strong>
-            <span>Follow the action ↗</span>
-          </Link>
           <Link href="/results" className="mega-link">
             <strong>Results</strong>
             <span>Verified scores ↗</span>
@@ -133,76 +165,88 @@ export default function HomePage() {
             <strong>Leaderboard</strong>
             <span>House championship ↗</span>
           </Link>
+          <Link href="/teams" className="mega-link">
+            <strong>Teams</strong>
+            <span>House rosters ↗</span>
+          </Link>
         </div>
       </Reveal>
 
-      {/* 6. Enter the Arena — Sports photo grid */}
+      {/* 5. Enter the Arena — Complete Festival Disciplines */}
       <Reveal as="section" className="section alt">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <h2>Pick your<br />game.</h2>
+              <div className="kicker">Complete Programme</div>
+              <h2>Pick your<br />discipline.</h2>
             </div>
             <Link href="/sports" className="btn">
-              All sports →
+              All disciplines →
             </Link>
           </div>
 
           <div className="grid grid4">
-            <Link
-              href="/sports/athletics"
-              className="card sport"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80')",
-              }}
-            >
-              <span className="tag">01 · Track</span>
-              <h3>Athletics</h3>
-            </Link>
-            <Link
-              href="/sports/football"
-              className="card sport"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=80')",
-              }}
-            >
-              <span className="tag">02 · Field</span>
-              <h3>Football</h3>
-            </Link>
-            <Link
-              href="/sports/tug-of-war"
-              className="card sport"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=900&q=80')",
-              }}
-            >
-              <span className="tag">03 · Arena</span>
-              <h3>Tug of War</h3>
-            </Link>
-            <Link
-              href="/sports/volleyball"
-              className="card sport"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1592656670411-0b1b3f8d0b88?auto=format&fit=crop&w=900&q=80')",
-              }}
-            >
-              <span className="tag">04 · Court</span>
-              <h3>Volleyball</h3>
-            </Link>
+            {sportsList.slice(0, 8).map((sport: any, idx: number) => {
+              const num = String(idx + 1).padStart(2, "0");
+              return (
+                <Link
+                  key={sport.id}
+                  href={`/sports/${sport.slug || sport.id}`}
+                  className="card sport"
+                  style={{
+                    background: "linear-gradient(145deg, rgba(25, 25, 28, 0.95), rgba(12, 12, 14, 0.98))",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    minHeight: "180px",
+                    padding: "24px 20px",
+                    borderRadius: "16px",
+                    textDecoration: "none",
+                    position: "relative",
+                    overflow: "hidden",
+                    transition: "border-color 0.2s ease, transform 0.2s ease",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="tag" style={{ margin: 0 }}>{num} · {sport.category || "General"}</span>
+                    {sport.pointClass && (
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: "rgba(255, 255, 255, 0.06)",
+                          color: "var(--muted)",
+                        }}
+                      >
+                        Tier {sport.pointClass}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 style={{ margin: "16px 0 6px", fontSize: "19px", fontWeight: 800, color: "#fff" }}>
+                      {sport.name}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
+                      {sport.venueName || "Campus Arena"}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </Reveal>
 
-      {/* 7. Right Now — Live & upcoming table */}
+      {/* 6. Upcoming Programme Table */}
       <Reveal as="section" className="section">
         <div className="wrap">
           <div className="section-head">
             <div>
-              <h2>Live & upcoming.</h2>
+              <div className="kicker">Official Timetable</div>
+              <h2>Upcoming schedule.</h2>
             </div>
             <Link href="/schedules" className="btn">
               Full schedule →
@@ -218,14 +262,17 @@ export default function HomePage() {
             </div>
 
             {scheduledProgrammes.length === 0 ? (
-              <div className="tr">
-                <span>09:30</span>
-                <span>
-                  <b>100m Sprint</b>
-                  <small style={{ display: "block", color: "var(--text-muted)" }}>Athletics · Finals</small>
-                </span>
-                <span>Main Track</span>
-                <span className="status live">Live</span>
+              <div
+                className="tr"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "24px",
+                  color: "var(--text-muted)",
+                  textAlign: "center",
+                }}
+              >
+                <span>Official timetable entries will appear once published by the technical committee.</span>
               </div>
             ) : (
               scheduledProgrammes.map((item) => (
@@ -238,7 +285,15 @@ export default function HomePage() {
                     </small>
                   </span>
                   <span>{item.venueName}</span>
-                  <span className={`status ${item.status === "Live" ? "live" : item.status === "Done" ? "done" : ""}`}>
+                  <span
+                    className={`status ${
+                      item.status === "Live"
+                        ? "live"
+                        : item.status === "Done"
+                        ? "done"
+                        : ""
+                    }`}
+                  >
                     {item.status}
                   </span>
                 </div>
@@ -248,27 +303,30 @@ export default function HomePage() {
         </div>
       </Reveal>
 
-      {/* 7.5 Tournament Regulations & Directives Accordion */}
+      {/* 7. Tournament Regulations & Directives Accordion */}
       <Skiper103 />
 
-      {/* 8. Split Feature Band — editorial photo + copy */}
+      {/* 8. Split Feature Band — Authentic Campus Photography */}
       <Reveal as="section" className="editorial-band light">
         <div className="wrap">
           <div className="split-feature">
             <div
               className="media"
               style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1400&q=85')",
+                backgroundImage: "url('/images/hero/zenithrow-arena-aerial.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
               }}
+              role="img"
+              aria-label="Hamdan Annual Sports Carnival official arena aerial view"
             />
             <div className="copy">
               <div>
                 <div className="kicker">HSU · ZENITHROW 2026</div>
-                <h2 className="editorial-title">Built for<br />the moment.</h2>
+                <h2 className="editorial-title">Built for<br />the campus.</h2>
               </div>
               <p className="sub">
-                From the first whistle to the final table, the experience stays clear, fast and connected.
+                From the opening ceremony to the final championship table, the official Hamdan fest experience stays clear, fast and connected.
               </p>
               <Link href="/my-result" className="btn primary" style={{ alignSelf: "flex-start" }}>
                 Open My ZENITHROW →

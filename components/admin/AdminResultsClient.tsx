@@ -17,8 +17,10 @@ import type {
 } from "@/lib/repositories";
 import type { Performance, ResultDisposition, ResultStatus } from "@/lib/types";
 import { getSafeEventPoints } from "@/lib/competition";
+import { resolveMatchOutcome } from "@/lib/competition/teamMatchResolution";
 import {
   adminCreateResultAction,
+  adminRecordFlexibleResultsAction,
   adminCorrectResultAction,
   verifyResultAction,
   publishResultAction,
@@ -31,6 +33,7 @@ interface AdminResultsClientProps {
   teams: TeamRow[];
   competitions?: CompetitionRow[];
   festivalId?: string;
+  initialEventId?: string;
 }
 
 export default function AdminResultsClient({
@@ -40,6 +43,7 @@ export default function AdminResultsClient({
   teams,
   competitions = [],
   festivalId = "",
+  initialEventId = "",
 }: AdminResultsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -60,10 +64,13 @@ export default function AdminResultsClient({
   // In-flight row action tracking
   const [activeRowActionId, setActiveRowActionId] = useState<string | null>(null);
 
-  // Form State: Direct Entry
-  const [entryEventId, setEntryEventId] = useState<string>(events[0]?.id || "");
+  // Form State: Direct & Flexible Entry
+  const [entryMode, setEntryMode] = useState<"podium" | "match" | "single">("podium");
+  const [entryEventId, setEntryEventId] = useState<string>(initialEventId || events[0]?.id || "");
   const [entryCompetitionId, setEntryCompetitionId] = useState<string>("");
-  const [entryTargetType, setEntryTargetType] = useState<"participant" | "team">("participant");
+  const [entryTargetType, setEntryTargetType] = useState<"participant" | "team">(
+    participants.length === 0 ? "team" : "participant"
+  );
   const [entryParticipantId, setEntryParticipantId] = useState<string>("");
   const [entryTeamId, setEntryTeamId] = useState<string>("");
   const [entryRank, setEntryRank] = useState<string>("1");
@@ -73,6 +80,26 @@ export default function AdminResultsClient({
   const [entryPoints, setEntryPoints] = useState<string>("10");
   const [entryStatus, setEntryStatus] = useState<ResultStatus>("submitted");
   const [entryNotes, setEntryNotes] = useState<string>("");
+
+  // Multi-House Podium State
+  const [podium1Team, setPodium1Team] = useState<string>("");
+  const [podium1Mark, setPodium1Mark] = useState<string>("");
+  const [podium1Points, setPodium1Points] = useState<string>("10");
+
+  const [podium2Team, setPodium2Team] = useState<string>("");
+  const [podium2Mark, setPodium2Mark] = useState<string>("");
+  const [podium2Points, setPodium2Points] = useState<string>("7");
+
+  const [podium3Team, setPodium3Team] = useState<string>("");
+  const [podium3Mark, setPodium3Mark] = useState<string>("");
+  const [podium3Points, setPodium3Points] = useState<string>("5");
+
+  // Team Matchup State
+  const [matchHomeTeam, setMatchHomeTeam] = useState<string>("");
+  const [matchHomeScore, setMatchHomeScore] = useState<string>("");
+  const [matchAwayTeam, setMatchAwayTeam] = useState<string>("");
+  const [matchAwayScore, setMatchAwayScore] = useState<string>("");
+  const [matchTiebreakWinner, setMatchTiebreakWinner] = useState<string>("");
 
   // Form State: Correction
   const [correctRank, setCorrectRank] = useState<string>("");
@@ -154,10 +181,19 @@ export default function AdminResultsClient({
   };
 
   // Open Direct Entry Modal
-  const handleOpenEntryModal = () => {
+  const updatePodiumDefaultPoints = (eventId: string) => {
+    const p1 = getSafeEventPoints(eventId, 1) ?? 10;
+    const p2 = getSafeEventPoints(eventId, 2) ?? 7;
+    const p3 = getSafeEventPoints(eventId, 3) ?? 5;
+    setPodium1Points(String(p1));
+    setPodium2Points(String(p2));
+    setPodium3Points(String(p3));
+  };
+
+  const handleOpenEntryModal = (overrideEventId?: string) => {
     setFeedback(null);
-    const firstEventId = events[0]?.id || "";
-    setEntryEventId(firstEventId);
+    const selectedEvId = overrideEventId || initialEventId || events[0]?.id || "";
+    setEntryEventId(selectedEvId);
     setEntryCompetitionId("");
     setEntryTargetType("participant");
     setEntryParticipantId(participants[0]?.id || "");
@@ -169,81 +205,253 @@ export default function AdminResultsClient({
     setEntryStatus("submitted");
     setEntryNotes("");
 
-    const initialCalc = getSafeEventPoints(firstEventId, 1);
+    // Initialize default podium points
+    updatePodiumDefaultPoints(selectedEvId);
+    setMatchTiebreakWinner("");
+
+    const initialCalc = getSafeEventPoints(selectedEvId, 1);
     setEntryPoints(initialCalc !== null ? String(initialCalc) : "10");
     setIsEntryModalOpen(true);
   };
 
-  // Open Correction Modal
   const handleOpenCorrectModal = (result: ResultRow) => {
-    setFeedback(null);
     setSelectedResultToCorrect(result);
-    setCorrectRank(result.rank ? String(result.rank) : "");
+    setCorrectRank(result.rank !== null ? String(result.rank) : "");
+    setCorrectPoints(result.points !== undefined && result.points !== null ? String(result.points) : "");
     setCorrectDisposition(result.disposition || "normal");
-    setCorrectPoints(String(result.points || 0));
-
-    // Determine performance raw/value
-    const perf = result.performance as Record<string, unknown> | null;
-    if (perf) {
-      if (typeof perf.timeMs === "number") {
-        setCorrectMarkValue(String((perf.timeMs / 1000).toFixed(2)));
-        setCorrectMarkMetric("time");
-      } else if (typeof perf.distanceM === "number") {
-        setCorrectMarkValue(String(perf.distanceM));
-        setCorrectMarkMetric("distance");
-      } else if (perf.score !== undefined) {
-        setCorrectMarkValue(String(perf.score));
-        setCorrectMarkMetric("score");
-      } else if (perf.raw) {
-        setCorrectMarkValue(String(perf.raw));
-        setCorrectMarkMetric("raw");
-      } else {
-        setCorrectMarkValue("");
-        setCorrectMarkMetric("raw");
-      }
-    } else {
-      setCorrectMarkValue("");
-      setCorrectMarkMetric("raw");
-    }
-
-    setCorrectTargetStatus(result.status === "published" ? "published" : result.status === "verified" ? "verified" : "corrected");
+    setCorrectTargetStatus("corrected");
     setCorrectReason("");
+    const perf = (result.performance as Record<string, unknown>) || {};
+    setCorrectMarkValue(String(perf.raw || perf.timeMs || perf.distanceMeters || perf.numericValue || ""));
+    setCorrectMarkMetric((perf.metric as "time" | "distance" | "score" | "reps" | "raw") || "raw");
     setIsCorrectModalOpen(true);
   };
 
-  // Helper to build structured performance payload
-  const buildPerformancePayload = (val: string, metric: "time" | "distance" | "score" | "reps" | "raw") => {
-    const trimmed = val.trim();
-    if (!trimmed) return {};
-    if (metric === "time") {
-      const parsedSec = parseFloat(trimmed);
-      return !isNaN(parsedSec)
-        ? { timeMs: Math.round(parsedSec * 1000), raw: `${parsedSec}s` }
-        : { raw: trimmed };
+  function buildPerformancePayload(
+    val: string,
+    metric: "time" | "distance" | "score" | "reps" | "raw"
+  ): Record<string, unknown> {
+    if (!val.trim()) return {};
+    const num = parseFloat(val.trim());
+    return {
+      raw: val.trim(),
+      metric,
+      numericValue: !isNaN(num) ? num : undefined,
+    };
+  }
+
+  // Submit Multi-House Podium Result Entry
+  const handleSaveFlexiblePodium = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!podium1Team && !podium2Team && !podium3Team) {
+      setFeedback({ type: "error", message: "Please select at least one podium house." });
+      return;
     }
-    if (metric === "distance") {
-      const parsedM = parseFloat(trimmed);
-      return !isNaN(parsedM) ? { distanceM: parsedM, raw: `${parsedM}m` } : { raw: trimmed };
+
+    startTransition(async () => {
+      const rows = [];
+      if (podium1Team) {
+        rows.push({
+          teamId: podium1Team,
+          rank: 1,
+          points: podium1Points.trim() ? parseInt(podium1Points, 10) : getSafeEventPoints(entryEventId, 1),
+          performance: podium1Mark.trim() ? { raw: podium1Mark.trim() } : {},
+          disposition: "normal" as ResultDisposition,
+        });
+      }
+      if (podium2Team) {
+        rows.push({
+          teamId: podium2Team,
+          rank: 2,
+          points: podium2Points.trim() ? parseInt(podium2Points, 10) : getSafeEventPoints(entryEventId, 2),
+          performance: podium2Mark.trim() ? { raw: podium2Mark.trim() } : {},
+          disposition: "normal" as ResultDisposition,
+        });
+      }
+      if (podium3Team) {
+        rows.push({
+          teamId: podium3Team,
+          rank: 3,
+          points: podium3Points.trim() ? parseInt(podium3Points, 10) : getSafeEventPoints(entryEventId, 3),
+          performance: podium3Mark.trim() ? { raw: podium3Mark.trim() } : {},
+          disposition: "normal" as ResultDisposition,
+        });
+      }
+
+      const res = await adminRecordFlexibleResultsAction({
+        festivalId: festivalId || initialResults[0]?.festival_id || "",
+        eventId: entryEventId,
+        competitionId: entryCompetitionId || null,
+        formatType: "podium",
+        targetStatus: entryStatus,
+        summaryNotes: entryNotes,
+        rows,
+      });
+
+      if (res.success) {
+        setIsEntryModalOpen(false);
+        setFeedback({
+          type: "success",
+          message: `✓ Podium standings recorded with status: ${getResultStatusLabel(entryStatus)}.`,
+        });
+        router.refresh();
+      } else {
+        setFeedback({ type: "error", message: res.error || "Failed to record podium." });
+      }
+    });
+  };
+
+  // Submit Dual Team Match Result Entry
+  const handleSaveFlexibleMatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matchHomeTeam || !matchAwayTeam) {
+      setFeedback({ type: "error", message: "Both home and away teams are required." });
+      return;
     }
-    if (metric === "score") {
-      const parsedScore = parseFloat(trimmed);
-      return !isNaN(parsedScore) ? { score: parsedScore, raw: trimmed } : { score: trimmed, raw: trimmed };
+
+    if (matchHomeTeam === matchAwayTeam) {
+      setFeedback({ type: "error", message: "Home and away teams must be different." });
+      return;
     }
-    if (metric === "reps") {
-      const parsedReps = parseInt(trimmed, 10);
-      return !isNaN(parsedReps) ? { reps: parsedReps, raw: `${parsedReps} reps` } : { raw: trimmed };
+
+    if (matchHomeScore.trim() === "" || matchAwayScore.trim() === "") {
+      setFeedback({ type: "error", message: "Please enter numeric scores for both teams." });
+      return;
     }
-    return { raw: trimmed };
+
+    const homeScoreNum = parseFloat(matchHomeScore);
+    const awayScoreNum = parseFloat(matchAwayScore);
+
+    if (isNaN(homeScoreNum) || isNaN(awayScoreNum) || homeScoreNum < 0 || awayScoreNum < 0) {
+      setFeedback({ type: "error", message: "Scores must be valid non-negative numbers." });
+      return;
+    }
+
+    // Reuse canonical match resolver
+    const outcome = resolveMatchOutcome({
+      homeTeamId: matchHomeTeam,
+      awayTeamId: matchAwayTeam,
+      scoreHome: homeScoreNum,
+      scoreAway: awayScoreNum,
+    });
+
+    const rank1Points = getSafeEventPoints(entryEventId, 1) ?? 10;
+    const rank2Points = getSafeEventPoints(entryEventId, 2) ?? 7;
+
+    // Critical rule: Equal scores must never award 1st-place points to both teams automatically.
+    if (outcome.isDraw) {
+      if (!matchTiebreakWinner) {
+        setFeedback({
+          type: "error",
+          message: `The match ended in a draw (${homeScoreNum} - ${awayScoreNum}). Tournament rules forbid awarding duplicate first-place points. Please select the official Shoot-out / Tiebreak winner before saving.`,
+        });
+        return;
+      }
+    }
+
+    startTransition(async () => {
+      let rows;
+
+      if (outcome.isDraw && matchTiebreakWinner) {
+        const isHomeWinner = matchTiebreakWinner === matchHomeTeam;
+        const winnerTeamId = isHomeWinner ? matchHomeTeam : matchAwayTeam;
+        const loserTeamId = isHomeWinner ? matchAwayTeam : matchHomeTeam;
+
+        rows = [
+          {
+            teamId: winnerTeamId,
+            rank: 1,
+            points: rank1Points,
+            performance: {
+              scoreHome: homeScoreNum,
+              scoreAway: awayScoreNum,
+              raw: `${homeScoreNum} - ${awayScoreNum} (Tiebreak Winner)`,
+              tiebreakResolved: true,
+            },
+            disposition: "normal" as ResultDisposition,
+            notes: `Winner via Shoot-out/Tiebreak (${homeScoreNum} - ${awayScoreNum})`,
+          },
+          {
+            teamId: loserTeamId,
+            rank: 2,
+            points: rank2Points,
+            performance: {
+              scoreHome: homeScoreNum,
+              scoreAway: awayScoreNum,
+              raw: `${homeScoreNum} - ${awayScoreNum} (Tiebreak Runner-up)`,
+              tiebreakResolved: true,
+            },
+            disposition: "normal" as ResultDisposition,
+            notes: `Runner-up via Shoot-out/Tiebreak (${homeScoreNum} - ${awayScoreNum})`,
+          },
+        ];
+      } else {
+        const homeWon = outcome.winnerTeamId === matchHomeTeam;
+        rows = [
+          {
+            teamId: matchHomeTeam,
+            rank: homeWon ? 1 : 2,
+            points: homeWon ? rank1Points : rank2Points,
+            performance: { scoreHome: homeScoreNum, scoreAway: awayScoreNum, raw: `${homeScoreNum} - ${awayScoreNum}` },
+            disposition: "normal" as ResultDisposition,
+            notes: homeWon ? "Match Winner" : "Runner-up",
+          },
+          {
+            teamId: matchAwayTeam,
+            rank: homeWon ? 2 : 1,
+            points: homeWon ? rank2Points : rank1Points,
+            performance: { scoreHome: homeScoreNum, scoreAway: awayScoreNum, raw: `${homeScoreNum} - ${awayScoreNum}` },
+            disposition: "normal" as ResultDisposition,
+            notes: homeWon ? "Runner-up" : "Match Winner",
+          },
+        ];
+      }
+
+      const res = await adminRecordFlexibleResultsAction({
+        festivalId: festivalId || initialResults[0]?.festival_id || "",
+        eventId: entryEventId,
+        competitionId: entryCompetitionId || null,
+        formatType: "match",
+        targetStatus: entryStatus,
+        summaryNotes: entryNotes || `Match: ${homeScoreNum} - ${awayScoreNum}`,
+        rows,
+      });
+
+      if (res.success) {
+        setIsEntryModalOpen(false);
+        setFeedback({
+          type: "success",
+          message: `✓ Match result recorded with status: ${getResultStatusLabel(entryStatus)}.`,
+        });
+        router.refresh();
+      } else {
+        setFeedback({ type: "error", message: res.error || "Failed to record match." });
+      }
+    });
   };
 
   // Submit Direct Result Entry
   const handleSaveDirectResult = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (entryMode === "podium") {
+      return handleSaveFlexiblePodium(e);
+    }
+    if (entryMode === "match") {
+      return handleSaveFlexibleMatch(e);
+    }
+
     if (!entryEventId) {
       setFeedback({ type: "error", message: "Please select a competition event." });
       return;
     }
     if (entryTargetType === "participant" && !entryParticipantId) {
+      if (participants.length === 0) {
+        setFeedback({
+          type: "error",
+          message: "Student records have not been imported yet. Please record results as a Team Entrant or use House Podium / Dual Match.",
+        });
+        return;
+      }
       setFeedback({ type: "error", message: "Please select an athlete/participant." });
       return;
     }
@@ -503,7 +711,7 @@ export default function AdminResultsClient({
         <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
           <button
             type="button"
-            onClick={handleOpenEntryModal}
+            onClick={() => handleOpenEntryModal()}
             className="pegasus-button pegasus-button--primary"
             style={{ fontWeight: 800, padding: "8px 16px", minHeight: "36px" }}
           >
@@ -866,156 +1074,466 @@ export default function AdminResultsClient({
                   </div>
                 )}
 
-                {/* Competitor Target: Athlete or Team */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Entrant Type
-                    </label>
-                    <select
-                      className="pegasus-select"
-                      style={{ width: "100%" }}
-                      value={entryTargetType}
-                      onChange={(e) => setEntryTargetType(e.target.value as "participant" | "team")}
-                    >
-                      <option value="participant">Individual Athlete</option>
-                      <option value="team">Team Entrant</option>
-                    </select>
-                  </div>
-
-                  {entryTargetType === "participant" ? (
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                        Athlete / Competitor *
-                      </label>
-                      <select
-                        className="pegasus-select"
-                        style={{ width: "100%" }}
-                        value={entryParticipantId}
-                        onChange={(e) => setEntryParticipantId(e.target.value)}
-                        required
+                {/* Result Format Mode Switcher */}
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 750, marginBottom: "8px", color: "var(--foreground)" }}>
+                    Competition Format Mode
+                  </label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {[
+                      { id: "podium", label: "🏆 House Podium (1st, 2nd, 3rd)" },
+                      { id: "match", label: "⚔️ Dual Match (Home vs Away)" },
+                      { id: "single", label: "👤 Single Entrant Record" },
+                    ].map((mode) => (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => {
+                          setEntryMode(mode.id as any);
+                          if (mode.id === "podium") updatePodiumDefaultPoints(entryEventId);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: "8px 10px",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          background: entryMode === mode.id ? "var(--foreground)" : "rgba(255,255,255,0.04)",
+                          color: entryMode === mode.id ? "var(--background)" : "var(--muted)",
+                          border: "1px solid",
+                          borderColor: entryMode === mode.id ? "var(--foreground)" : "var(--border)",
+                          cursor: "pointer",
+                        }}
                       >
-                        <option value="">Select Athlete...</option>
-                        {participants.map((p) => {
-                          const t = p.team_id ? teamMap.get(p.team_id) : undefined;
-                          return (
-                            <option key={p.id} value={p.id}>
-                              {p.name} {p.chest_number ? `(#${p.chest_number})` : ""} - {t?.name || "Independent"}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  ) : (
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                        Team *
-                      </label>
-                      <select
-                        className="pegasus-select"
-                        style={{ width: "100%" }}
-                        value={entryTeamId}
-                        onChange={(e) => setEntryTeamId(e.target.value)}
-                        required
-                      >
-                        <option value="">Select Team...</option>
-                        {teams.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.name} ({t.code})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-
-                {/* Rank & Mark */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Rank / Position
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={99}
-                      className="pegasus-input"
-                      style={{ width: "100%" }}
-                      value={entryRank}
-                      onChange={(e) => {
-                        setEntryRank(e.target.value);
-                        handleEntryRankOrEventChange(entryEventId, e.target.value, entryDisposition);
-                      }}
-                      placeholder="e.g. 1"
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Performance Mark / Score
-                    </label>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <input
-                        type="text"
-                        className="pegasus-input"
-                        style={{ flex: 1 }}
-                        value={entryMarkValue}
-                        onChange={(e) => setEntryMarkValue(e.target.value)}
-                        placeholder="e.g. 10.45 or 7.82"
-                      />
-                      <select
-                        className="pegasus-select"
-                        style={{ width: "120px" }}
-                        value={entryMarkMetric}
-                        onChange={(e) => setEntryMarkMetric(e.target.value as any)}
-                      >
-                        <option value="time">Seconds (s)</option>
-                        <option value="distance">Meters (m)</option>
-                        <option value="score">Score/Goals</option>
-                        <option value="reps">Reps</option>
-                        <option value="raw">Custom/Raw</option>
-                      </select>
-                    </div>
+                        {mode.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Disposition & Championship Points */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Disposition
-                    </label>
-                    <select
-                      className="pegasus-select"
-                      style={{ width: "100%" }}
-                      value={entryDisposition}
-                      onChange={(e) => {
-                        const disp = e.target.value as ResultDisposition;
-                        setEntryDisposition(disp);
-                        handleEntryRankOrEventChange(entryEventId, entryRank, disp);
-                      }}
-                    >
-                      <option value="normal">Normal / Standard Finish</option>
-                      <option value="dns">DNS — Did Not Start (0 pts)</option>
-                      <option value="dnf">DNF — Did Not Finish (0 pts)</option>
-                      <option value="dq">DQ — Disqualified (0 pts)</option>
-                    </select>
-                  </div>
+                {/* MODE 1: MULTI-HOUSE PODIUM */}
+                {entryMode === "podium" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "12px", background: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
+                      Official House Championship Podium Allocation
+                    </span>
 
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
-                      Championship Points
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      className="pegasus-input"
-                      style={{ width: "100%" }}
-                      value={entryPoints}
-                      onChange={(e) => setEntryPoints(e.target.value)}
-                    />
+                    {/* 1st Place */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 80px", gap: "8px", alignItems: "center" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#10b981", marginBottom: "4px" }}>
+                          🥇 1st Place House *
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={podium1Team}
+                          onChange={(e) => setPodium1Team(e.target.value)}
+                        >
+                          <option value="">Select House...</option>
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Mark / Time (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          placeholder="e.g. 10.45s or 3-1"
+                          value={podium1Mark}
+                          onChange={(e) => setPodium1Mark(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Points
+                        </label>
+                        <input
+                          type="number"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          value={podium1Points}
+                          onChange={(e) => setPodium1Points(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 2nd Place */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 80px", gap: "8px", alignItems: "center" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#3b82f6", marginBottom: "4px" }}>
+                          🥈 2nd Place House
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={podium2Team}
+                          onChange={(e) => setPodium2Team(e.target.value)}
+                        >
+                          <option value="">Select House...</option>
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Mark / Time (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          placeholder="e.g. 10.82s"
+                          value={podium2Mark}
+                          onChange={(e) => setPodium2Mark(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Points
+                        </label>
+                        <input
+                          type="number"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          value={podium2Points}
+                          onChange={(e) => setPodium2Points(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 80px", gap: "8px", alignItems: "center" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#f59e0b", marginBottom: "4px" }}>
+                          🥉 3rd Place House
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={podium3Team}
+                          onChange={(e) => setPodium3Team(e.target.value)}
+                        >
+                          <option value="">Select House...</option>
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Mark / Time (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          placeholder="e.g. 11.05s"
+                          value={podium3Mark}
+                          onChange={(e) => setPodium3Mark(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginBottom: "4px" }}>
+                          Points
+                        </label>
+                        <input
+                          type="number"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          value={podium3Points}
+                          onChange={(e) => setPodium3Points(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* MODE 2: TEAM MATCHUP */}
+                {entryMode === "match" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "12px", background: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
+                      Dual Team Matchup Score Entry
+                    </span>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: "10px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, marginBottom: "4px", color: "var(--foreground)" }}>
+                          Home House *
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={matchHomeTeam}
+                          onChange={(e) => setMatchHomeTeam(e.target.value)}
+                          required
+                        >
+                          <option value="">Select Home House...</option>
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, marginBottom: "4px", color: "var(--foreground)" }}>
+                          Home Score *
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          placeholder="e.g. 3"
+                          value={matchHomeScore}
+                          onChange={(e) => setMatchHomeScore(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: "10px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, marginBottom: "4px", color: "var(--foreground)" }}>
+                          Away House *
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={matchAwayTeam}
+                          onChange={(e) => setMatchAwayTeam(e.target.value)}
+                          required
+                        >
+                          <option value="">Select Away House...</option>
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 700, marginBottom: "4px", color: "var(--foreground)" }}>
+                          Away Score *
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          placeholder="e.g. 1"
+                          value={matchAwayScore}
+                          onChange={(e) => setMatchAwayScore(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tiebreak selector if scores are identical */}
+                    {matchHomeScore.trim() !== "" &&
+                      matchAwayScore.trim() !== "" &&
+                      parseFloat(matchHomeScore) === parseFloat(matchAwayScore) && (
+                        <div style={{ marginTop: "6px", padding: "10px 12px", background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "6px" }}>
+                          <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#f59e0b", marginBottom: "6px" }}>
+                            ⚠️ Tie Score ({matchHomeScore} - {matchAwayScore}) • Shoot-out / Tiebreak Winner *
+                          </label>
+                          <select
+                            className="pegasus-select"
+                            style={{ width: "100%", borderColor: "rgba(245, 158, 11, 0.5)" }}
+                            value={matchTiebreakWinner}
+                            onChange={(e) => setMatchTiebreakWinner(e.target.value)}
+                            required
+                          >
+                            <option value="">Select official tiebreak winner...</option>
+                            {matchHomeTeam && (
+                              <option value={matchHomeTeam}>
+                                {teamMap.get(matchHomeTeam)?.name || "Home House"} (Winner)
+                              </option>
+                            )}
+                            {matchAwayTeam && (
+                              <option value={matchAwayTeam}>
+                                {teamMap.get(matchAwayTeam)?.name || "Away House"} (Winner)
+                              </option>
+                            )}
+                          </select>
+                        </div>
+                      )}
+                  </div>
+                )}
+
+                {/* MODE 3: SINGLE ENTRANT RECORD */}
+                {entryMode === "single" && (
+                  <>
+                    {participants.length === 0 && (
+                      <div
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "6px",
+                          background: "rgba(56, 189, 248, 0.08)",
+                          border: "1px solid rgba(56, 189, 248, 0.2)",
+                          fontSize: "12px",
+                          color: "#38bdf8",
+                        }}
+                      >
+                        ℹ️ Student records are not yet imported. Recording results directly at the House/Team level.
+                      </div>
+                    )}
+
+                    {/* Competitor Target: Athlete or Team */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                          Entrant Type
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={entryTargetType}
+                          onChange={(e) => setEntryTargetType(e.target.value as "participant" | "team")}
+                        >
+                          <option value="participant">Individual Athlete</option>
+                          <option value="team">Team Entrant</option>
+                        </select>
+                      </div>
+
+                      {entryTargetType === "participant" ? (
+                        <div>
+                          <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                            Athlete / Competitor *
+                          </label>
+                          <select
+                            className="pegasus-select"
+                            style={{ width: "100%" }}
+                            value={entryParticipantId}
+                            onChange={(e) => setEntryParticipantId(e.target.value)}
+                            required
+                          >
+                            <option value="">Select Athlete...</option>
+                            {participants.map((p) => {
+                              const t = p.team_id ? teamMap.get(p.team_id) : undefined;
+                              return (
+                                <option key={p.id} value={p.id}>
+                                  {p.name} {p.chest_number ? `(#${p.chest_number})` : ""} - {t?.name || "Independent"}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      ) : (
+                        <div>
+                          <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                            Team *
+                          </label>
+                          <select
+                            className="pegasus-select"
+                            style={{ width: "100%" }}
+                            value={entryTeamId}
+                            onChange={(e) => setEntryTeamId(e.target.value)}
+                            required
+                          >
+                            <option value="">Select Team...</option>
+                            {teams.map((t) => (
+                              <option key={t.id} value={t.id}>
+                                {t.name} ({t.code})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rank & Mark */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                          Rank / Position
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={99}
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          value={entryRank}
+                          onChange={(e) => {
+                            setEntryRank(e.target.value);
+                            handleEntryRankOrEventChange(entryEventId, e.target.value, entryDisposition);
+                          }}
+                          placeholder="e.g. 1"
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                          Performance Mark / Score
+                        </label>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <input
+                            type="text"
+                            className="pegasus-input"
+                            style={{ flex: 1 }}
+                            value={entryMarkValue}
+                            onChange={(e) => setEntryMarkValue(e.target.value)}
+                            placeholder="e.g. 10.45 or 7.82"
+                          />
+                          <select
+                            className="pegasus-select"
+                            style={{ width: "120px" }}
+                            value={entryMarkMetric}
+                            onChange={(e) => setEntryMarkMetric(e.target.value as any)}
+                          >
+                            <option value="time">Seconds (s)</option>
+                            <option value="distance">Meters (m)</option>
+                            <option value="score">Score/Goals</option>
+                            <option value="reps">Reps</option>
+                            <option value="raw">Custom/Raw</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Disposition & Championship Points */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                          Disposition
+                        </label>
+                        <select
+                          className="pegasus-select"
+                          style={{ width: "100%" }}
+                          value={entryDisposition}
+                          onChange={(e) => {
+                            const disp = e.target.value as ResultDisposition;
+                            setEntryDisposition(disp);
+                            handleEntryRankOrEventChange(entryEventId, entryRank, disp);
+                          }}
+                        >
+                          <option value="normal">Normal / Standard Finish</option>
+                          <option value="dns">DNS — Did Not Start (0 pts)</option>
+                          <option value="dnf">DNF — Did Not Finish (0 pts)</option>
+                          <option value="dq">DQ — Disqualified (0 pts)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "6px", color: "var(--muted)" }}>
+                          Championship Points
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          className="pegasus-input"
+                          style={{ width: "100%" }}
+                          value={entryPoints}
+                          onChange={(e) => setEntryPoints(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Target Status */}
                 <div>

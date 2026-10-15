@@ -1,6 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import type { ResultStatus, ResultDisposition, Result } from "../types";
+import { createClient } from "../supabase/server.ts";
+import { createAdminClient } from "../supabase/admin.ts";
+import type { ResultStatus, ResultDisposition, Result } from "../types/index.ts";
 import {
   verifyResult,
   publishResult,
@@ -8,8 +8,8 @@ import {
   correctResult,
   reverifyResult,
   republishResult,
-} from "../results/resultService";
-import { getSafeEventPoints } from "../competition";
+} from "../results/resultService.ts";
+import { getSafeEventPoints } from "../competition/index.ts";
 
 /**
  * Shape of a row in public.results as defined by migration 20260920000100.
@@ -52,6 +52,9 @@ const RESULT_COLUMNS =
 const OPERATIONAL_RESULT_COLUMNS =
   "id, festival_id, event_id, competition_id, fixture_id, participant_id, team_id, rank, points, performance, disposition, status, is_official, published_at, created_at, updated_at, submitted_by, verified_by" as const;
 
+import { isUuid } from "../utils.ts";
+export { isUuid };
+
 
 /**
  * Retrieves all published results for a given festival.
@@ -68,7 +71,8 @@ export async function getPublishedResultsByFestival(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -148,7 +152,8 @@ export async function getPublishedResultsByParticipant(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -188,7 +193,8 @@ export async function getResultsByCompetition(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -226,7 +232,8 @@ export async function getResultById(
 ): Promise<ResultRow | null> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return null;
   }
@@ -286,7 +293,8 @@ export async function getResultsByEvent(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -325,7 +333,8 @@ export async function saveDraftResultsBatch(
 ): Promise<{ success: boolean; count: number; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return { success: true, count: entries.length };
   }
@@ -378,14 +387,6 @@ export async function saveDraftResultsBatch(
       }
     }
   }
-
-  const isUuid = (val: string | null | undefined): boolean =>
-    Boolean(
-      val &&
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          val,
-        ),
-    );
 
   const validActorUuid = isUuid(actorId) ? actorId : null;
 
@@ -503,7 +504,8 @@ export async function submitResultsBatch(
 ): Promise<{ success: boolean; count: number; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return { success: true, count: entries.length };
   }
@@ -561,14 +563,6 @@ export async function submitResultsBatch(
       }
     }
   }
-
-  const isUuid = (val: string | null | undefined): boolean =>
-    Boolean(
-      val &&
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          val,
-        ),
-    );
 
   const validActorUuid = isUuid(actorId) ? actorId : null;
 
@@ -706,7 +700,8 @@ export async function getResultsByFestivalOperational(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -741,7 +736,8 @@ export async function getResultsByStatus(
 ): Promise<ResultRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -779,7 +775,8 @@ export async function verifyResultRecord(
 ): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return {
       success: false,
@@ -885,7 +882,8 @@ export async function publishResultRecord(
 ): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return {
       success: false,
@@ -990,7 +988,8 @@ export async function unlockResultForCorrectionRecord(
 ): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return {
       success: false,
@@ -1110,7 +1109,8 @@ export async function correctResultRecord(
 ): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return {
       success: false,
@@ -1294,7 +1294,8 @@ export async function createAdminResultRecord(
 ): Promise<{ success: boolean; result?: ResultRow; error?: string }> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return {
       success: false,
@@ -1333,8 +1334,16 @@ export async function createAdminResultRecord(
     points = getSafeEventPoints(input.eventId, rank) ?? 0;
   }
 
+  const validActorUuid = isUuid(input.actorUuid) ? input.actorUuid : null;
   const status: ResultStatus = input.status ?? "submitted";
   const nowTimestamp = new Date().toISOString();
+
+  // Critical lifecycle rule: Results entered as draft or submitted MUST NOT have verified_by populated.
+  // The person entering a result must not be recorded as its verifier before the verification workflow verifies it.
+  const isPublished = status === "published";
+  const isVerified = status === "verified" || isPublished;
+  const verifiedBy = isVerified ? validActorUuid : null;
+  const publishedAt = isPublished ? nowTimestamp : null;
 
   const insertPayload: Record<string, unknown> = {
     festival_id: input.festivalId,
@@ -1348,18 +1357,13 @@ export async function createAdminResultRecord(
     performance: input.performance || {},
     disposition: disp,
     status,
-    is_official: status === "published",
+    is_official: isPublished,
     created_at: nowTimestamp,
     updated_at: nowTimestamp,
-    submitted_by: input.actorUuid,
+    submitted_by: validActorUuid,
+    verified_by: verifiedBy,
+    published_at: publishedAt,
   };
-
-  if (status === "verified" || status === "published") {
-    insertPayload.verified_by = input.actorUuid;
-  }
-  if (status === "published") {
-    insertPayload.published_at = nowTimestamp;
-  }
 
   const { data: inserted, error: insertError } = await supabase
     .from("results")
@@ -1372,10 +1376,10 @@ export async function createAdminResultRecord(
     return { success: false, error: `Failed to create result: ${insertError.message}` };
   }
 
-  // Audit log
+  // Audit log with validated actor UUID (or null for non-auth presets) while preserving human name in after_state
   await supabase.from("result_audit_entries").insert({
     result_id: (inserted as ResultRow).id,
-    actor_id: input.actorUuid,
+    actor_id: validActorUuid,
     action: "admin_create_result",
     reason: input.notes ? `Admin result created: ${input.notes.trim()}` : "Direct result recorded by Admin",
     before_state: null,
@@ -1413,7 +1417,8 @@ export async function getRecentResultAuditEntries(
 ): Promise<ResultAuditRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -1445,6 +1450,107 @@ export async function getRecentResultAuditEntries(
     );
     return [];
   }
+}
+
+// ============================================================================
+// FLEXIBLE RESULTS MULTI-FORMAT CREATION
+// ============================================================================
+
+export type FlexibleResultRowInput = {
+  participantId?: string | null;
+  teamId?: string | null;
+  rank?: number | null;
+  points?: number | null;
+  performance?: Record<string, unknown>;
+  disposition?: ResultDisposition;
+  notes?: string;
+};
+
+export type FlexibleResultSubmissionInput = {
+  festivalId: string;
+  eventId: string;
+  competitionId?: string | null;
+  fixtureId?: string | null;
+  formatType?: "podium" | "match" | "individual_rankings" | "measurement" | "custom";
+  targetStatus: ResultStatus;
+  summaryNotes?: string;
+  rows: FlexibleResultRowInput[];
+  actorUuid: string;
+  actorName: string;
+};
+
+/**
+ * Creates a batch of validated competition results supporting podiums,
+ * multi-house standings, matchups, and measured results.
+ */
+export async function createFlexibleAdminResults(
+  input: FlexibleResultSubmissionInput
+): Promise<{ success: boolean; results?: ResultRow[]; error?: string }> {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    return {
+      success: false,
+      error: "Supabase service environment is not configured.",
+    };
+  }
+
+  if (!input.eventId || input.eventId.trim() === "") {
+    return { success: false, error: "Event ID is required." };
+  }
+
+  if (!input.rows || input.rows.length === 0) {
+    return { success: false, error: "At least one result row is required." };
+  }
+
+  const createdResults: ResultRow[] = [];
+
+  for (let i = 0; i < input.rows.length; i++) {
+    const row = input.rows[i];
+    if (!row.participantId && !row.teamId) {
+      continue; // Skip empty rows
+    }
+
+    const rowNotes = row.notes
+      ? `${row.notes} (${input.summaryNotes || "Flexible entry"})`
+      : input.summaryNotes;
+
+    const res = await createAdminResultRecord({
+      festivalId: input.festivalId,
+      eventId: input.eventId,
+      competitionId: input.competitionId || null,
+      fixtureId: input.fixtureId || null,
+      participantId: row.participantId || null,
+      teamId: row.teamId || null,
+      rank: row.rank,
+      points: row.points,
+      performance: row.performance || {},
+      disposition: row.disposition || "normal",
+      status: input.targetStatus || "submitted",
+      notes: rowNotes,
+      actorUuid: input.actorUuid,
+      actorName: input.actorName,
+    });
+
+    if (!res.success || !res.result) {
+      return {
+        success: false,
+        error: `Failed on row ${i + 1}: ${res.error || "Unknown error"}`,
+      };
+    }
+
+    createdResults.push(res.result);
+  }
+
+  if (createdResults.length === 0) {
+    return {
+      success: false,
+      error: "No valid result rows were provided (each row must select a participant or team).",
+    };
+  }
+
+  return { success: true, results: createdResults };
 }
 
 

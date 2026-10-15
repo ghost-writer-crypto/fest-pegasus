@@ -159,11 +159,11 @@ export default async function SchedulesPage() {
           <Reveal>
             <div className="section-head" style={{ marginTop: "75px" }}>
               <div>
-                <h2>Follow live<br />or check results.</h2>
+                <h2>Explore programmes<br />or check results.</h2>
               </div>
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <Link href="/live" className="btn primary">
-                  Live broadcast →
+                <Link href="/sports" className="btn primary">
+                  View all sports →
                 </Link>
                 <Link href="/results" className="btn">
                   Verified results →

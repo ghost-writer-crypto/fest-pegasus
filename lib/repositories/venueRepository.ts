@@ -62,7 +62,8 @@ export async function getVenuesByFestival(
 ): Promise<VenueRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -104,7 +105,8 @@ export async function getVenueById(
 ): Promise<VenueRow | null> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return null;
   }

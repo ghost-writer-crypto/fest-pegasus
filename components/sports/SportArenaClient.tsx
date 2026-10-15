@@ -76,8 +76,9 @@ export default function SportArenaClient({
   }, [events, selectedDivision, eventSearch]);
 
   const bgImage =
-    sport.coverImage ||
-    "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80";
+    sport.coverImage && !sport.coverImage.includes("unsplash.com")
+      ? sport.coverImage
+      : "/images/hero/zenithrow-arena-aerial.jpg";
 
   const venueName = venue?.name || sport.venueName || "Main Arena Complex";
   const venueLocation = venue?.location || "Main Campus";
@@ -112,13 +113,12 @@ export default function SportArenaClient({
 
               {sport.pointClass && (
                 <span
-                  className={`${styles.pointBadge} ${
-                    sport.pointClass === "Z"
+                  className={`${styles.pointBadge} ${sport.pointClass === "Z"
                       ? styles.pointBadgeZ
                       : sport.pointClass === "Y"
-                      ? styles.pointBadgeY
-                      : styles.pointBadgeW
-                  }`}
+                        ? styles.pointBadgeY
+                        : styles.pointBadgeW
+                    }`}
                   style={{ backdropFilter: "blur(8px)" }}
                 >
                   Tier {sport.pointClass} Competition
@@ -141,11 +141,7 @@ export default function SportArenaClient({
                 <Calendar size={15} style={{ marginRight: "6px" }} />
                 View Timetable &amp; Fixtures →
               </Link>
-              <Link href="/display" className="btn ghost">
-                <Activity size={15} style={{ marginRight: "6px" }} />
-                Live Arena Display ↗
-              </Link>
-              <Link href="/sports" className="btn" style={{ marginLeft: "auto" }}>
+              <Link href="/sports" className="btn">
                 <ArrowLeft size={14} style={{ marginRight: "6px" }} />
                 All Disciplines
               </Link>
@@ -182,8 +178,8 @@ export default function SportArenaClient({
               {sport.pointClass === "Z"
                 ? "10 Championship Pts"
                 : sport.pointClass === "Y"
-                ? "7 Championship Pts"
-                : "5 Championship Pts"}
+                  ? "7 Championship Pts"
+                  : "5 Championship Pts"}
             </span>
           </div>
 

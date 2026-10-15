@@ -19,7 +19,6 @@ export default function Footer() {
           </b>
           <Link href="/sports">Sports</Link>
           <Link href="/schedules">Schedule</Link>
-          <Link href="/display">Live</Link>
           <Link href="/results">Results</Link>
         </div>
 
@@ -34,11 +33,10 @@ export default function Footer() {
 
         <div>
           <b style={{ color: "rgba(245,245,247,0.35)", display: "block", marginBottom: "14px", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 600 }}>
-            Operations
+            Management
           </b>
-          <Link href="/team-manager">Team Manager</Link>
-          <Link href="/judge">Judge Desk</Link>
-          <Link href="/admin">Admin</Link>
+          <Link href="/admin">Admin Panel</Link>
+          <Link href="/login">Operator Login</Link>
         </div>
       </div>
 
@@ -47,7 +45,7 @@ export default function Footer() {
           © 2026 Hamdan Students Union · ZENITHROW Sports Festival
         </small>
         <small style={{ color: "rgba(245,245,247,0.3)", fontSize: "11px" }}>
-          <Link href="/login" style={{ color: "rgba(245,245,247,0.3)", textDecoration: "none" }}>Operator Portal</Link>
+          Official Campus Sports Championship
         </small>
       </div>
     </footer>

@@ -91,7 +91,8 @@ export async function getOrCreateQrIdentity(
 ): Promise<QrIdentityRow> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   if (hasSupabaseConfig) {
@@ -169,7 +170,8 @@ export async function getOrCreateQrIdentity(
 export async function revokeQrIdentity(qrToken: string): Promise<{ success: boolean; error?: string }> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   const now = new Date().toISOString();
@@ -208,7 +210,8 @@ export async function rotateQrIdentity(
 ): Promise<{ success: boolean; newIdentity?: QrIdentityRow; error?: string }> {
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   const now = new Date().toISOString();
@@ -288,7 +291,8 @@ export async function resolveQrToken(qrToken: string): Promise<QrResolutionResul
   const cleanToken = qrToken.trim();
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   );
 
   let qrRow: QrIdentityRow | null = null;

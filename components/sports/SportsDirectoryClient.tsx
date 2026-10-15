@@ -269,16 +269,22 @@ export default function SportsDirectoryClient({
             {filteredSports.map((sport, index) => {
               const tagNumber = String(index + 1).padStart(2, "0");
               const drawCount = eventCountBySport[sport.id] || 0;
-              const bgImage =
-                sport.coverImage ||
-                "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80";
+              const hasValidRealImage =
+                sport.coverImage &&
+                !sport.coverImage.includes("unsplash.com") &&
+                !sport.coverImage.includes("images.unsplash");
+              const bgImage = hasValidRealImage
+                ? sport.coverImage
+                : sport.category === "Track & Field"
+                ? "/images/hero/zenithrow-arena-aerial.jpg"
+                : undefined;
 
               return (
                 <Link
                   key={sport.id}
                   href={`/sports/${sport.slug || sport.id}`}
                   className={styles.sportCard}
-                  style={{ backgroundImage: `url(${bgImage})` }}
+                  style={bgImage ? { backgroundImage: `url(${bgImage})` } : undefined}
                 >
                   <div className={styles.sportCardContent}>
                     {/* Top Row: Index Tag & Badges */}
@@ -345,10 +351,6 @@ export default function SportsDirectoryClient({
             <Link href="/leaderboard" className="btn">
               <Trophy size={15} style={{ marginRight: "6px" }} />
               House Standings →
-            </Link>
-            <Link href="/display" className="btn ghost">
-              <Activity size={15} style={{ marginRight: "6px" }} />
-              Live Arena Radar ↗
             </Link>
           </div>
         </section>

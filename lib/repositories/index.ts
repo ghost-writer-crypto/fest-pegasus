@@ -10,7 +10,7 @@
 // ============================================================================
 
 export type { FestivalRow } from "./festivalRepository";
-export type { SportRow } from "./sportRepository";
+export type { SportRow, SportWithImage } from "./sportRepository";
 export type { EventRow } from "./eventRepository";
 export type { DivisionRow } from "./divisionRepository";
 export type {
@@ -26,6 +26,8 @@ export type {
   ResultAuditRow,
   CorrectResultInput,
   CreateAdminResultInput,
+  FlexibleResultRowInput,
+  FlexibleResultSubmissionInput,
 } from "./resultRepository";
 export type {
   ScheduleRow,
@@ -55,6 +57,10 @@ export { getActiveFestival } from "./festivalRepository";
 export {
   getSportsByFestival,
   getSportById,
+  getReconciledSports,
+  CANONICAL_SPORTS_CATALOG,
+  CANONICAL_SPORT_SLUGS,
+  isValidSportSlug,
 } from "./sportRepository";
 
 // ============================================================================
@@ -180,6 +186,7 @@ export {
   unlockResultForCorrectionRecord,
   correctResultRecord,
   createAdminResultRecord,
+  createFlexibleAdminResults,
   getRecentResultAuditEntries,
 } from "./resultRepository";
 
