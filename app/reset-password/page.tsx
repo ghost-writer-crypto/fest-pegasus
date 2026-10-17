@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import { createClient } from "@/lib/supabase/client";
 
@@ -74,10 +75,10 @@ export default function ResetPasswordPage() {
           alignItems: "center",
         }}
       >
-        <a href="/" className="pegasus-brand">
+        <Link href="/" className="pegasus-brand">
           <span className="pegasus-brand__mark">Z</span>
           <span className="pegasus-brand__name">ZENITHROW</span>
-        </a>
+        </Link>
       </header>
 
       <main

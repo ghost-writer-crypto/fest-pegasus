@@ -21,9 +21,10 @@ type Props = {
 
 const DIVISION_FILTERS = [
   { id: "all", label: "All Divisions" },
+  { id: "sub-junior", label: "Sub Junior" },
+  { id: "junior", label: "Junior" },
   { id: "pre-senior", label: "Pre-Senior" },
   { id: "senior", label: "Senior" },
-  { id: "junior", label: "Junior" },
   { id: "super-senior", label: "Super Senior" },
 ];
 
@@ -67,19 +68,22 @@ export default function SchedulesClient({
       .split(/[,/|]/)
       .map((t) => t.trim().replace(/\s+/g, "-"));
 
-    if (divisionKey === "pre-senior") {
-      return tokens.some((t) => t === "PRE-SENIOR");
-    }
-    if (divisionKey === "senior") {
-      return tokens.some((t) => t === "SENIOR");
+    if (divisionKey === "sub-junior") {
+      return tokens.some((t) => t === "SUB-JUNIOR" || t === "BIDAYA");
     }
     if (divisionKey === "junior") {
-      return tokens.some((t) => t === "JUNIOR");
+      return tokens.some((t) => t === "JUNIOR" || t === "THANIYA");
+    }
+    if (divisionKey === "pre-senior") {
+      return tokens.some((t) => t === "PRE-SENIOR" || t === "THAMHEEDIYYA");
+    }
+    if (divisionKey === "senior") {
+      return tokens.some((t) => t === "SENIOR" || t === "ALIYA");
     }
     if (divisionKey === "super-senior") {
-      return tokens.some((t) => t === "SUPER-SENIOR");
+      return tokens.some((t) => t === "SUPER-SENIOR" || t === "MAJESTIR");
     }
-    return true;
+    return false;
   };
 
   // Helper to check if an item is completed

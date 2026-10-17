@@ -1,7 +1,7 @@
 import {
   getActiveFestival,
   getTeamsByFestival,
-  getParticipantsByFestivalAdmin,
+  getParticipantsByFestival,
 } from "@/lib/repositories";
 import AdminTeamsClient from "@/components/admin/AdminTeamsClient";
 
@@ -17,8 +17,14 @@ export default async function AdminTeamsPage() {
   const festivalId = festival?.id || "";
 
   const [teams, participants] = await Promise.all([
-    getTeamsByFestival(festivalId),
-    getParticipantsByFestivalAdmin(festivalId),
+    getTeamsByFestival(festivalId).catch((err) => {
+      console.error("[AdminTeamsPage] Error fetching teams:", err);
+      return [];
+    }),
+    getParticipantsByFestival(festivalId).catch((err) => {
+      console.warn("[AdminTeamsPage] Warning fetching participants for roster counts:", err);
+      return [];
+    }),
   ]);
 
   return (

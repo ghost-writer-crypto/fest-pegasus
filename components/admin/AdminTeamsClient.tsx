@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { TeamRow, AdminParticipantRow } from "@/lib/repositories";
+import type { TeamRow, ParticipantRow } from "@/lib/repositories";
 import { createTeamAction, updateTeamAction } from "@/app/admin/actions";
 
 interface AdminTeamsClientProps {
   festivalId: string;
   initialTeams: TeamRow[];
-  participants: AdminParticipantRow[];
+  participants: ParticipantRow[];
 }
 
 const PRESET_COLORS = [

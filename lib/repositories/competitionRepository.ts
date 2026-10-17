@@ -52,7 +52,8 @@ export async function getCompetitionsByFestival(
 ): Promise<CompetitionRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -87,7 +88,8 @@ export async function getCompetitionById(
 ): Promise<CompetitionRow | null> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return null;
   }
@@ -123,7 +125,8 @@ export async function getCompetitionsByEvent(
 ): Promise<CompetitionRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -160,7 +163,8 @@ export async function getCompetitionChangeEntries(
 ): Promise<CompetitionChangeRow[]> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   ) {
     return [];
   }
@@ -323,7 +327,7 @@ export async function updateCompetitionRecord(
   input: UpdateCompetitionInput,
   actorId: string,
 ): Promise<{ success: boolean; data?: CompetitionRow; error?: string }> {
-  const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
   if (!input.competitionId?.trim()) {
     return {
@@ -358,7 +362,7 @@ export async function updateCompetitionRecord(
     };
   }
 
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await adminSupabase
     .from("competitions")
     .update({
       name: input.name.trim(),
@@ -385,7 +389,7 @@ export async function updateCompetitionRecord(
   }
 
   // Audit
-  await supabase.from("competition_change_entries").insert({
+  await adminSupabase.from("competition_change_entries").insert({
     competition_id: updated.id,
     actor_id: actorId,
     action: "competition_updated",
@@ -409,7 +413,7 @@ export async function updateCompetitionStatusRecord(
   actorId: string,
   reason?: string,
 ): Promise<{ success: boolean; data?: CompetitionRow; error?: string }> {
-  const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
   const existing = await getCompetitionById(competitionId.trim());
 
@@ -448,7 +452,7 @@ export async function updateCompetitionStatusRecord(
     };
   }
 
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await adminSupabase
     .from("competitions")
     .update({
       status: newStatus,
@@ -473,7 +477,7 @@ export async function updateCompetitionStatusRecord(
   }
 
   // Audit
-  await supabase.from("competition_change_entries").insert({
+  await adminSupabase.from("competition_change_entries").insert({
     competition_id: updated.id,
     actor_id: actorId,
     action: "status_changed",

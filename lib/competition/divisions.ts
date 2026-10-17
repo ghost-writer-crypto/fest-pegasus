@@ -43,3 +43,44 @@ export const CODEX_DIVISIONS: CodexDivision[] = [
     maxParticipants: 7,
   },
 ];
+
+/**
+ * Authoritative organizer-approved category mappings:
+ * Bidaya -> Sub Junior
+ * Thaniya -> Junior
+ * Thamheediyya -> Pre Senior
+ * Aliya -> Senior
+ * Majestir -> Super Senior
+ *
+ * These are five renamed categories, NOT ten separate categories.
+ */
+export const CATEGORY_MAP: Record<string, string> = {
+  bidaya: "Sub Junior",
+  thaniya: "Junior",
+  thamheediyya: "Pre Senior",
+  aliya: "Senior",
+  majestir: "Super Senior",
+};
+
+export const REVERSE_CATEGORY_MAP: Record<string, string> = {
+  "sub junior": "bidaya",
+  "sub-junior": "bidaya",
+  junior: "thaniya",
+  "pre senior": "thamheediyya",
+  "pre-senior": "thamheediyya",
+  senior: "aliya",
+  "super senior": "majestir",
+  "super-senior": "majestir",
+};
+
+/**
+ * Resolves the canonical display name for an academic division / category.
+ */
+export function getConfirmedCategoryDisplayName(codeOrName: string | null | undefined): string {
+  if (!codeOrName) return "";
+  const normalized = codeOrName.trim().toLowerCase();
+  if (CATEGORY_MAP[normalized]) return CATEGORY_MAP[normalized];
+  const rev = REVERSE_CATEGORY_MAP[normalized];
+  if (rev && CATEGORY_MAP[rev]) return CATEGORY_MAP[rev];
+  return codeOrName.trim();
+}

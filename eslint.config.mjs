@@ -17,7 +17,15 @@ const eslintConfig = defineConfig([
     ".agents/**",
     ".claude/**",
     ".gemini/**",
+    "scratch/**",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

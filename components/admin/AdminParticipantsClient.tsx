@@ -17,6 +17,7 @@ import {
   getParticipantStatusLabel,
   getParticipantStatusBadgeClass,
 } from "@/lib/participants";
+import { getConfirmedCategoryDisplayName } from "@/lib/competition/divisions";
 import type {
   AdminParticipantRow,
   TeamRow,
@@ -712,7 +713,7 @@ export default function AdminParticipantsClient({
             <option value="all">All Divisions</option>
             {divisions.map((div) => (
               <option key={div.id} value={div.id}>
-                {div.name}
+                {div.name} — {getConfirmedCategoryDisplayName(div.code)}
               </option>
             ))}
           </select>
@@ -1014,19 +1015,18 @@ export default function AdminParticipantsClient({
 
                         {/* Division */}
                         <td>
-                          <span style={{ color: "var(--foreground)" }}>
-                            {division?.name ?? "—"}
+                          <span style={{ color: "var(--foreground)", fontWeight: 600 }}>
+                            {getConfirmedCategoryDisplayName(division?.code) || division?.name || "—"}
                           </span>
-                          {division?.code && (
+                          {division?.name && (
                             <span
                               style={{
                                 display: "block",
                                 fontSize: "11px",
                                 color: "var(--muted)",
-                                textTransform: "capitalize",
                               }}
                             >
-                              {division.code}
+                              {division.name}
                             </span>
                           )}
                         </td>
@@ -1504,7 +1504,7 @@ export default function AdminParticipantsClient({
                     <option value="">Select Division (None)</option>
                     {divisions.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.name}
+                        {d.name} — {getConfirmedCategoryDisplayName(d.code)}
                       </option>
                     ))}
                   </select>
@@ -1753,7 +1753,7 @@ export default function AdminParticipantsClient({
                     <option value="">Select Division (None)</option>
                     {divisions.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.name}
+                        {d.name} — {getConfirmedCategoryDisplayName(d.code)}
                       </option>
                     ))}
                   </select>
@@ -2106,7 +2106,7 @@ export default function AdminParticipantsClient({
                   Academic Division
                 </span>
                 <p style={{ margin: "4px 0 0", fontSize: "15px", fontWeight: 800, color: "var(--foreground)" }}>
-                  {viewingParticipant.division_id ? divisionMap.get(viewingParticipant.division_id)?.name ?? "—" : "No Division"}
+                  {viewingParticipant.division_id ? `${getConfirmedCategoryDisplayName(divisionMap.get(viewingParticipant.division_id)?.code)} (${divisionMap.get(viewingParticipant.division_id)?.name})` : "No Division"}
                 </p>
                 {viewingParticipant.division_id && (
                   <span style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--muted)", textTransform: "capitalize" }}>
